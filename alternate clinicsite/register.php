@@ -1,0 +1,211 @@
+<?php
+
+declare(strict_types=1);
+require __DIR__ . '/config.php';
+
+$errors = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $fullName = trim($_POST['full-name'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    $phone = trim($_POST['phone'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm-password'] ?? '';
+
+    if ($fullName === '') {
+        $errors[] = 'Full name is required.';
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Valid email is required.';
+    }
+    if (strlen($password) < 6) {
+        $errors[] = 'Password must be at least 6 characters.';
+    }
+    if ($password !== $confirmPassword) {
+        $errors[] = 'Passwords do not match.';
+    }
+    if (!isset($_POST['terms'])) {
+        $errors[] = 'You must accept the terms.';
+    }
+
+    if (!$errors) {
+        // Check unique email
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
+        $stmt->execute([':email' => $email]);
+        if ($stmt->fetch()) {
+            $errors[] = 'Email already registered.';
+        } else {
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $insert = $pdo->prepare('INSERT INTO users (full_name, email, phone, password_hash) VALUES (:full_name, :email, :phone, :password_hash)');
+            $insert->execute([
+                ':full_name' => $fullName,
+                ':email' => $email,
+                ':phone' => $phone,
+                ':password_hash' => $passwordHash,
+            ]);
+
+            $_SESSION['user_id'] = (int)$pdo->lastInsertId();
+            redirect('patient-dashboard.php');
+        }
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .register-bg {
+            background-image: linear-gradient(rgba(59, 130, 246, 0.8), rgba(29, 78, 216, 0.8)), url('http://static.photos/medical/1200x630/2');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+    <script>
+        function showError(msg) {
+            const el = document.getElementById('form-errors');
+            el.innerHTML = msg;
+            el.classList.remove('hidden');
+        }
+    </script>
+</head>
+
+<body class="font-sans antialiased">
+    <div class="min-h-screen flex">
+        <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+            <div class="mx-auto w-full max-w-sm lg:w-96">
+                <div>
+                    <div class="flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
+                        <span class="ml-2 text-xl font-bold text-blue-600">MediCare</span>
+                    </div>
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                        Create a new account
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-600">
+                        Already have an account? <a href="login.php" class="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
+                    </p>
+                </div>
+
+                <?php if ($errors): ?>
+                    <div id="form-errors" class="mt-6 bg-red-50 border border-red-200 text-red-700 p-3 rounded">
+                        <ul class="list-disc list-inside text-sm">
+                            <?php foreach ($errors as $e): ?>
+                                <li><?php echo h($e); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endif; ?>
+
+                <div class="mt-8">
+                    <div class="mt-6">
+                        <form action="" method="POST" class="space-y-6">
+                            <div>
+                                <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                <div class="mt-1">
+                                    <input id="full-name" name="full-name" type="text" autocomplete="name" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="<?php echo h($_POST['full-name'] ?? ''); ?>">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                                <div class="mt-1">
+                                    <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="<?php echo h($_POST['email'] ?? ''); ?>">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <div class="mt-1">
+                                    <input id="phone" name="phone" type="tel" autocomplete="tel" class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" value="<?php echo h($_POST['phone'] ?? ''); ?>">
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <div class="mt-1">
+                                    <input id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div class="space-y-1">
+                                <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                                <div class="mt-1">
+                                    <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <input id="terms" name="terms" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" required <?php echo isset($_POST['terms']) ? 'checked' : ''; ?>>
+                                <label for="terms" class="ml-2 block text-sm text-gray-900">
+                                    I agree to the <a href="terms.html" class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="privacy.html" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                                </label>
+                            </div>
+
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Register
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden lg:block relative w-0 flex-1 register-bg">
+            <div class="absolute inset-0 flex items-center justify-center p-12">
+                <div class="bg-white bg-opacity-90 p-8 rounded-lg max-w-md">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Why Register?</h3>
+                    <p class="text-gray-600 mb-6">Join thousands of patients managing their healthcare online with our secure patient portal.</p>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i data-feather="calendar" class="h-5 w-5 text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">Book and manage appointments 24/7</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i data-feather="file-text" class="h-5 w-5 text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">Access your medical records anytime</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i data-feather="message-square" class="h-5 w-5 text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">Secure messaging with your care team</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i data-feather="bell" class="h-5 w-5 text-blue-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">Get important health reminders</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .sidebar { transition: all 0.3s; }
+        .sidebar-collapsed { width: 5rem; }
+        .sidebar-expanded { width: 16rem; }
+        .main-content { transition: margin-left 0.3s; }
+        .thread:hover { background-color: #f9fafb; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <div class="sidebar sidebar-expanded bg-blue-800 text-white">
+            <div class="flex flex-col h-full">
+                <div class="flex items-center justify-between p-4 border-b border-blue-700">
+                    <div class="flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-white"></i>
+                        <span class="ml-2 text-xl font-bold">MediCare</span>
+                    </div>
+                    <button class="text-blue-200 hover:text-white">
+                        <i data-feather="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto">
+                    <nav class="p-4">
+                        <div class="space-y-1">
+                            <a href="patient-dashboard.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="home" class="mr-3 h-5 w-5"></i>
+                                Dashboard
+                            </a>
+                            <a href="patient-appointments.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
+                                Appointments
+                            </a>
+                            <a href="patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
+                                Book Appointment
+                            </a>
+                            <a href="patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
+                                Medical Records
+                            </a>
+                            <a href="patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
+                                Prescriptions
+                            </a>
+                            <a href="patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
+                                Messages
+                            </a>
+                        </div>
+                        <div class="mt-8 pt-8 border-t border-blue-700">
+                            <a href="patient-profile.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="user" class="mr-3 h-5 w-5"></i>
+                                Profile
+                            </a>
+                            <a href="patient-settings.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="settings" class="mr-3 h-5 w-5"></i>
+                                Settings
+                            </a>
+                            <a href="index.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="main-content flex-1 overflow-auto">
+            <header class="bg-white shadow-sm">
+                <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <h1 class="text-lg font-semibold text-gray-900">Messages</h1>
+                    <button class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <i data-feather="edit" class="mr-1 h-4 w-4"></i>
+                        New Message
+                    </button>
+                </div>
+            </header>
+            <main class="p-4 sm:px-6 lg:px-8">
+                <div class="bg-white shadow rounded-lg overflow-hidden h-[calc(100vh-8rem)] flex">
+                    <aside class="w-80 border-r border-gray-200 hidden md:block">
+                        <div class="p-4">
+                            <div class="relative">
+                                <i data-feather="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                                <input class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search conversations" />
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto h-full divide-y divide-gray-100">
+                            <div class="thread p-4 flex items-start">
+                                <img class="h-10 w-10 rounded-full" src="http://static.photos/people/200x200/2" alt="Doctor">
+                                <div class="ml-3 flex-1">
+                                    <div class="flex justify-between items-center">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Sarah Johnson</div>
+                                        <div class="text-xs text-gray-400">2h</div>
+                                    </div>
+                                    <div class="text-xs text-gray-600 truncate">Your test results have come back normal...</div>
+                                </div>
+                            </div>
+                            <div class="thread p-4 flex items-start">
+                                <img class="h-10 w-10 rounded-full" src="http://static.photos/people/200x200/4" alt="Nurse">
+                                <div class="ml-3 flex-1">
+                                    <div class="flex justify-between items-center">
+                                        <div class="text-sm font-semibold text-gray-900">Nurse Williams</div>
+                                        <div class="text-xs text-gray-400">1d</div>
+                                    </div>
+                                    <div class="text-xs text-gray-600 truncate">Just confirming your appointment for tomorrow...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                    <section class="flex-1 flex flex-col">
+                        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <img class="h-8 w-8 rounded-full" src="http://static.photos/people/200x200/2" alt="Doctor">
+                                <div class="ml-3">
+                                    <div class="text-sm font-semibold text-gray-900">Dr. Sarah Johnson</div>
+                                    <div class="text-xs text-gray-500">Cardiology</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="px-3 py-1.5 text-sm rounded-md border">Mark Read</button>
+                                <button class="px-3 py-1.5 text-sm rounded-md border">Archive</button>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                            <div class="flex">
+                                <div class="max-w-lg p-3 rounded-lg bg-white shadow text-sm">
+                                    Hello John, your test results have come back normal. We can discuss them at your next appointment.
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <div class="max-w-lg p-3 rounded-lg bg-blue-600 text-white shadow text-sm">
+                                    Thank you, doctor! See you tomorrow.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 border-t border-gray-200 flex items-center gap-2">
+                            <input class="flex-1 px-3 py-2 border rounded-md" placeholder="Type your message..." />
+                            <button class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                <i data-feather="send" class="mr-1 h-4 w-4"></i>
+                                Send
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        feather.replace();
+        document.querySelector('[data-feather="menu"]').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('sidebar-collapsed');
+            sidebar.classList.toggle('sidebar-expanded');
+            const mainContent = document.querySelector('.main-content');
+            if (sidebar.classList.contains('sidebar-collapsed')) {
+                mainContent.classList.add('ml-20');
+            } else {
+                mainContent.classList.remove('ml-20');
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment | MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+
+        .sidebar-collapsed {
+            width: 5rem;
+        }
+
+        .sidebar-expanded {
+            width: 16rem;
+        }
+
+        .main-content {
+            transition: margin-left 0.3s;
+        }
+
+        .time-slot:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .time-slot.selected {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar sidebar-expanded bg-blue-800 text-white">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar header -->
+                <div class="flex items-center justify-between p-4 border-b border-blue-700">
+                    <div class="flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-white"></i>
+                        <span class="ml-2 text-xl font-bold">MediCare</span>
+                    </div>
+                    <button class="text-blue-200 hover:text-white">
+                        <i data-feather="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+
+                <!-- Sidebar content -->
+                <div class="flex-1 overflow-y-auto">
+                    <nav class="p-4">
+                        <div class="space-y-1">
+                            <a href="patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="home" class="mr-3 h-5 w-5"></i>
+                                Dashboard
+                            </a>
+                            <a href="patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
+                                Appointments
+                            </a>
+                            <a href="patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                                <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
+                                Book Appointment
+                            </a>
+                            <a href="patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
+                                Medical Records
+                            </a>
+                            <a href="patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
+                                Prescriptions
+                            </a>
+                            <a href="patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
+                                Messages
+                            </a>
+                        </div>
+                        <div class="mt-8 pt-8 border-t border-blue-700">
+                            <a href="patient-profile.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="user" class="mr-3 h-5 w-5"></i>
+                                Profile
+                            </a>
+                            <a href="patient-settings.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="settings" class="mr-3 h-5 w-5"></i>
+                                Settings
+                            </a>
+                            <a href="index.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content flex-1 overflow-auto">
+            <!-- Top navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <h1 class="text-lg  font-semibold text-gray-900">Book New Appointment</h1>
+                    <div class="flex items-center space-x-4">
+                        <button class="p-1 text-gray-400 hover:text-gray-500">
+                            <i data-feather="bell" class="h-6 w-6"></i>
+                        </button>
+            
+                    </div>
+                </div>
+            </header>
+
+            <!-- Booking content -->
+            <main class="p-4 sm:px-6 lg:px-8">
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <form id="bookingForm" action="submit-booking.php" method="POST" class="p-6">
+                        <h2 class="text-lg font-medium text-gray-900 mb-6">Select a doctor and time for your appointment</h2>
+                        <!-- Step 1: Select Department -->
+                        <div class="mb-8">
+                            <h3 class="text-md font-medium text-gray-900 mb-4">1. Select Department</h3>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <label class="dept-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start" data-dept="Cardiology">
+                                    <input type="radio" name="department" value="Cardiology" required class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <i data-feather="heart" class="ml-3 h-6 w-6 text-red-500"></i>
+                                    <div class="ml-3">
+                                        <div class="mt-0.5 font-medium text-gray-900">Cardiology</div>
+                                        <div class="mt-1 text-sm text-gray-500">Heart and cardiovascular system</div>
+                                    </div>
+                                </label>
+                                <label class="dept-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start" data-dept="General Medicine">
+                                    <input type="radio" name="department" value="General Medicine" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <i data-feather="activity" class="ml-3 h-6 w-6 text-green-500"></i>
+                                    <div class="ml-3">
+                                        <div class="mt-0.5 font-medium text-gray-900">General Medicine</div>
+                                        <div class="mt-1 text-sm text-gray-500">General health and wellness</div>
+                                    </div>
+                                </label>
+                                <label class="dept-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start" data-dept="Ophthalmology">
+                                    <input type="radio" name="department" value="Ophthalmology" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <i data-feather="eye" class="ml-3 h-6 w-6 text-purple-500"></i>
+                                    <div class="ml-3">
+                                        <div class="mt-0.5 font-medium text-gray-900">Ophthalmology</div>
+                                        <div class="mt-1 text-sm text-gray-500">Eye and vision care</div>
+                                    </div>
+                                </label>
+                                <label class="dept-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start" data-dept="Orthopedics">
+                                    <input type="radio" name="department" value="Orthopedics" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <i data-feather="bone" class="ml-3 h-6 w-6 text-yellow-500"></i>
+                                    <div class="ml-3">
+                                        <div class="mt-0.5 font-medium text-gray-900">Orthopedics</div>
+                                        <div class="mt-1 text-sm text-gray-500">Bones and joints</div>
+                                    </div>
+                                </label>
+                                <label class="dept-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start" data-dept="Pediatrics">
+                                    <input type="radio" name="department" value="Pediatrics" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <i data-feather="thermometer" class="ml-3 h-6 w-6 text-blue-500"></i>
+                                    <div class="ml-3">
+                                        <div class="mt-0.5 font-medium text-gray-900">Pediatrics</div>
+                                        <div class="mt-1 text-sm text-gray-500">Children's health</div>
+                                    </div>
+                                </label>
+                                <label class="dept-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start" data-dept="Dermatology">
+                                    <input type="radio" name="department" value="Dermatology" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <i data-feather="user" class="ml-3 h-6 w-6 text-pink-500"></i>
+                                    <div class="ml-3">
+                                        <div class="mt-0.5 font-medium text-gray-900">Dermatology</div>
+                                        <div class="mt-1 text-sm text-gray-500">Skin, hair and nails</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Step 2: Select Doctor (auto-populated by department) -->
+                        <div class="mb-8">
+                            <h3 class="text-md font-medium text-gray-900 mb-1">2. Select Doctor</h3>
+                            <div class="text-sm text-gray-500 mb-3">Choose a doctor below. Each shows their department.</div>
+                            <div id="doctorList" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
+                                <label class="doctor-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start">
+                                    <input type="radio" name="doctorId" value="cardio-1" required class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <img class="h-12 w-12 rounded-full ml-3" src="http://static.photos/people/200x200/2" alt="Doctor">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Sarah Johnson</div>
+                                        <div class="text-sm text-gray-500">Cardiology</div>
+                                        <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: Cardiology</div>
+                                    </div>
+                                </label>
+                                <label class="doctor-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start">
+                                    <input type="radio" name="doctorId" value="gm-1" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <img class="h-12 w-12 rounded-full ml-3" src="http://static.photos/people/200x200/3" alt="Doctor">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Michael Chen</div>
+                                        <div class="text-sm text-gray-500">General Medicine</div>
+                                        <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: General Medicine</div>
+                                    </div>
+                                </label>
+                                <label class="doctor-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start">
+                                    <input type="radio" name="doctorId" value="oph-1" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <img class="h-12 w-12 rounded-full ml-3" src="http://static.photos/people/200x200/5" alt="Doctor">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Elena Novak</div>
+                                        <div class="text-sm text-gray-500">Ophthalmology</div>
+                                        <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: Ophthalmology</div>
+                                    </div>
+                                </label>
+                                <label class="doctor-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start">
+                                    <input type="radio" name="doctorId" value="ortho-1" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <img class="h-12 w-12 rounded-full ml-3" src="http://static.photos/people/200x200/6" alt="Doctor">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Rajesh Kumar</div>
+                                        <div class="text-sm text-gray-500">Orthopedics</div>
+                                        <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: Orthopedics</div>
+                                    </div>
+                                </label>
+                                <label class="doctor-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start">
+                                    <input type="radio" name="doctorId" value="ped-1" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <img class="h-12 w-12 rounded-full ml-3" src="http://static.photos/people/200x200/7" alt="Doctor">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Emily Carter</div>
+                                        <div class="text-sm text-gray-500">Pediatrics</div>
+                                        <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: Pediatrics</div>
+                                    </div>
+                                </label>
+                                <label class="doctor-card cursor-pointer p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 flex items-start">
+                                    <input type="radio" name="doctorId" value="derm-1" class="mt-1 h-4 w-4 text-blue-600 border-gray-300" />
+                                    <img class="h-12 w-12 rounded-full ml-3" src="http://static.photos/people/200x200/4" alt="Doctor">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900">Dr. Aisha Patel</div>
+                                        <div class="text-sm text-gray-500">Dermatology</div>
+                                        <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: Dermatology</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Step 3: Select Date & Time -->
+                        <div class="mb-8">
+                            <h3 class="text-md font-medium text-gray-900 mb-4">3. Select Date & Time</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input name="date" type="date" required class="border border-gray-300 rounded-md px-3 py-2" />
+                                <div class="col-span-2 grid grid-cols-3 gap-2">
+                                    <label class="px-3 py-2 border border-gray-300 rounded-md cursor-pointer flex items-center">
+                                        <input type="radio" name="time" value="09:00" required class="h-5 w-5 mr-2">
+                                        <span>09:00</span>
+                                    </label>
+                                    <label class="px-3 py-2 border border-gray-300 rounded-md cursor-pointer flex items-center">
+                                        <input type="radio" name="time" value="10:30" class="h-5 w-5 mr-2">
+                                        <span>10:30</span>
+                                    </label>
+                                    <label class="px-3 py-2 border border-gray-300 rounded-md cursor-pointer flex items-center">
+                                        <input type="radio" name="time" value="11:15" class="h-5 w-5 mr-2">
+                                        <span>11:15</span>
+                                    </label>
+                                    <label class="px-3 py-2 border border-gray-300 rounded-md cursor-pointer flex items-center">
+                                        <input type="radio" name="time" value="13:00" class="h-5 w-5 mr-2">
+                                        <span>13:00</span>
+                                    </label>
+                                    <label class="px-3 py-2 border border-gray-300 rounded-md cursor-pointer flex items-center">
+                                        <input type="radio" name="time" value="14:45" class="h-5 w-5 mr-2">
+                                        <span>14:45</span>
+                                    </label>
+                                    <label class="px-3 py-2 border border-gray-300 rounded-md cursor-pointer flex items-center">
+                                        <input type="radio" name="time" value="16:30" class="h-5 w-5 mr-2">
+                                        <span>16:30</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Step 4: Reason & Notes -->
+                        <div class="mb-6">
+                            <h3 class="text-md font-medium text-gray-900 mb-4">4. Reason for visit</h3>
+                            <input name="reason" type="text" placeholder="e.g., Chest pain, follow-up" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
+                            <textarea name="notes" rows="3" placeholder="Additional notes (optional)" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <a href="patient-appointments.html" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancel</a>
+                            <button type="submit" id="confirmBookingBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                <i data-feather="check" class="h-4 w-4 mr-2"></i>
+                                Confirm Booking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

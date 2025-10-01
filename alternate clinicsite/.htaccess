@@ -1,0 +1,9 @@
+Options -Indexes
+DirectoryIndex index.php index.html
+
+<IfModule mod_php.c>
+    php_flag display_errors On
+    php_value error_reporting 32767
+</IfModule>
+
+

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
+                        <span class="ml-2 text-xl font-bold text-blue-600">MediCare</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                    <a href="services.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Services</a>
+                    <a href="doctors.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Doctors</a>
+                    <a href="about.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <a href="login.html" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">Login</a>
+                    <a href="register.html" class="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Register</a>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i data-feather="menu" class="block h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient text-white">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                    Quality Healthcare Made Simple
+                </h1>
+                <p class="mt-6 max-w-lg mx-auto text-xl">
+                    Book appointments with top specialists, manage your health records, and get personalized care - all in one place.
+                </p>
+                <div class="mt-10">
+                    <a href="register.html" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
+                        Get Started
+                        <i data-feather="arrow-right" class="ml-2"></i>
+                    </a>
+                    <a href="login.html" class="ml-4 inline-flex items-center px-6 py-3 border border-white text-base font-medium rounded-md text-white bg-transparent hover:bg-blue-700">
+                        Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    A better way to manage your health
+                </p>
+            </div>
+
+            <div class="mt-10">
+                <div class="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+                    <div class="relative p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-50 rounded-md p-3">
+                                <i data-feather="calendar" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                            <div class="ml-5">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Easy Appointment Booking</h3>
+                                <p class="mt-2 text-base text-gray-500">
+                                    Book appointments with specialists in just a few clicks, 24/7.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-50 rounded-md p-3">
+                                <i data-feather="bell" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                            <div class="ml-5">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Smart Reminders</h3>
+                                <p class="mt-2 text-base text-gray-500">
+                                    Get reminders for your appointments and medication schedules.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-50 rounded-md p-3">
+                                <i data-feather="file-text" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                            <div class="ml-5">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Digital Records</h3>
+                                <p class="mt-2 text-base text-gray-500">
+                                    Access your medical records and prescriptions anytime, anywhere.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-blue-50">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
+            <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <span class="block">Ready to take control of your health?</span>
+                <span class="block text-blue-600">Register today and book your first appointment.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                <div class="inline-flex rounded-md shadow">
+                    <a href="register.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        Get started
+                    </a>
+                </div>
+                <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="login.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">
+                        Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <nav class="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 hover:text-gray-900">Home</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="services.html" class="text-base text-gray-500 hover:text-gray-900">Services</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="doctors.html" class="text-base text-gray-500 hover:text-gray-900">Doctors</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="about.html" class="text-base text-gray-500 hover:text-gray-900">About</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="privacy.html" class="text-base text-gray-500 hover:text-gray-900">Privacy Policy</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="terms.html" class="text-base text-gray-500 hover:text-gray-900">Terms</a>
+                </div>
+            </nav>
+            <div class="mt-8 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="facebook" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="instagram" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="twitter" class="h-6 w-6"></i>
+                </a>
+            </div>
+            <p class="mt-8 text-center text-base text-gray-400">
+                &copy; 2023 MediCare Clinic. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init();
+        feather.replace();
+    </script>
+</body>
+</html>
