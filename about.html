@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
+                        <span class="ml-2 text-xl font-bold text-blue-600">MediCare</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                    <a href="services.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Services</a>
+                    <a href="doctors.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Doctors</a>
+                    <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <a href="login.html" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">Login</a>
+                    <a href="register.html" class="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Register</a>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i data-feather="menu" class="block h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient text-white">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                    About MediCare Clinic
+                </h1>
+                <p class="mt-6 max-w-lg mx-auto text-xl">
+                    Dedicated to providing exceptional healthcare services with compassion, innovation, and excellence since 1995.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Our Mission</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Transforming healthcare for better lives
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div data-aos="fade-right">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Our Commitment to Excellence</h3>
+                    <p class="text-lg text-gray-600 mb-6">
+                        At MediCare Clinic, we believe that quality healthcare should be accessible, compassionate, and comprehensive. Our mission is to provide exceptional medical care that not only treats illness but promotes wellness and prevents disease.
+                    </p>
+                    <p class="text-lg text-gray-600 mb-6">
+                        We are committed to staying at the forefront of medical innovation while maintaining the personal touch that makes healthcare truly healing. Our team of dedicated professionals works tirelessly to ensure that every patient receives the highest standard of care.
+                    </p>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-50 rounded-full p-3">
+                            <i data-feather="award" class="h-6 w-6 text-blue-600"></i>
+                        </div>
+                        <span class="text-gray-700 font-medium">Accredited by the Joint Commission</span>
+                    </div>
+                </div>
+                <div class="bg-gray-100 rounded-lg p-8" data-aos="fade-left">
+                    <h4 class="text-xl font-semibold text-gray-900 mb-6">Our Core Values</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i data-feather="heart" class="h-5 w-5 text-blue-600 mt-1 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <span class="font-medium text-gray-900">Compassion:</span>
+                                <span class="text-gray-600"> Treating every patient with empathy, understanding, and genuine care for their wellbeing</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="star" class="h-5 w-5 text-blue-600 mt-1 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <span class="font-medium text-gray-900">Excellence:</span>
+                                <span class="text-gray-600"> Delivering the highest quality medical care through continuous improvement and best practices</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="zap" class="h-5 w-5 text-blue-600 mt-1 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <span class="font-medium text-gray-900">Innovation:</span>
+                                <span class="text-gray-600"> Embracing cutting-edge medical technology and pioneering treatment approaches</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="shield" class="h-5 w-5 text-blue-600 mt-1 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <span class="font-medium text-gray-900">Integrity:</span>
+                                <span class="text-gray-600"> Maintaining the highest ethical standards and transparent communication with patients</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Section -->
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Our History</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Nearly three decades of caring
+                </p>
+            </div>
+
+            <div class="space-y-8">
+                <div class="flex items-center" data-aos="fade-up">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        1995
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Foundation</h3>
+                        <p class="text-gray-600">MediCare Clinic was founded by Dr. Sarah Johnson with a vision to provide comprehensive healthcare to the community. Starting with just 5 staff members in a small clinic.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        2000
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">First Expansion</h3>
+                        <p class="text-gray-600">Expanded services to include specialized care and added our first diagnostic equipment. Patient base grew to over 5,000 individuals.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        2005
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Major Expansion</h3>
+                        <p class="text-gray-600">Opened our second location and introduced specialized departments including cardiology, orthopedics, and pediatrics. Added 15 new specialists to our team.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        2010
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Technology Integration</h3>
+                        <p class="text-gray-600">Implemented advanced medical technology including MRI and CT scanning capabilities. Introduced electronic health records system.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center" data-aos="fade-up" data-aos-delay="400">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        2015
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Digital Innovation</h3>
+                        <p class="text-gray-600">Launched our digital health platform, enabling online appointments, telemedicine consultations, and patient portal access to medical records.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center" data-aos="fade-up" data-aos-delay="500">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        2020
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Pandemic Response</h3>
+                        <p class="text-gray-600">Rapidly adapted to provide safe healthcare during COVID-19, implementing telehealth services and enhanced safety protocols while maintaining quality care.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center" data-aos="fade-up" data-aos-delay="600">
+                    <div class="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        2023
+                    </div>
+                    <div class="ml-6">
+                        <h3 class="text-xl font-semibold text-gray-900">Modern Healthcare Excellence</h3>
+                        <p class="text-gray-600">Today, we serve over 50,000 patients with state-of-the-art facilities, 25+ specialists, and cutting-edge medical technology while maintaining our founding values.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">By the Numbers</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Our impact in the community
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="text-center" data-aos="zoom-in">
+                    <div class="bg-blue-50 rounded-full p-6 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="users" class="h-8 w-8 text-blue-600"></i>
+                    </div>
+                    <div class="text-4xl font-bold text-blue-600 mb-2">50K+</div>
+                    <div class="text-gray-600 font-medium">Patients Served</div>
+                    <div class="text-sm text-gray-500 mt-1">Across all specialties</div>
+                </div>
+                <div class="text-center" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="bg-blue-50 rounded-full p-6 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user-check" class="h-8 w-8 text-blue-600"></i>
+                    </div>
+                    <div class="text-4xl font-bold text-blue-600 mb-2">25+</div>
+                    <div class="text-gray-600 font-medium">Medical Specialists</div>
+                    <div class="text-sm text-gray-500 mt-1">Board-certified experts</div>
+                </div>
+                <div class="text-center" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="bg-blue-50 rounded-full p-6 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="thumbs-up" class="h-8 w-8 text-blue-600"></i>
+                    </div>
+                    <div class="text-4xl font-bold text-blue-600 mb-2">98%</div>
+                    <div class="text-gray-600 font-medium">Patient Satisfaction</div>
+                    <div class="text-sm text-gray-500 mt-1">Based on recent surveys</div>
+                </div>
+                <div class="text-center" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="bg-blue-50 rounded-full p-6 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="clock" class="h-8 w-8 text-blue-600"></i>
+                    </div>
+                    <div class="text-4xl font-bold text-blue-600 mb-2">24/7</div>
+                    <div class="text-gray-600 font-medium">Emergency Care</div>
+                    <div class="text-sm text-gray-500 mt-1">Always here for you</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leadership Team -->
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Leadership Team</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Meet our executive team
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center transition-all duration-300 card-hover" data-aos="fade-up">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Sarah Johnson</h3>
+                    <p class="text-blue-600 mb-3 font-medium">Chief Executive Officer & Founder</p>
+                    <p class="text-gray-600 text-sm mb-4">Founder and visionary leader with over 30 years of experience in healthcare administration and patient care. Harvard Medical School graduate.</p>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Specialization:</strong> Internal Medicine</p>
+                        <p><strong>Years at MediCare:</strong> 28 years</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Michael Chen</h3>
+                    <p class="text-blue-600 mb-3 font-medium">Chief Medical Officer</p>
+                    <p class="text-gray-600 text-sm mb-4">Board-certified physician specializing in cardiology with expertise in quality improvement, patient safety, and medical staff leadership.</p>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Specialization:</strong> Cardiology</p>
+                        <p><strong>Years at MediCare:</strong> 15 years</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Lisa Rodriguez</h3>
+                    <p class="text-blue-600 mb-3 font-medium">Chief Operating Officer</p>
+                    <p class="text-gray-600 text-sm mb-4">Healthcare operations expert focused on optimizing patient experience and operational efficiency across all departments and locations.</p>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Background:</strong> Healthcare Administration</p>
+                        <p><strong>Years at MediCare:</strong> 12 years</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">David Park</h3>
+                    <p class="text-blue-600 mb-3 font-medium">Chief Financial Officer</p>
+                    <p class="text-gray-600 text-sm mb-4">Financial strategist with extensive experience in healthcare economics, ensuring sustainable growth while maintaining affordable patient care.</p>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Background:</strong> Healthcare Finance</p>
+                        <p><strong>Years at MediCare:</strong> 8 years</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Jennifer Walsh</h3>
+                    <p class="text-blue-600 mb-3 font-medium">Chief Nursing Officer</p>
+                    <p class="text-gray-600 text-sm mb-4">Registered nurse with 25+ years of clinical experience, leading our nursing staff and ensuring the highest standards of patient care.</p>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Background:</strong> Critical Care Nursing</p>
+                        <p><strong>Years at MediCare:</strong> 18 years</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6 text-center transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="500">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Mark Thompson</h3>
+                    <p class="text-blue-600 mb-3 font-medium">Chief Technology Officer</p>
+                    <p class="text-gray-600 text-sm mb-4">Technology innovator leading our digital transformation initiatives, electronic health records, and telemedicine platforms.</p>
+                    <div class="text-xs text-gray-500">
+                        <p><strong>Background:</strong> Health IT Systems</p>
+                        <p><strong>Years at MediCare:</strong> 6 years</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-blue-50">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
+            <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <span class="block">Ready to experience our care?</span>
+                <span class="block text-blue-600">Join thousands of satisfied patients today.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                <div class="inline-flex rounded-md shadow">
+                    <a href="register.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <i data-feather="user-plus" class="h-5 w-5 mr-2"></i>
+                        Get Started
+                    </a>
+                </div>
+                <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="services.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">
+                        <i data-feather="list" class="h-5 w-5 mr-2"></i>
+                        Our Services
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <nav class="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+                <div class="px-5 py-2">
+                    <a href="index.html" class="text-base text-gray-500 hover:text-gray-900">Home</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="services.html" class="text-base text-gray-500 hover:text-gray-900">Services</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="doctors.html" class="text-base text-gray-500 hover:text-gray-900">Doctors</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 hover:text-gray-900">About</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="privacy.html" class="text-base text-gray-500 hover:text-gray-900">Privacy Policy</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="terms.html" class="text-base text-gray-500 hover:text-gray-900">Terms</a>
+                </div>
+            </nav>
+            <div class="mt-8 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="facebook" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="instagram" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="twitter" class="h-6 w-6"></i>
+                </a>
+            </div>
+            <p class="mt-8 text-center text-base text-gray-400">
+                &copy; 2023 MediCare Clinic. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init();
+        feather.replace();
+    </script>
+</body>
+</html>

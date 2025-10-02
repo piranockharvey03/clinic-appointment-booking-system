@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Doctors - MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
+                        <span class="ml-2 text-xl font-bold text-blue-600">MediCare</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                    <a href="services.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Services</a>
+                    <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Doctors</a>
+                    <a href="about.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <a href="login.html" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">Login</a>
+                    <a href="register.html" class="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Register</a>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i data-feather="menu" class="block h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient text-white">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                    Meet Our Expert Doctors
+                </h1>
+                <p class="mt-6 max-w-lg mx-auto text-xl">
+                    Our team of board-certified physicians and specialists are dedicated to providing you with the highest quality medical care.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctors Grid -->
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Medical Team</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Experienced healthcare professionals
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Dr. Sarah Johnson -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 card-hover" data-aos="fade-up">
+                    <div class="p-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Sarah Johnson</h3>
+                            <p class="text-blue-600 font-medium mb-3">Internal Medicine</p>
+                            <p class="text-gray-600 text-sm mb-4">Board-certified internist with over 20 years of experience in primary care and preventive medicine.</p>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Specialties:</h4>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Internal Medicine</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Preventive Care</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Diabetes Care</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 text-sm text-gray-600">
+                                <p><strong>Education:</strong> Harvard Medical School</p>
+                                <p><strong>Experience:</strong> 20+ years</p>
+                                <p><strong>Languages:</strong> English, Spanish</p>
+                            </div>
+
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                <i data-feather="calendar" class="h-4 w-4 inline mr-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dr. Michael Chen -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="100">
+                    <div class="p-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Michael Chen</h3>
+                            <p class="text-blue-600 font-medium mb-3">Cardiology</p>
+                            <p class="text-gray-600 text-sm mb-4">Interventional cardiologist specializing in heart disease prevention, diagnosis, and treatment.</p>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Specialties:</h4>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Cardiology</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Heart Surgery</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Cardiac Catheterization</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 text-sm text-gray-600">
+                                <p><strong>Education:</strong> Johns Hopkins University</p>
+                                <p><strong>Experience:</strong> 15+ years</p>
+                                <p><strong>Languages:</strong> English, Mandarin</p>
+                            </div>
+
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                <i data-feather="calendar" class="h-4 w-4 inline mr-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dr. Emily Rodriguez -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="200">
+                    <div class="p-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Emily Rodriguez</h3>
+                            <p class="text-blue-600 font-medium mb-3">Pediatrics</p>
+                            <p class="text-gray-600 text-sm mb-4">Board-certified pediatrician providing comprehensive care for children from infancy through adolescence.</p>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Specialties:</h4>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Pediatrics</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Child Development</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Immunizations</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 text-sm text-gray-600">
+                                <p><strong>Education:</strong> Stanford Medical School</p>
+                                <p><strong>Experience:</strong> 12+ years</p>
+                                <p><strong>Languages:</strong> English, Spanish</p>
+                            </div>
+
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                <i data-feather="calendar" class="h-4 w-4 inline mr-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dr. James Wilson -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="300">
+                    <div class="p-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. James Wilson</h3>
+                            <p class="text-blue-600 font-medium mb-3">Orthopedics</p>
+                            <p class="text-gray-600 text-sm mb-4">Specialized in joint replacement, sports medicine, and minimally invasive orthopedic procedures.</p>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Specialties:</h4>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Orthopedics</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Sports Medicine</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Joint Replacement</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 text-sm text-gray-600">
+                                <p><strong>Education:</strong> Mayo Clinic</p>
+                                <p><strong>Experience:</strong> 18+ years</p>
+                                <p><strong>Languages:</strong> English, French</p>
+                            </div>
+
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                <i data-feather="calendar" class="h-4 w-4 inline mr-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dr. Lisa Thompson -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="400">
+                    <div class="p-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Lisa Thompson</h3>
+                            <p class="text-blue-600 font-medium mb-3">Dermatology</p>
+                            <p class="text-gray-600 text-sm mb-4">Board-certified dermatologist specializing in medical, surgical, and cosmetic dermatology.</p>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Specialties:</h4>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Dermatology</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Skin Cancer</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Cosmetic Procedures</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 text-sm text-gray-600">
+                                <p><strong>Education:</strong> University of Pennsylvania</p>
+                                <p><strong>Experience:</strong> 14+ years</p>
+                                <p><strong>Languages:</strong> English, German</p>
+                            </div>
+
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                <i data-feather="calendar" class="h-4 w-4 inline mr-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dr. Robert Kim -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="500">
+                    <div class="p-6">
+                        <div class="w-24 h-24 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i data-feather="user" class="h-12 w-12 text-blue-600"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Dr. Robert Kim</h3>
+                            <p class="text-blue-600 font-medium mb-3">Emergency Medicine</p>
+                            <p class="text-gray-600 text-sm mb-4">Emergency medicine physician with expertise in critical care and trauma management.</p>
+                            
+                            <div class="mb-4">
+                                <h4 class="font-semibold text-gray-900 mb-2">Specialties:</h4>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Emergency Medicine</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Trauma Care</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Critical Care</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 text-sm text-gray-600">
+                                <p><strong>Education:</strong> UCLA Medical School</p>
+                                <p><strong>Experience:</strong> 10+ years</p>
+                                <p><strong>Languages:</strong> English, Korean</p>
+                            </div>
+
+                            <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
+                                <i data-feather="calendar" class="h-4 w-4 inline mr-2"></i>
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specialties Filter -->
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Find by Specialty</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Browse doctors by medical specialty
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow cursor-pointer" data-aos="zoom-in">
+                    <i data-feather="heart" class="h-8 w-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="text-sm font-medium text-gray-900">Cardiology</p>
+                    <p class="text-xs text-gray-500 mt-1">Dr. Chen</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow cursor-pointer" data-aos="zoom-in" data-aos-delay="50">
+                    <i data-feather="smile" class="h-8 w-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="text-sm font-medium text-gray-900">Pediatrics</p>
+                    <p class="text-xs text-gray-500 mt-1">Dr. Rodriguez</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow cursor-pointer" data-aos="zoom-in" data-aos-delay="100">
+                    <i data-feather="activity" class="h-8 w-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="text-sm font-medium text-gray-900">Orthopedics</p>
+                    <p class="text-xs text-gray-500 mt-1">Dr. Wilson</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow cursor-pointer" data-aos="zoom-in" data-aos-delay="150">
+                    <i data-feather="sun" class="h-8 w-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="text-sm font-medium text-gray-900">Dermatology</p>
+                    <p class="text-xs text-gray-500 mt-1">Dr. Thompson</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow cursor-pointer" data-aos="zoom-in" data-aos-delay="200">
+                    <i data-feather="zap" class="h-8 w-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="text-sm font-medium text-gray-900">Emergency</p>
+                    <p class="text-xs text-gray-500 mt-1">Dr. Kim</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm text-center hover:shadow-md transition-shadow cursor-pointer" data-aos="zoom-in" data-aos-delay="250">
+                    <i data-feather="user-check" class="h-8 w-8 text-blue-600 mx-auto mb-2"></i>
+                    <p class="text-sm font-medium text-gray-900">Internal Medicine</p>
+                    <p class="text-xs text-gray-500 mt-1">Dr. Johnson</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-blue-50">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
+            <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <span class="block">Ready to meet with a specialist?</span>
+                <span class="block text-blue-600">Schedule your appointment today.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                <div class="inline-flex rounded-md shadow">
+                    <a href="register.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <i data-feather="user-plus" class="h-5 w-5 mr-2"></i>
+                        Register Now
+                    </a>
+                </div>
+                <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="services.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">
+                        <i data-feather="list" class="h-5 w-5 mr-2"></i>
+                        View Services
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <nav class="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+                <div class="px-5 py-2">
+                    <a href="index.html" class="text-base text-gray-500 hover:text-gray-900">Home</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="services.html" class="text-base text-gray-500 hover:text-gray-900">Services</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 hover:text-gray-900">Doctors</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="about.html" class="text-base text-gray-500 hover:text-gray-900">About</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="privacy.html" class="text-base text-gray-500 hover:text-gray-900">Privacy Policy</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="terms.html" class="text-base text-gray-500 hover:text-gray-900">Terms</a>
+                </div>
+            </nav>
+            <div class="mt-8 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="facebook" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="instagram" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="twitter" class="h-6 w-6"></i>
+                </a>
+            </div>
+            <p class="mt-8 text-center text-base text-gray-400">
+                &copy; 2023 MediCare Clinic. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init();
+        feather.replace();
+    </script>
+</body>
+</html>

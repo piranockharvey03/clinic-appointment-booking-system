@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - MediCare Clinic</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
+                        <span class="ml-2 text-xl font-bold text-blue-600">MediCare</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Home</a>
+                    <a href="#" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Services</a>
+                    <a href="doctors.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Doctors</a>
+                    <a href="about.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">About</a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <a href="login.html" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">Login</a>
+                    <a href="register.html" class="ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Register</a>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i data-feather="menu" class="block h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient text-white">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                    Our Medical Services
+                </h1>
+                <p class="mt-6 max-w-lg mx-auto text-xl">
+                    Comprehensive healthcare services delivered by experienced professionals with state-of-the-art technology.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Medical Services</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Complete healthcare solutions
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- General Medicine -->
+                <div class="relative p-8 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover" data-aos="fade-up">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-50 rounded-full p-4">
+                                <i data-feather="user-check" class="h-8 w-8 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">General Medicine</h3>
+                        <p class="text-gray-600 mb-4">Comprehensive primary care services including routine check-ups, preventive care, and treatment of common illnesses.</p>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li>• Annual physical exams</li>
+                            <li>• Chronic disease management</li>
+                            <li>• Preventive screenings</li>
+                            <li>• Vaccination services</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Cardiology -->
+                <div class="relative p-8 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-50 rounded-full p-4">
+                                <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Cardiology</h3>
+                        <p class="text-gray-600 mb-4">Expert cardiac care including diagnosis and treatment of heart conditions with advanced cardiovascular technology.</p>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li>• ECG and stress testing</li>
+                            <li>• Echocardiography</li>
+                            <li>• Heart disease treatment</li>
+                            <li>• Cardiac rehabilitation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Pediatrics -->
+                <div class="relative p-8 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-50 rounded-full p-4">
+                                <i data-feather="smile" class="h-8 w-8 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Pediatrics</h3>
+                        <p class="text-gray-600 mb-4">Specialized medical care for infants, children, and adolescents in a child-friendly environment.</p>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li>• Well-child visits</li>
+                            <li>• Immunizations</li>
+                            <li>• Growth monitoring</li>
+                            <li>• Developmental assessments</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Orthopedics -->
+                <div class="relative p-8 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-50 rounded-full p-4">
+                                <i data-feather="activity" class="h-8 w-8 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Orthopedics</h3>
+                        <p class="text-gray-600 mb-4">Treatment of musculoskeletal conditions including bones, joints, muscles, and ligaments.</p>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li>• Joint replacement surgery</li>
+                            <li>• Sports injury treatment</li>
+                            <li>• Fracture care</li>
+                            <li>• Physical therapy</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Dermatology -->
+                <div class="relative p-8 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="400">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-50 rounded-full p-4">
+                                <i data-feather="sun" class="h-8 w-8 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Dermatology</h3>
+                        <p class="text-gray-600 mb-4">Comprehensive skin care services including diagnosis and treatment of skin conditions and cosmetic procedures.</p>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li>• Skin cancer screening</li>
+                            <li>• Acne treatment</li>
+                            <li>• Cosmetic procedures</li>
+                            <li>• Mole removal</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Emergency Care -->
+                <div class="relative p-8 rounded-lg border border-gray-200 shadow-sm transition-all duration-300 card-hover" data-aos="fade-up" data-aos-delay="500">
+                    <div class="text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-blue-50 rounded-full p-4">
+                                <i data-feather="zap" class="h-8 w-8 text-blue-600"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">Emergency Care</h3>
+                        <p class="text-gray-600 mb-4">24/7 emergency medical services with rapid response times and advanced life support capabilities.</p>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li>• 24/7 emergency room</li>
+                            <li>• Trauma care</li>
+                            <li>• Critical care unit</li>
+                            <li>• Ambulance services</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnostic Services -->
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase">Diagnostic Services</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Advanced diagnostic technology
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm" data-aos="zoom-in">
+                    <i data-feather="eye" class="h-12 w-12 text-blue-600 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">X-Ray Imaging</h3>
+                    <p class="text-gray-600 text-sm">Digital X-ray services for bone and organ imaging with instant results</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm" data-aos="zoom-in" data-aos-delay="100">
+                    <i data-feather="target" class="h-12 w-12 text-blue-600 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">MRI Scanning</h3>
+                    <p class="text-gray-600 text-sm">High-resolution MRI for detailed tissue imaging and accurate diagnosis</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm" data-aos="zoom-in" data-aos-delay="200">
+                    <i data-feather="droplet" class="h-12 w-12 text-blue-600 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Lab Tests</h3>
+                    <p class="text-gray-600 text-sm">Comprehensive blood work and diagnostic testing with fast turnaround</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-lg shadow-sm" data-aos="zoom-in" data-aos-delay="300">
+                    <i data-feather="monitor" class="h-12 w-12 text-blue-600 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Ultrasound</h3>
+                    <p class="text-gray-600 text-sm">Real-time ultrasound imaging for various conditions and pregnancy care</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-blue-50">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
+            <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <span class="block">Need medical care?</span>
+                <span class="block text-blue-600">Book an appointment with our specialists today.</span>
+            </h2>
+            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+                <div class="inline-flex rounded-md shadow">
+                    <a href="register.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        Book Appointment
+                    </a>
+                </div>
+                <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="doctors.html" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50">
+                        View Doctors
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <nav class="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+                <div class="px-5 py-2">
+                    <a href="index.html" class="text-base text-gray-500 hover:text-gray-900">Home</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="#" class="text-base text-gray-500 hover:text-gray-900">Services</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="doctors.html" class="text-base text-gray-500 hover:text-gray-900">Doctors</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="about.html" class="text-base text-gray-500 hover:text-gray-900">About</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="privacy.html" class="text-base text-gray-500 hover:text-gray-900">Privacy Policy</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="terms.html" class="text-base text-gray-500 hover:text-gray-900">Terms</a>
+                </div>
+            </nav>
+            <div class="mt-8 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="facebook" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="instagram" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="twitter" class="h-6 w-6"></i>
+                </a>
+            </div>
+            <p class="mt-8 text-center text-base text-gray-400">
+                &copy; 2023 MediCare Clinic. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init();
+        feather.replace();
+    </script>
+</body>
+</html>

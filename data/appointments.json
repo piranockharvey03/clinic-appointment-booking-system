@@ -58,5 +58,20 @@
         "notes": "",
         "patientName": "John Doe",
         "status": "canceled"
+    },
+    {
+        "id": "appt_68de16713a2351.66317289",
+        "createdAt": "2025-10-02T08:06:41+02:00",
+        "department": "General Medicine",
+        "doctorId": "gm-1",
+        "doctorName": "Dr. Michael Chen",
+        "doctorSpecialty": "General Medicine",
+        "doctorPhoto": "http:\/\/static.photos\/people\/200x200\/3",
+        "date": "2025-10-27",
+        "time": "08:30",
+        "reason": "I am having a general body pain",
+        "notes": "",
+        "patientName": "John Doe",
+        "status": "canceled"
     }
 ]
