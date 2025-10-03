@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_email'] = $email;
 
             // Redirect to PHP dashboard (uses session)
-            header("Location: patient-dashboard.php");
+            header("Location: admin-dashboard.php");
             exit;
         } else {
             echo "❌ Invalid password!";
