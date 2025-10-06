@@ -9,6 +9,43 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name'])) {
 
 $fullName = $_SESSION['user_name'];
 $firstName = trim(explode(' ', $fullName)[0]);
+
+// Load appointments data
+$jsonFile = __DIR__ . '/data/appointments.json';
+$appointments = [];
+if (file_exists($jsonFile)) {
+    $appointments = json_decode(file_get_contents($jsonFile), true) ?? [];
+}
+
+// Filter appointments for current patient (in real app, filter by patient ID)
+// For now, showing all appointments as demo
+$patientAppointments = $appointments;
+
+// Calculate statistics
+$stats = [
+    'total' => count($patientAppointments),
+    'upcoming' => 0,
+    'approved' => 0,
+    'pending' => 0,
+    'rescheduled' => 0,
+    'canceled' => 0
+];
+
+foreach ($patientAppointments as $appt) {
+    $status = strtolower($appt['status'] ?? 'pending');
+    if ($status === 'pending') $stats['pending']++;
+    if ($status === 'approved') $stats['approved']++;
+    if ($status === 'rescheduled') $stats['rescheduled']++;
+    if ($status === 'canceled') $stats['canceled']++;
+    if (in_array($status, ['pending', 'approved', 'rescheduled'])) $stats['upcoming']++;
+}
+
+// Get upcoming appointments (pending, approved, rescheduled - not canceled or past)
+$upcomingAppointments = array_filter($patientAppointments, function ($appt) {
+    $status = strtolower($appt['status'] ?? 'pending');
+    return !in_array($status, ['canceled', 'past'], true);
+});
+$upcomingAppointments = array_slice(array_reverse($upcomingAppointments), 0, 3);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -69,7 +106,7 @@ $firstName = trim(explode(' ', $fullName)[0]);
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="patient-appointments.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
@@ -139,10 +176,10 @@ $firstName = trim(explode(' ', $fullName)[0]);
                             <h2 class="text-2xl font-bold text-white">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                             <p class="mt-1 text-blue-100">Here's what's happening with your health today.</p>
                         </div>
-                        <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
+                        <a href="patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
                             Book Appointment
                             <i data-feather="plus" class="ml-2"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -157,7 +194,7 @@ $firstName = trim(explode(' ', $fullName)[0]);
                                 <div class="ml-5 w-0 flex-1">
                                     <dt class="text-sm font-medium text-gray-500 truncate">Upcoming Appointments</dt>
                                     <dd class="flex items-baseline">
-                                        <div class="text-2xl font-semibold text-gray-900">2</div>
+                                        <div class="text-2xl font-semibold text-gray-900"><?= $stats['upcoming'] ?></div>
                                     </dd>
                                 </div>
                             </div>
@@ -171,9 +208,9 @@ $firstName = trim(explode(' ', $fullName)[0]);
                                     <i data-feather="check-circle" class="h-6 w-6 text-white"></i>
                                 </div>
                                 <div class="ml-5 w-0 flex-1">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Completed Visits</dt>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
                                     <dd class="flex items-baseline">
-                                        <div class="text-2xl font-semibold text-gray-900">12</div>
+                                        <div class="text-2xl font-semibold text-gray-900"><?= $stats['approved'] ?></div>
                                     </dd>
                                 </div>
                             </div>
@@ -187,9 +224,9 @@ $firstName = trim(explode(' ', $fullName)[0]);
                                     <i data-feather="file-text" class="h-6 w-6 text-white"></i>
                                 </div>
                                 <div class="ml-5 w-0 flex-1">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Pending Results</dt>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
                                     <dd class="flex items-baseline">
-                                        <div class="text-2xl font-semibold text-gray-900">1</div>
+                                        <div class="text-2xl font-semibold text-gray-900"><?= $stats['pending'] ?></div>
                                     </dd>
                                 </div>
                             </div>
@@ -203,9 +240,9 @@ $firstName = trim(explode(' ', $fullName)[0]);
                                     <i data-feather="message-square" class="h-6 w-6 text-white"></i>
                                 </div>
                                 <div class="ml-5 w-0 flex-1">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Unread Messages</dt>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Appointments</dt>
                                     <dd class="flex items-baseline">
-                                        <div class="text-2xl font-semibold text-gray-900">3</div>
+                                        <div class="text-2xl font-semibold text-gray-900"><?= $stats['total'] ?></div>
                                     </dd>
                                 </div>
                             </div>
@@ -213,101 +250,69 @@ $firstName = trim(explode(' ', $fullName)[0]);
                     </div>
                 </div>
 
-                <!-- Upcoming appointments -->
+                <!-- Upcoming Appointments -->
                 <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                     <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Upcoming Appointments</h3>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Upcoming Appointments</h3>
+                            <a href="patient-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
+                        </div>
                     </div>
                     <div class="divide-y divide-gray-200">
-                        <div class="appointment-card transition duration-300 ease-in-out p-4 hover:bg-gray-50">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/2" alt="Doctor">
-                                    <div class="ml-4">
-                                        <h4 class="text-sm font-semibold text-gray-900">Dr. Sarah Johnson</h4>
-                                        <div class="flex items-center text-sm text-gray-500">
-                                            <i data-feather="clock" class="h-4 w-4 mr-1"></i>
-                                            <span>Tomorrow, 10:30 AM</span>
+                        <?php if (!empty($upcomingAppointments)): ?>
+                            <?php foreach ($upcomingAppointments as $appt): ?>
+                                <?php
+                                $status = strtolower($appt['status'] ?? 'pending');
+                                $statusColors = [
+                                    'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                    'approved' => 'bg-green-100 text-green-800 border-green-200',
+                                    'rescheduled' => 'bg-blue-100 text-blue-800 border-blue-200'
+                                ];
+                                $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
+                                ?>
+                                <div class="appointment-card transition duration-300 ease-in-out p-5 hover:bg-gray-50">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <?php if (!empty($appt['doctorPhoto'])): ?>
+                                                <img class="h-12 w-12 rounded-full" src="<?= htmlspecialchars($appt['doctorPhoto']) ?>" alt="Doctor">
+                                            <?php else: ?>
+                                                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <i data-feather="user" class="h-6 w-6 text-blue-600"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                            <div class="ml-4">
+                                                <h4 class="text-sm font-semibold text-gray-900">Dr. <?= htmlspecialchars($appt['doctorName'] ?? 'Unknown') ?></h4>
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    <?= htmlspecialchars($appt['doctorSpecialty'] ?? '') ?> • <?= htmlspecialchars($appt['department'] ?? '') ?>
+                                                </p>
+                                                <div class="flex items-center text-xs text-gray-400 mt-1">
+                                                    <i data-feather="calendar" class="h-3 w-3 mr-1"></i>
+                                                    <span><?= htmlspecialchars($appt['date'] ?? '') ?> at <?= htmlspecialchars($appt['time'] ?? '') ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="px-3 py-1.5 text-xs font-semibold rounded-full border <?= $badgeClass ?>">
+                                                <?= ucfirst($status) ?>
+                                            </span>
+                                            <a href="patient-appointments.php" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                View Details
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center space-x-2">
-                                    <button class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                        <i data-feather="message-square" class="h-4 w-4 mr-1"></i>
-                                        Message
-                                    </button>
-                                    <button class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                                        <i data-feather="video" class="h-4 w-4 mr-1"></i>
-                                        Join
-                                    </button>
-                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="p-12 text-center text-gray-500">
+                                <i data-feather="calendar" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
+                                <p class="text-lg font-medium">No upcoming appointments</p>
+                                <p class="text-sm mt-1 mb-4">Book your first appointment to get started</p>
+                                <a href="patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                    <i data-feather="plus" class="h-4 w-4 mr-2"></i>
+                                    Book Appointment
+                                </a>
                             </div>
-                        </div>
-
-                        <div class="appointment-card transition duration-300 ease-in-out p-4 hover:bg-gray-50">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/3" alt="Doctor">
-                                    <div class="ml-4">
-                                        <h4 class="text-sm font-semibold text-gray-900">Dr. Michael Chen</h4>
-                                        <div class="flex items-center text-sm text-gray-500">
-                                            <i data-feather="clock" class="h-4 w-4 mr-1"></i>
-                                            <span>Friday, June 10, 2:15 PM</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <button class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                        <i data-feather="message-square" class="h-4 w-4 mr-1"></i>
-                                        Message
-                                    </button>
-                                    <button class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
-                                        <i data-feather="video" class="h-4 w-4 mr-1"></i>
-                                        Join
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-4 py-4 sm:px-6 bg-gray-50 text-right">
-                        <a href="patient-appointments.html" class="text-sm font-medium text-blue-600 hover:text-blue-500">View all appointments</a>
-                    </div>
-                </div>
-
-                <!-- Recent messages -->
-                <div class="bg-white shadow rounded-lg overflow-hidden">
-                    <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Messages</h3>
-                    </div>
-                    <div class="divide-y divide-gray-200">
-                        <div class="p-4 hover:bg-gray-50">
-                            <div class="flex items-start">
-                                <img class="h-10 w-10 rounded-full" src="http://static.photos/people/200x200/2" alt="Doctor">
-                                <div class="ml-3 flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="text-sm font-semibold text-gray-900">Dr. Sarah Johnson</h4>
-                                        <span class="text-xs text-gray-500">2 hours ago</span>
-                                    </div>
-                                    <p class="mt-1 text-sm text-gray-600">Your test results have come back normal. We can discuss them at your next appointment.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-4 hover:bg-gray-50">
-                            <div class="flex items-start">
-                                <img class="h-10 w-10 rounded-full" src="http://static.photos/people/200x200/4" alt="Nurse">
-                                <div class="ml-3 flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="text-sm font-semibold text-gray-900">Nurse Williams</h4>
-                                        <span class="text-xs text-gray-500">1 day ago</span>
-                                    </div>
-                                    <p class="mt-1 text-sm text-gray-600">Just confirming your appointment for tomorrow at 10:30 AM. Please arrive 15 minutes early.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-4 py-4 sm:px-6 bg-gray-50 text-right">
-                        <a href="patient-messages.html" class="text-sm font-medium text-blue-600 hover:text-blue-500">View all messages</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </main>

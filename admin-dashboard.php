@@ -5,52 +5,37 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name'])) {
     exit;
 }
 
-// Use the correct path!
+// Load appointments data
 $jsonFile = __DIR__ . '/data/appointments.json';
 $appointments = [];
 if (file_exists($jsonFile)) {
     $appointments = json_decode(file_get_contents($jsonFile), true) ?? [];
 }
 
-// Approve action
-if (isset($_POST['approve_id'])) {
-    foreach ($appointments as &$appt) {
-        if ($appt['id'] === $_POST['approve_id']) {
-            $appt['status'] = 'approved';
-            break;
-        }
-    }
-    file_put_contents($jsonFile, json_encode($appointments, JSON_PRETTY_PRINT));
-    header("Location: admin-dashboard.php");
-    exit;
-}
+// Calculate statistics
+$stats = [
+    'total' => count($appointments),
+    'pending' => 0,
+    'approved' => 0,
+    'rescheduled' => 0,
+    'canceled' => 0
+];
 
-// Reschedule action
-if (isset($_POST['reschedule_id']) && isset($_POST['new_date']) && isset($_POST['new_time'])) {
-    foreach ($appointments as &$appt) {
-        if ($appt['id'] === $_POST['reschedule_id']) {
-            $appt['date'] = $_POST['new_date'];
-            $appt['time'] = $_POST['new_time'];
-            $appt['status'] = 'rescheduled';
-            break;
-        }
-    }
-    file_put_contents($jsonFile, json_encode($appointments, JSON_PRETTY_PRINT));
-    header("Location: admin-dashboard.php");
-    exit;
-}
-
-// Filter: Only show pending or empty status
-$filteredAppointments = array_filter($appointments, function ($appt) {
+foreach ($appointments as $appt) {
     $status = strtolower($appt['status'] ?? 'pending');
-    return $status === 'pending' || $status === '';
-});
+    if (isset($stats[$status])) {
+        $stats[$status]++;
+    }
+}
+
+// Get recent appointments (last 5)
+$recentAppointments = array_slice(array_reverse($appointments), 0, 5);
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | MediCare Clinic</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -75,7 +60,13 @@ $filteredAppointments = array_filter($appointments, function ($appt) {
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
+                                Appointments
+                            </a>
+                        </div>
+                        <div class="mt-8 pt-8 border-t border-blue-700">
+                            <a href="admin-login.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -96,83 +87,115 @@ $filteredAppointments = array_filter($appointments, function ($appt) {
                 </div>
             </header>
             <main class="p-4 sm:px-6 lg:px-8">
-                <div class="max-w-5xl mx-auto bg-white shadow rounded-lg p-8">
-                    <h2 class="text-2xl font-bold mb-6 text-gray-900">Pending Appointments</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doctor</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <?php if (!empty($filteredAppointments)): ?>
-                                    <?php foreach ($filteredAppointments as $appt): ?>
-                                        <tr>
-                                            <td class="px-4 py-2"><?php echo htmlspecialchars($appt['patientName'] ?? ''); ?></td>
-                                            <td class="px-4 py-2"><?php echo htmlspecialchars($appt['doctorName'] ?? ''); ?></td>
-                                            <td class="px-4 py-2"><?php echo htmlspecialchars($appt['department'] ?? ''); ?></td>
-                                            <td class="px-4 py-2"><?php echo htmlspecialchars($appt['date'] ?? ''); ?></td>
-                                            <td class="px-4 py-2"><?php echo htmlspecialchars($appt['time'] ?? ''); ?></td>
-                                            <td class="px-4 py-2 capitalize"><?php echo htmlspecialchars($appt['status'] ?? 'pending'); ?></td>
-                                            <td class="px-4 py-2 space-x-2">
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="approve_id" value="<?php echo htmlspecialchars($appt['id']); ?>">
-                                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Approve</button>
-                                                </form>
-                                                <button onclick="showReschedule('<?php echo $appt['id']; ?>', '<?php echo htmlspecialchars($appt['date']); ?>', '<?php echo htmlspecialchars($appt['time']); ?>')" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Reschedule</button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="7" class="px-4 py-2 text-center text-gray-500">No pending appointments found.</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- Reschedule Modal -->
-                    <div id="rescheduleModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 hidden">
-                        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
-                            <h3 class="text-lg font-bold mb-4">Reschedule Appointment</h3>
-                            <form method="post" id="rescheduleForm">
-                                <input type="hidden" name="reschedule_id" id="reschedule_id">
-                                <label class="block mb-2 text-sm font-medium">New Date</label>
-                                <input type="date" name="new_date" id="new_date" required class="w-full px-3 py-2 border rounded mb-4">
-                                <label class="block mb-2 text-sm font-medium">New Time</label>
-                                <input type="time" name="new_time" id="new_time" required class="w-full px-3 py-2 border rounded mb-4">
-                                <div class="flex justify-end space-x-2">
-                                    <button type="button" onclick="closeReschedule()" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-                                </div>
-                            </form>
+                <!-- Statistics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 uppercase">Total Appointments</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-2"><?= $stats['total'] ?></p>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-full">
+                                <i data-feather="calendar" class="h-8 w-8 text-blue-600"></i>
+                            </div>
                         </div>
                     </div>
-                    <script>
-                        function showReschedule(id, date, time) {
-                            document.getElementById('reschedule_id').value = id;
-                            document.getElementById('new_date').value = date;
-                            document.getElementById('new_time').value = time;
-                            document.getElementById('rescheduleModal').classList.remove('hidden');
-                        }
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 uppercase">Pending</p>
+                                <p class="text-3xl font-bold text-yellow-600 mt-2"><?= $stats['pending'] ?></p>
+                            </div>
+                            <div class="p-3 bg-yellow-100 rounded-full">
+                                <i data-feather="clock" class="h-8 w-8 text-yellow-600"></i>
+                            </div>
+                        </div>
+                        <a href="admin-appointments.php?tab=pending" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 uppercase">Approved</p>
+                                <p class="text-3xl font-bold text-green-600 mt-2"><?= $stats['approved'] ?></p>
+                            </div>
+                            <div class="p-3 bg-green-100 rounded-full">
+                                <i data-feather="check-circle" class="h-8 w-8 text-green-600"></i>
+                            </div>
+                        </div>
+                        <a href="admin-appointments.php?tab=approved" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 uppercase">Rescheduled</p>
+                                <p class="text-3xl font-bold text-purple-600 mt-2"><?= $stats['rescheduled'] ?></p>
+                            </div>
+                            <div class="p-3 bg-purple-100 rounded-full">
+                                <i data-feather="refresh-cw" class="h-8 w-8 text-purple-600"></i>
+                            </div>
+                        </div>
+                        <a href="admin-appointments.php?tab=rescheduled" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                    </div>
+                </div>
 
-                        function closeReschedule() {
-                            document.getElementById('rescheduleModal').classList.add('hidden');
-                        }
-                        window.onclick = function(event) {
-                            var modal = document.getElementById('rescheduleModal');
-                            if (event.target === modal) {
-                                closeReschedule();
-                            }
-                        }
-                    </script>
+                <!-- Recent Appointments -->
+                <div class="bg-white rounded-lg shadow-md">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-bold text-gray-900">Recent Appointments</h2>
+                            <a href="admin-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <?php if (!empty($recentAppointments)): ?>
+                            <?php foreach ($recentAppointments as $appt): ?>
+                                <?php 
+                                    $status = strtolower($appt['status'] ?? 'pending');
+                                    $statusColors = [
+                                        'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                        'approved' => 'bg-green-100 text-green-800 border-green-200',
+                                        'rescheduled' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                        'canceled' => 'bg-red-100 text-red-800 border-red-200'
+                                    ];
+                                    $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
+                                ?>
+                                <div class="p-5 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <i data-feather="user" class="h-5 w-5 text-blue-600"></i>
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($appt['patientName'] ?? 'Unknown Patient') ?></h3>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        <span class="font-medium">Dr. <?= htmlspecialchars($appt['doctorName'] ?? 'Unknown') ?></span> • 
+                                                        <?= htmlspecialchars($appt['department'] ?? '') ?>
+                                                    </p>
+                                                    <p class="text-xs text-gray-400 mt-0.5">
+                                                        <i data-feather="calendar" class="h-3 w-3 inline"></i>
+                                                        <?= htmlspecialchars($appt['date'] ?? '') ?> at <?= htmlspecialchars($appt['time'] ?? '') ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1.5 text-xs font-semibold rounded-full border <?= $badgeClass ?>">
+                                            <?= ucfirst($status) ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="p-12 text-center text-gray-500">
+                                <i data-feather="inbox" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
+                                <p class="text-lg font-medium">No appointments yet</p>
+                                <p class="text-sm mt-1">Appointments will appear here once patients start booking</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </main>
         </div>

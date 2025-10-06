@@ -36,7 +36,6 @@ $doctorDirectory = [
     'ped-1'    => ['name' => 'Dr. Emily Carter',   'specialty' => 'Pediatrics',        'photo' => 'http://static.photos/people/200x200/7'],
     'derm-1'   => ['name' => 'Dr. Aisha Patel',    'specialty' => 'Dermatology',       'photo' => 'http://static.photos/people/200x200/4'],
 ];
-
 $doctor = isset($doctorDirectory[$doctorId]) ? $doctorDirectory[$doctorId] : ['name' => 'Unknown', 'specialty' => $department, 'photo' => ''];
 
 // Build appointment record
@@ -53,7 +52,9 @@ $appointment = [
     'reason' => $reason,
     'notes' => $notes,
     // In a real app, bind to logged-in patient id. For demo, static placeholder.
-    'patientName' => 'John Doe'
+    'patientName' => 'John Doe',
+    // Default status is pending until admin approval
+    'status' => 'pending'
 ];
 
 // Ensure data directory exists
