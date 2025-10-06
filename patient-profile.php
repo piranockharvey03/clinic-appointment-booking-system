@@ -47,7 +47,6 @@ $stmt->bind_result($fullName, $email, $phone, $dob, $gender, $address, $insuranc
 $stmt->fetch();
 $stmt->close();
 ?>
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -55,8 +54,10 @@ $stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Profile | MediCare Clinic</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="assets/css/dark-mode.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="assets/js/dark-mode.js"></script>
     <style>
         .sidebar {
             transition: all 0.3s;

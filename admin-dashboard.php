@@ -38,8 +38,10 @@ $recentAppointments = array_slice(array_reverse($appointments), 0, 5);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | MediCare Clinic</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="assets/css/dark-mode.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="assets/js/dark-mode.js"></script>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
@@ -66,6 +68,10 @@ $recentAppointments = array_slice(array_reverse($appointments), 0, 5);
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
+                            <a href="admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="settings" class="mr-3 h-5 w-5"></i>
+                                Settings
+                            </a>
                             <a href="admin-login.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout

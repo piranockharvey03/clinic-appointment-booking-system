@@ -67,9 +67,10 @@ if ($reschedule_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointments | MediCare Clinic</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="assets/css/dark-mode.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="assets/js/dark-mode.js"></script>
     <style>
         .sidebar {
             transition: all 0.3s;
