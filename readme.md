@@ -47,5 +47,15 @@ created_at timestamp NOT NULL DEFAULT current_timestamp(),
 PRIMARY KEY (id)
 );
 
+CREATE TABLE `admin` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`full_name` varchar(100) NOT NULL,
+`email` varchar(100) NOT NULL,
+`password` varchar(255) NOT NULL,
+`created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+PRIMARY KEY (`id`),
+UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 After running those sql commands, then go to ur browser and then acces the website using the path
 (http://localhost/hospital/index.html)
