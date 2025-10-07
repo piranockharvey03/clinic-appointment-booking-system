@@ -202,6 +202,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                             <a href="admin-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
                         </div>
                     </div>
+                      <!--piranockharvey03--> 
                     <div class="divide-y divide-gray-200">
                         <?php if (!empty($recentAppointments)): ?>
                             <?php foreach ($recentAppointments as $appt): ?>
