@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Appointment | MediCare Clinic</title>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="assets/css/dark-mode.css">
+    <link rel="stylesheet" href="assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="assets/js/dark-mode.js"></script>
@@ -39,9 +40,12 @@
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <div class="sidebar sidebar-expanded bg-blue-800 text-white">
+        <div class="sidebar bg-blue-800 text-white" id="sidebar">
             <div class="flex flex-col h-full">
                 <!-- Sidebar header -->
                 <div class="flex items-center justify-between p-4 border-b border-blue-700">
@@ -49,7 +53,7 @@
                         <i data-feather="heart" class="h-8 w-8 text-white"></i>
                         <span class="ml-2 text-xl font-bold">MediCare</span>
                     </div>
-                    <button class="text-blue-200 hover:text-white">
+                    <button class="text-blue-200 hover:text-white md:hidden" id="menuBtn">
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                 </div>
@@ -103,11 +107,14 @@
         </div>
 
         <!-- Main content -->
-        <div class="main-content flex-1 overflow-auto">
+        <div class="main-content flex-1 overflow-auto w-full">
             <!-- Top navigation -->
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                    <h1 class="text-lg  font-semibold text-gray-900">Book New Appointment</h1>
+                    <button class="md:hidden text-gray-600 hover:text-gray-900" id="mobileMenuBtn">
+                        <i data-feather="menu" class="h-6 w-6"></i>
+                    </button>
+                    <h1 class="text-lg font-semibold text-gray-900">Book New Appointment</h1>
                     <div class="flex items-center space-x-4">
                         <button class="p-1 text-gray-400 hover:text-gray-500">
                             <i data-feather="bell" class="h-6 w-6"></i>
@@ -272,7 +279,8 @@
                         </div>
                         <!-- Step 4: Reason & Notes -->
                         <div class="mb-6">
-                            <h3 class="text-md font-medium text-gray-900 mb-4">4. Reason for visit</h3>
+                            <h3 class="text-md font-medium text-gray-900 mb-4">4. Contact & Reason for visit</h3>
+                            <input name="phone" type="tel" placeholder="Phone number" required class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
                             <input name="reason" type="text" placeholder="e.g., Chest pain, follow-up" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
                             <textarea name="notes" rows="3" placeholder="Additional notes (optional)" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
                         </div>
@@ -289,7 +297,10 @@
         </div>
     </div>
 
-
+    <script src="assets/js/mobile-menu.js"></script>
+    <script>
+        feather.replace();
+    </script>
 </body>
 
 </html>

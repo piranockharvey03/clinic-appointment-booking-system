@@ -1,5 +1,17 @@
 <?php
+session_start();
 
+// Prevent caching of this page
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Redirect to login if not authenticated or not a patient
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
+    header('Location: login.html');
+    exit;
+}
 
 // Load saved appointments
 $dataFile = __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'appointments.json';
@@ -66,8 +78,9 @@ if ($reschedule_id) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointments | MediCare Clinic</title>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="assets/css/dark-mode.css">
+    <link rel="stylesheet" href="assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="assets/js/dark-mode.js"></script>
@@ -99,8 +112,11 @@ if ($reschedule_id) {
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="flex h-screen overflow-hidden">
-        <div class="sidebar sidebar-expanded bg-blue-800 text-white">
+        <div class="sidebar bg-blue-800 text-white" id="sidebar">
             <!-- ...existing sidebar code... -->
             <div class="flex flex-col h-full">
                 <div class="flex items-center justify-between p-4 border-b border-blue-700">
@@ -108,7 +124,7 @@ if ($reschedule_id) {
                         <i data-feather="heart" class="h-8 w-8 text-white"></i>
                         <span class="ml-2 text-xl font-bold">MediCare</span>
                     </div>
-                    <button class="text-blue-200 hover:text-white">
+                    <button class="text-blue-200 hover:text-white md:hidden" id="menuBtn">
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                 </div>
@@ -149,7 +165,7 @@ if ($reschedule_id) {
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="index.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -158,9 +174,12 @@ if ($reschedule_id) {
                 </div>
             </div>
         </div>
-        <div class="main-content flex-1 overflow-auto">
+        <div class="main-content flex-1 overflow-auto w-full">
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <button class="md:hidden text-gray-600 hover:text-gray-900" id="mobileMenuBtn">
+                        <i data-feather="menu" class="h-6 w-6"></i>
+                    </button>
                     <h1 class="text-lg font-semibold text-gray-900">Appointments</h1>
                     <a href="patient-book.html" class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
                         <i data-feather="plus" class="mr-1 h-4 w-4"></i>
@@ -260,19 +279,9 @@ if ($reschedule_id) {
             }
         </style>
     <?php endif; ?>
+    <script src="assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
-        document.querySelector('[data-feather="menu"]').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('sidebar-collapsed');
-            sidebar.classList.toggle('sidebar-expanded');
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('sidebar-collapsed')) {
-                mainContent.classList.add('ml-20');
-            } else {
-                mainContent.classList.remove('ml-20');
-            }
-        });
     </script>
 </body>
 

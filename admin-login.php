@@ -36,6 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $id;
             $_SESSION['user_name'] = $fullName;
             $_SESSION['user_email'] = $email;
+            $_SESSION['user_role'] = 'admin';
+            $_SESSION['login_time'] = time();
 
             // Redirect to PHP dashboard (uses session)
             header("Location: admin-dashboard.php");

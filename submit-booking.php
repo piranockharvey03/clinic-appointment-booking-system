@@ -19,6 +19,7 @@ $date       = get_post('date');
 $time       = get_post('time');
 $reason     = get_post('reason');
 $notes      = get_post('notes');
+$phone      = get_post('phone');
 
 // Basic validation
 if ($department === '' || $doctorId === '' || $date === '' || $time === '') {
@@ -51,6 +52,7 @@ $appointment = [
     'time' => $time,
     'reason' => $reason,
     'notes' => $notes,
+    'phone' => $phone,
     // In a real app, bind to logged-in patient id. For demo, static placeholder.
     'patientName' => 'John Doe',
     // Default status is pending until admin approval

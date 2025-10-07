@@ -1,8 +1,15 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name'])) {
-    header('Location: adminlogin.php');
+// Prevent caching of this page
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// Redirect to login if not authenticated or not an admin
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header('Location: admin-login.html');
     exit;
 }
 
@@ -15,41 +22,28 @@ $fullName = $_SESSION['user_name'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Settings | MediCare Clinic</title>
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="assets/css/dark-mode.css">
+    <link rel="stylesheet" href="assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="assets/js/dark-mode.js"></script>
-    <style>
-        .sidebar {
-            transition: all 0.3s;
-        }
-
-        .sidebar-collapsed {
-            width: 5rem;
-        }
-
-        .sidebar-expanded {
-            width: 16rem;
-        }
-
-        .main-content {
-            transition: margin-left 0.3s;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <div class="sidebar sidebar-expanded bg-blue-800 text-white">
+        <div class="sidebar bg-blue-800 text-white" id="sidebar">
             <div class="flex flex-col h-full">
                 <div class="flex items-center justify-between p-4 border-b border-blue-700">
                     <div class="flex items-center">
                         <i data-feather="heart" class="h-8 w-8 text-white"></i>
-                        <span class="ml-2 text-xl font-bold">MediCare Admin</span>
+                        <span class="ml-2 text-xl font-bold">MediCare</span>
                     </div>
-                    <button id="sidebarToggle" class="text-blue-200 hover:text-white">
+                    <button class="text-blue-200 hover:text-white md:hidden" id="menuBtn">
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                 </div>
@@ -64,14 +58,13 @@ $fullName = $_SESSION['user_name'];
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                           
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="index.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -82,21 +75,17 @@ $fullName = $_SESSION['user_name'];
         </div>
 
         <!-- Main content -->
-        <div class="main-content flex-1 overflow-auto">
+        <div class="main-content flex-1 overflow-auto w-full">
+            <!-- Top navigation -->
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+                    <button class="md:hidden text-gray-600 hover:text-gray-900" id="mobileMenuBtn">
+                        <i data-feather="menu" class="h-6 w-6"></i>
+                    </button>
                     <h1 class="text-lg font-semibold text-gray-900">Admin Settings</h1>
                     <div class="flex items-center space-x-4">
-                        <button class="p-1 text-gray-400 hover:text-gray-500">
-                            <i data-feather="bell" class="h-6 w-6"></i>
-                        </button>
-                        <div class="relative">
-                            <button class="flex items-center space-x-2">
-                                <img class="h-8 w-8 rounded-full" src="http://static.photos/people/200x200/1" alt="Admin profile">
-                                <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
-                                <i data-feather="chevron-down" class="h-4 w-4"></i>
-                            </button>
-                        </div>
+                        <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
+                        <i data-feather="user" class="h-6 w-6 text-blue-600"></i>
                     </div>
                 </div>
             </header>
@@ -120,20 +109,27 @@ $fullName = $_SESSION['user_name'];
                         </div>
                     </div>
 
-                    <!-- System Settings -->
+                    <!-- Notification Settings -->
                     <div class="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 class="text-xl font-bold mb-6 text-gray-900">System Settings</h2>
+                        <h2 class="text-xl font-bold mb-6 text-gray-900">Notifications</h2>
                         <div class="space-y-4">
                             <div class="flex items-center justify-between py-3 border-b border-gray-200">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Email Notifications</h3>
-                                    <p class="text-sm text-gray-500">Receive system notifications via email</p>
+                                    <p class="text-sm text-gray-500">Receive system alerts via email</p>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <span class="text-sm font-medium text-gray-700" id="emailStatus">On</span>
                                     <div class="toggle-switch active" id="emailToggle"></div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- System Settings -->
+                    <div class="bg-white shadow rounded-lg p-6 mb-6">
+                        <h2 class="text-xl font-bold mb-6 text-gray-900">System</h2>
+                        <div class="space-y-4">
                             <div class="flex items-center justify-between py-3 border-b border-gray-200">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Auto-Approve Appointments</h3>
@@ -166,12 +162,8 @@ $fullName = $_SESSION['user_name'];
                                 Change Password
                             </button>
                             <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
-                                <i data-feather="shield" class="inline h-5 w-5 mr-2"></i>
-                                Two-Factor Authentication
-                            </button>
-                            <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
-                                <i data-feather="download" class="inline h-5 w-5 mr-2"></i>
-                                Export Data
+                                <i data-feather="database" class="inline h-5 w-5 mr-2"></i>
+                                Backup Database
                             </button>
                         </div>
                     </div>
@@ -180,24 +172,10 @@ $fullName = $_SESSION['user_name'];
         </div>
     </div>
 
+    <script src="assets/js/mobile-menu.js"></script>
+    <script src="assets/js/dark-mode.js"></script>
     <script>
-        // Initialize Feather icons
         feather.replace();
-
-        // Sidebar toggle
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('sidebar-collapsed');
-            sidebar.classList.toggle('sidebar-expanded');
-            const mainContent = document.querySelector('.main-content');
-            if (sidebar.classList.contains('sidebar-collapsed')) {
-                mainContent.classList.add('ml-20');
-            } else {
-                mainContent.classList.remove('ml-20');
-            }
-        });
-
-        // Dark mode is handled by assets/js/dark-mode.js
 
         // Email Notifications Toggle
         const emailToggle = document.getElementById('emailToggle');
