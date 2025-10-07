@@ -1,5 +1,7 @@
 <?php
-// Simple booking handler that stores appointments in data/appointments.json
+// Booking handler that stores appointments in database
+session_start();
+require_once 'db-config.php';
 
 // Ensure request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,60 +41,57 @@ $doctorDirectory = [
 ];
 $doctor = isset($doctorDirectory[$doctorId]) ? $doctorDirectory[$doctorId] : ['name' => 'Unknown', 'specialty' => $department, 'photo' => ''];
 
-// Build appointment record
-$appointment = [
-    'id' => uniqid('appt_', true),
-    'createdAt' => date('c'),
-    'department' => $department,
-    'doctorId' => $doctorId,
-    'doctorName' => $doctor['name'],
-    'doctorSpecialty' => $doctor['specialty'],
-    'doctorPhoto' => $doctor['photo'],
-    'date' => $date,
-    'time' => $time,
-    'reason' => $reason,
-    'notes' => $notes,
-    'phone' => $phone,
-    // In a real app, bind to logged-in patient id. For demo, static placeholder.
-    'patientName' => 'John Doe',
-    // Default status is pending until admin approval
-    'status' => 'pending'
-];
+// Generate unique appointment ID
+$appointmentId = uniqid('appt_', true);
 
-// Ensure data directory exists
-$dataDir = __DIR__ . DIRECTORY_SEPARATOR . 'data';
-if (!is_dir($dataDir)) {
-    mkdir($dataDir, 0777, true);
-}
+// Get patient information from session (or use placeholder if not logged in)
+$patientId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+$patientName = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : 'John Doe';
 
-$dataFile = $dataDir . DIRECTORY_SEPARATOR . 'appointments.json';
-if (!file_exists($dataFile)) {
-    file_put_contents($dataFile, json_encode([]));
-}
-
-// Read, append, and write atomically
-$appointments = [];
-$raw = file_get_contents($dataFile);
-if ($raw !== false && $raw !== '') {
-    $decoded = json_decode($raw, true);
-    if (is_array($decoded)) {
-        $appointments = $decoded;
+try {
+    // Get database connection
+    $conn = getDBConnection();
+    
+    // Prepare SQL statement to insert appointment
+    $stmt = $conn->prepare("
+        INSERT INTO appointments 
+        (appointment_id, patient_id, patient_name, phone, department, doctor_id, 
+         doctor_name, doctor_specialty, doctor_photo, appointment_date, appointment_time, 
+         reason, notes, status) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+    ");
+    
+    $stmt->bind_param(
+        "sisssssssssss",
+        $appointmentId,
+        $patientId,
+        $patientName,
+        $phone,
+        $department,
+        $doctorId,
+        $doctor['name'],
+        $doctor['specialty'],
+        $doctor['photo'],
+        $date,
+        $time,
+        $reason,
+        $notes
+    );
+    
+    // Execute the statement
+    if ($stmt->execute()) {
+        $stmt->close();
+        closeDBConnection($conn);
+        // Redirect to the appointments page
+        header('Location: patient-appointments.php');
+        exit;
+    } else {
+        throw new Exception("Failed to create appointment: " . $stmt->error);
     }
+    
+} catch (Exception $e) {
+    error_log("Appointment booking error: " . $e->getMessage());
+    // Redirect back to booking page with error
+    header('Location: patient-book.html?error=1');
+    exit;
 }
-
-$appointments[] = $appointment;
-
-// Write with locking
-$fp = fopen($dataFile, 'c+');
-if ($fp) {
-    flock($fp, LOCK_EX);
-    ftruncate($fp, 0);
-    fwrite($fp, json_encode($appointments, JSON_PRETTY_PRINT));
-    fflush($fp);
-    flock($fp, LOCK_UN);
-    fclose($fp);
-}
-
-// Redirect to the dynamic appointments page
-header('Location: patient-appointments.php');
-exit;

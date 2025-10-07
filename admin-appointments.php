@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -13,39 +14,70 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
     exit;
 }
 
-// Load saved appointments
-$dataFile = __DIR__ . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'appointments.json';
-$appointments = [];
-if (file_exists($dataFile)) {
-    $raw = file_get_contents($dataFile);
-    $decoded = json_decode($raw, true);
-    if (is_array($decoded)) {
-        $appointments = $decoded;
-    }
-}
-
 // Handle admin actions: approve, cancel, reschedule
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['appt_id'])) {
-    foreach ($appointments as &$appt) {
-        if ($appt['id'] == $_POST['appt_id']) {
-            if ($_POST['action'] === 'approve') {
-                $appt['status'] = 'approved';
-            } elseif ($_POST['action'] === 'cancel') {
-                $appt['status'] = 'canceled';
-            } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
-                $appt['date'] = $_POST['new_date'];
-                $appt['time'] = $_POST['new_time'];
-                $appt['status'] = 'rescheduled';
-            }
-            // Save changes
-            file_put_contents($dataFile, json_encode($appointments, JSON_PRETTY_PRINT));
-            break;
+    try {
+        $conn = getDBConnection();
+        $apptId = $_POST['appt_id'];
+        
+        if ($_POST['action'] === 'approve') {
+            $stmt = $conn->prepare("UPDATE appointments SET status = 'approved' WHERE appointment_id = ?");
+            $stmt->bind_param("s", $apptId);
+            $stmt->execute();
+            $stmt->close();
+        } elseif ($_POST['action'] === 'cancel') {
+            $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled' WHERE appointment_id = ?");
+            $stmt->bind_param("s", $apptId);
+            $stmt->execute();
+            $stmt->close();
+        } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
+            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'rescheduled' WHERE appointment_id = ?");
+            $stmt->bind_param("sss", $_POST['new_date'], $_POST['new_time'], $apptId);
+            $stmt->execute();
+            $stmt->close();
         }
+        
+        closeDBConnection($conn);
+    } catch (Exception $e) {
+        error_log("Admin appointment action error: " . $e->getMessage());
     }
-    unset($appt);
+    
     // Redirect to avoid form resubmission
     header("Location: admin-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
     exit;
+}
+
+// Load appointments from database
+$appointments = [];
+try {
+    $conn = getDBConnection();
+    $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
+    
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $appointments[] = [
+                'id' => $row['appointment_id'],
+                'patientName' => $row['patient_name'],
+                'phone' => $row['phone'],
+                'department' => $row['department'],
+                'doctorId' => $row['doctor_id'],
+                'doctorName' => $row['doctor_name'],
+                'doctorSpecialty' => $row['doctor_specialty'],
+                'doctorPhoto' => $row['doctor_photo'],
+                'date' => $row['appointment_date'],
+                'time' => $row['appointment_time'],
+                'reason' => $row['reason'],
+                'notes' => $row['notes'],
+                'status' => $row['status'],
+                'createdAt' => $row['created_at']
+            ];
+        }
+        $result->free();
+    }
+    
+    closeDBConnection($conn);
+} catch (Exception $e) {
+    error_log("Failed to load appointments: " . $e->getMessage());
 }
 
 // Determine which tab to show

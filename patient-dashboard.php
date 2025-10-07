@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -16,20 +17,10 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
 $fullName = $_SESSION['user_name'];
 $firstName = trim(explode(' ', $fullName)[0]);
 
-// Load appointments data
-$jsonFile = __DIR__ . '/data/appointments.json';
-$appointments = [];
-if (file_exists($jsonFile)) {
-    $appointments = json_decode(file_get_contents($jsonFile), true) ?? [];
-}
-
-// Filter appointments for current patient (in real app, filter by patient ID)
-// For now, showing all appointments as demo
-$patientAppointments = $appointments;
-
-// Calculate statistics
+// Load appointments data from database
+$patientAppointments = [];
 $stats = [
-    'total' => count($patientAppointments),
+    'total' => 0,
     'upcoming' => 0,
     'approved' => 0,
     'pending' => 0,
@@ -37,13 +28,47 @@ $stats = [
     'canceled' => 0
 ];
 
-foreach ($patientAppointments as $appt) {
-    $status = strtolower($appt['status'] ?? 'pending');
-    if ($status === 'pending') $stats['pending']++;
-    if ($status === 'approved') $stats['approved']++;
-    if ($status === 'rescheduled') $stats['rescheduled']++;
-    if ($status === 'canceled') $stats['canceled']++;
-    if (in_array($status, ['pending', 'approved', 'rescheduled'])) $stats['upcoming']++;
+try {
+    $conn = getDBConnection();
+    
+    // Get all appointments (in production, filter by patient_id)
+    $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
+    
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $patientAppointments[] = [
+                'id' => $row['appointment_id'],
+                'patientName' => $row['patient_name'],
+                'phone' => $row['phone'],
+                'department' => $row['department'],
+                'doctorId' => $row['doctor_id'],
+                'doctorName' => $row['doctor_name'],
+                'doctorSpecialty' => $row['doctor_specialty'],
+                'doctorPhoto' => $row['doctor_photo'],
+                'date' => $row['appointment_date'],
+                'time' => $row['appointment_time'],
+                'reason' => $row['reason'],
+                'notes' => $row['notes'],
+                'status' => $row['status'],
+                'createdAt' => $row['created_at']
+            ];
+            
+            // Count statistics
+            $status = strtolower($row['status']);
+            if ($status === 'pending') $stats['pending']++;
+            if ($status === 'approved') $stats['approved']++;
+            if ($status === 'rescheduled') $stats['rescheduled']++;
+            if ($status === 'canceled') $stats['canceled']++;
+            if (in_array($status, ['pending', 'approved', 'rescheduled'])) $stats['upcoming']++;
+        }
+        $result->free();
+    }
+    
+    $stats['total'] = count($patientAppointments);
+    
+    closeDBConnection($conn);
+} catch (Exception $e) {
+    error_log("Failed to load appointments: " . $e->getMessage());
 }
 
 // Get upcoming appointments (pending, approved, rescheduled - not canceled or past)
@@ -51,7 +76,7 @@ $upcomingAppointments = array_filter($patientAppointments, function ($appt) {
     $status = strtolower($appt['status'] ?? 'pending');
     return !in_array($status, ['canceled', 'past'], true);
 });
-$upcomingAppointments = array_slice(array_reverse($upcomingAppointments), 0, 3);
+$upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
 ?>
 <!DOCTYPE html>
 <html lang="en">

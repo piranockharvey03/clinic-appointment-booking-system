@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -13,31 +14,59 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
     exit;
 }
 
-// Load appointments data
-$jsonFile = __DIR__ . '/data/appointments.json';
+// Load appointments data from database
 $appointments = [];
-if (file_exists($jsonFile)) {
-    $appointments = json_decode(file_get_contents($jsonFile), true) ?? [];
-}
-
-// Calculate statistics
 $stats = [
-    'total' => count($appointments),
+    'total' => 0,
     'pending' => 0,
     'approved' => 0,
     'rescheduled' => 0,
     'canceled' => 0
 ];
 
-foreach ($appointments as $appt) {
-    $status = strtolower($appt['status'] ?? 'pending');
-    if (isset($stats[$status])) {
-        $stats[$status]++;
+try {
+    $conn = getDBConnection();
+    
+    // Get all appointments
+    $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
+    
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $appointments[] = [
+                'id' => $row['appointment_id'],
+                'patientName' => $row['patient_name'],
+                'phone' => $row['phone'],
+                'department' => $row['department'],
+                'doctorId' => $row['doctor_id'],
+                'doctorName' => $row['doctor_name'],
+                'doctorSpecialty' => $row['doctor_specialty'],
+                'doctorPhoto' => $row['doctor_photo'],
+                'date' => $row['appointment_date'],
+                'time' => $row['appointment_time'],
+                'reason' => $row['reason'],
+                'notes' => $row['notes'],
+                'status' => $row['status'],
+                'createdAt' => $row['created_at']
+            ];
+            
+            // Count statistics
+            $status = strtolower($row['status']);
+            if (isset($stats[$status])) {
+                $stats[$status]++;
+            }
+        }
+        $result->free();
     }
+    
+    $stats['total'] = count($appointments);
+    
+    closeDBConnection($conn);
+} catch (Exception $e) {
+    error_log("Failed to load appointments: " . $e->getMessage());
 }
 
 // Get recent appointments (last 5)
-$recentAppointments = array_slice(array_reverse($appointments), 0, 5);
+$recentAppointments = array_slice($appointments, 0, 5);
 ?>
 <!DOCTYPE html>
 <html lang="en">
