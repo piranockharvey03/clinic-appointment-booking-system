@@ -7,9 +7,9 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Redirect to login if not authenticated or not a patient
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
-    header('Location: login.html');
+// Redirect to login if not authenticated or not an admin
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header('Location: ../html/admin-login.html');
     exit;
 }
 
@@ -21,30 +21,13 @@ $fullName = $_SESSION['user_name'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="assets/css/dark-mode.css">
-    <link rel="stylesheet" href="assets/css/responsive-sidebar.css">
+    <title>Admin Settings | MediCare Clinic</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../assets/css/dark-mode.css">
+    <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="assets/js/dark-mode.js"></script>
-    <style>
-        .sidebar {
-            transition: all 0.3s;
-        }
-
-        .sidebar-collapsed {
-            width: 5rem;
-        }
-
-        .sidebar-expanded {
-            width: 16rem;
-        }
-
-        .main-content {
-            transition: margin-left 0.3s;
-        }
-    </style>
+    <script src="../assets/js/dark-mode.js"></script>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
@@ -67,45 +50,26 @@ $fullName = $_SESSION['user_name'];
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
-                                Book Appointment
-                            </a>
-                            <a href="patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
-                                Medical Records
-                            </a>
-                            <a href="patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
-                                Prescriptions
-                            </a>
-                            <a href="patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
-                                Messages
-                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="user" class="mr-3 h-5 w-5"></i>
-                                Profile
-                            </a>
-                            <a href="patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="../html/admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
                         </div>
+                    </nav>
                 </div>
             </div>
         </div>
@@ -118,17 +82,10 @@ $fullName = $_SESSION['user_name'];
                     <button class="md:hidden text-gray-600 hover:text-gray-900" id="mobileMenuBtn">
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-900">Settings</h1>
+                    <h1 class="text-lg font-semibold text-gray-900">Admin Settings</h1>
                     <div class="flex items-center space-x-4">
-                        <button class="p-1 text-gray-400 hover:text-gray-500">
-                            <i data-feather="bell" class="h-6 w-6"></i>
-                        </button>
-                        <div class="relative">
-                            <button class="flex items-center space-x-2">
-                                <img class="h-8 w-8 rounded-full" src="http://static.photos/people/200x200/1" alt="User profile">
-                                <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
-                            </button>
-                        </div>
+                        <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
+                        <i data-feather="user" class="h-6 w-6 text-blue-600"></i>
                     </div>
                 </div>
             </header>
@@ -159,21 +116,38 @@ $fullName = $_SESSION['user_name'];
                             <div class="flex items-center justify-between py-3 border-b border-gray-200">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Email Notifications</h3>
-                                    <p class="text-sm text-gray-500">Receive appointment reminders via email</p>
+                                    <p class="text-sm text-gray-500">Receive system alerts via email</p>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <span class="text-sm font-medium text-gray-700" id="emailStatus">On</span>
                                     <div class="toggle-switch active" id="emailToggle"></div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between py-3">
+                        </div>
+                    </div>
+
+                    <!-- System Settings -->
+                    <div class="bg-white shadow rounded-lg p-6 mb-6">
+                        <h2 class="text-xl font-bold mb-6 text-gray-900">System</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-3 border-b border-gray-200">
                                 <div>
-                                    <h3 class="text-base font-medium text-gray-900">SMS Notifications</h3>
-                                    <p class="text-sm text-gray-500">Receive appointment reminders via SMS</p>
+                                    <h3 class="text-base font-medium text-gray-900">Auto-Approve Appointments</h3>
+                                    <p class="text-sm text-gray-500">Automatically approve new appointments</p>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <span class="text-sm font-medium text-gray-700" id="smsStatus">On</span>
-                                    <div class="toggle-switch active" id="smsToggle"></div>
+                                    <span class="text-sm font-medium text-gray-700" id="autoApproveStatus">Off</span>
+                                    <div class="toggle-switch" id="autoApproveToggle"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between py-3">
+                                <div>
+                                    <h3 class="text-base font-medium text-gray-900">Maintenance Mode</h3>
+                                    <p class="text-sm text-gray-500">Put the system in maintenance mode</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-medium text-gray-700" id="maintenanceStatus">Off</span>
+                                    <div class="toggle-switch" id="maintenanceToggle"></div>
                                 </div>
                             </div>
                         </div>
@@ -187,9 +161,9 @@ $fullName = $_SESSION['user_name'];
                                 <i data-feather="key" class="inline h-5 w-5 mr-2"></i>
                                 Change Password
                             </button>
-                            <button class="w-full text-left px-4 py-3 border border-red-300 rounded-md hover:bg-red-50 text-red-600">
-                                <i data-feather="trash-2" class="inline h-5 w-5 mr-2"></i>
-                                Delete Account
+                            <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
+                                <i data-feather="database" class="inline h-5 w-5 mr-2"></i>
+                                Backup Database
                             </button>
                         </div>
                     </div>
@@ -198,8 +172,8 @@ $fullName = $_SESSION['user_name'];
         </div>
     </div>
 
-    <script src="assets/js/mobile-menu.js"></script>
-    <script src="assets/js/dark-mode.js"></script>
+    <script src="../assets/js/mobile-menu.js"></script>
+    <script src="../assets/js/dark-mode.js"></script>
     <script>
         feather.replace();
 
@@ -212,15 +186,26 @@ $fullName = $_SESSION['user_name'];
             emailStatus.textContent = emailToggle.classList.contains('active') ? 'On' : 'Off';
         });
 
-        // SMS Notifications Toggle
-        const smsToggle = document.getElementById('smsToggle');
-        const smsStatus = document.getElementById('smsStatus');
+        // Auto-Approve Toggle
+        const autoApproveToggle = document.getElementById('autoApproveToggle');
+        const autoApproveStatus = document.getElementById('autoApproveStatus');
 
-        smsToggle.addEventListener('click', function() {
-            smsToggle.classList.toggle('active');
-            smsStatus.textContent = smsToggle.classList.contains('active') ? 'On' : 'Off';
+        autoApproveToggle.addEventListener('click', function() {
+            autoApproveToggle.classList.toggle('active');
+            autoApproveStatus.textContent = autoApproveToggle.classList.contains('active') ? 'On' : 'Off';
+        });
+
+        // Maintenance Mode Toggle
+        const maintenanceToggle = document.getElementById('maintenanceToggle');
+        const maintenanceStatus = document.getElementById('maintenanceStatus');
+
+        maintenanceToggle.addEventListener('click', function() {
+            maintenanceToggle.classList.toggle('active');
+            maintenanceStatus.textContent = maintenanceToggle.classList.contains('active') ? 'On' : 'Off';
         });
     </script>
 </body>
 
 </html>
+
+

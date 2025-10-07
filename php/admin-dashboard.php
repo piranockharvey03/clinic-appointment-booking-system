@@ -10,7 +10,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not an admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: admin-login.html');
+    header('Location: ../html/admin-login.html');
     exit;
 }
 
@@ -74,12 +74,12 @@ $recentAppointments = array_slice($appointments, 0, 5);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="assets/css/dark-mode.css">
-    <link rel="stylesheet" href="assets/css/responsive-sidebar.css">
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../assets/css/dark-mode.css">
+    <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="assets/js/dark-mode.js"></script>
+    <script src="../assets/js/dark-mode.js"></script>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
@@ -102,21 +102,21 @@ $recentAppointments = array_slice($appointments, 0, 5);
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="../html/admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -164,7 +164,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                                 <i data-feather="clock" class="h-8 w-8 text-yellow-600"></i>
                             </div>
                         </div>
-                        <a href="admin-appointments.php?tab=pending" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                        <a href="../html/admin-appointments.php?tab=pending" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
                     
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
@@ -177,7 +177,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                                 <i data-feather="check-circle" class="h-8 w-8 text-green-600"></i>
                             </div>
                         </div>
-                        <a href="admin-appointments.php?tab=approved" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                        <a href="../html/admin-appointments.php?tab=approved" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
                     
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
@@ -190,7 +190,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                                 <i data-feather="refresh-cw" class="h-8 w-8 text-purple-600"></i>
                             </div>
                         </div>
-                        <a href="admin-appointments.php?tab=rescheduled" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                        <a href="../html/admin-appointments.php?tab=rescheduled" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
                 </div>
 
@@ -199,7 +199,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                     <div class="p-6 border-b border-gray-200">
                         <div class="flex items-center justify-between">
                             <h2 class="text-xl font-bold text-gray-900">Recent Appointments</h2>
-                            <a href="admin-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
+                            <a href="../html/admin-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
                         </div>
                     </div>
                       <!--piranockharvey03--> 
@@ -254,9 +254,10 @@ $recentAppointments = array_slice($appointments, 0, 5);
             </main>
         </div>
     </div>
-    <script src="assets/js/mobile-menu.js"></script>
+    <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
     </script>
 </body>
 </html>
+

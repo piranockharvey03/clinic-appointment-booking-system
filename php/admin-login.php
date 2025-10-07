@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Get user by email
-    $stmt = $conn->prepare("SELECT id, full_name, password FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT id, full_name, password FROM admin WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->store_result();
@@ -36,11 +36,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $id;
             $_SESSION['user_name'] = $fullName;
             $_SESSION['user_email'] = $email;
-            $_SESSION['user_role'] = 'patient';
+            $_SESSION['user_role'] = 'admin';
             $_SESSION['login_time'] = time();
 
             // Redirect to PHP dashboard (uses session)
-            header("Location: patient-dashboard.php");
+            header("Location: ../php/admin-dashboard.php");
             exit;
         } else {
             echo "❌ Invalid password!";
@@ -53,3 +53,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 $conn->close();
+

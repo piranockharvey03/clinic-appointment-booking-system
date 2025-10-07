@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ssss", $fullName, $email, $phone, $hashedPassword);
 
     if ($stmt->execute()) {
-        header('Location: login.html');
+        header('Location: ../html/login.html');
     } else {
         echo "❌ Error: " . $stmt->error;
     }

@@ -5,7 +5,7 @@ require_once 'db-config.php';
 
 // Ensure request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: patient-book.html');
+    header('Location: ../html/patient-book.html');
     exit;
 }
 
@@ -26,7 +26,7 @@ $phone      = get_post('phone');
 // Basic validation
 if ($department === '' || $doctorId === '' || $date === '' || $time === '') {
     // Missing required fields
-    header('Location: patient-book.html');
+    header('Location: ../html/patient-book.html');
     exit;
 }
 

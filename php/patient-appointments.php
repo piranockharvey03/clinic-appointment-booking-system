@@ -8,30 +8,25 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Redirect to login if not authenticated or not an admin
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: admin-login.html');
+// Redirect to login if not authenticated or not a patient
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
+    header('Location: ../html/login.html');
     exit;
 }
 
-// Handle admin actions: approve, cancel, reschedule
+// Handle status change actions and reschedule
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['appt_id'])) {
     try {
         $conn = getDBConnection();
         $apptId = $_POST['appt_id'];
         
-        if ($_POST['action'] === 'approve') {
-            $stmt = $conn->prepare("UPDATE appointments SET status = 'approved' WHERE appointment_id = ?");
-            $stmt->bind_param("s", $apptId);
-            $stmt->execute();
-            $stmt->close();
-        } elseif ($_POST['action'] === 'cancel') {
+        if ($_POST['action'] === 'cancel') {
             $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled' WHERE appointment_id = ?");
             $stmt->bind_param("s", $apptId);
             $stmt->execute();
             $stmt->close();
         } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
-            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'rescheduled' WHERE appointment_id = ?");
+            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ? WHERE appointment_id = ?");
             $stmt->bind_param("sss", $_POST['new_date'], $_POST['new_time'], $apptId);
             $stmt->execute();
             $stmt->close();
@@ -39,11 +34,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
         
         closeDBConnection($conn);
     } catch (Exception $e) {
-        error_log("Admin appointment action error: " . $e->getMessage());
+        error_log("Patient appointment action error: " . $e->getMessage());
     }
     
     // Redirect to avoid form resubmission
-    header("Location: admin-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
+    header("Location: patient-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
     exit;
 }
 
@@ -51,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
 $appointments = [];
 try {
     $conn = getDBConnection();
+    // In production, filter by patient_id: WHERE patient_id = ?
     $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
     
     if ($result) {
@@ -87,8 +83,8 @@ function filter_appointments($appointments, $tab)
     $statusOf = fn($a) => strtolower($a['status'] ?? 'pending');
     if ($tab === 'pending') return array_filter($appointments, fn($a) => $statusOf($a) === 'pending');
     if ($tab === 'approved') return array_filter($appointments, fn($a) => $statusOf($a) === 'approved');
-    if ($tab === 'canceled') return array_filter($appointments, fn($a) => $statusOf($a) === 'canceled');
     if ($tab === 'rescheduled') return array_filter($appointments, fn($a) => $statusOf($a) === 'rescheduled');
+    if ($tab === 'canceled') return array_filter($appointments, fn($a) => $statusOf($a) === 'canceled');
     return $appointments;
 }
 $filtered = array_reverse(filter_appointments($appointments, $tab));
@@ -104,18 +100,6 @@ if ($reschedule_id) {
         }
     }
 }
-
-// For view details modal
-$view_id = $_GET['view'] ?? null;
-$view_appt = null;
-if ($view_id) {
-    foreach ($appointments as $a) {
-        if ($a['id'] == $view_id) {
-            $view_appt = $a;
-            break;
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,13 +107,13 @@ if ($view_id) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Appointments | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="assets/css/dark-mode.css">
-    <link rel="stylesheet" href="assets/css/responsive-sidebar.css">
+    <title>Appointments | MediCare Clinic</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="stylesheet" href="../assets/css/dark-mode.css">
+    <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="assets/js/dark-mode.js"></script>
+    <script src="../assets/js/dark-mode.js"></script>
     <style>
         .sidebar {
             transition: all 0.3s;
@@ -177,21 +161,41 @@ if ($view_id) {
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="../html/patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
+                            <a href="../html/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
+                                Book Appointment
+                            </a>
+                            <a href="../html/patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
+                                Medical Records
+                            </a>
+                            <a href="../html/patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
+                                Prescriptions
+                            </a>
+                            <a href="../html/patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
+                                Messages
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../html/patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="user" class="mr-3 h-5 w-5"></i>
+                                Profile
+                            </a>
+                            <a href="../html/patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../php/logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -207,7 +211,11 @@ if ($view_id) {
                     <button class="md:hidden text-gray-600 hover:text-gray-900" id="mobileMenuBtn">
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-900">Admin - Manage Appointments</h1>
+                    <h1 class="text-lg font-semibold text-gray-900">Appointments</h1>
+                    <a href="../html/patient-book.html" class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <i data-feather="plus" class="mr-1 h-4 w-4"></i>
+                        New
+                    </a>
                 </div>
             </header>
             <main class="p-4 sm:px-6 lg:px-8">
@@ -227,7 +235,7 @@ if ($view_id) {
                         </div>
                         <div class="divide-y divide-gray-200">
                             <?php if (empty($filtered)) : ?>
-                                <div class="p-6 text-sm text-gray-600">No appointments in this category.</div>
+                                <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../html/patient-book.html">Book your appointment here</a>.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
                                     <div class="appointment-card p-4 flex items-center justify-between">
@@ -238,26 +246,18 @@ if ($view_id) {
                                                 <div class="h-12 w-12 rounded-full bg-gray-200"></div>
                                             <?php endif; ?>
                                             <div class="ml-4">
-                                                <h4 class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($appt['patientName'] ?? 'Unknown Patient') ?></h4>
+                                                <h4 class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($appt['doctorName']) ?></h4>
                                                 <div class="text-xs text-gray-500">
-                                                    Dr. <?= htmlspecialchars($appt['doctorName']) ?> • <?= htmlspecialchars($appt['doctorSpecialty']) ?>
-                                                </div>
-                                                <div class="text-xs text-gray-500 mt-0.5">
-                                                    <?= htmlspecialchars($appt['date']) ?>, <?= htmlspecialchars($appt['time']) ?>
+                                                    <?= htmlspecialchars($appt['doctorSpecialty']) ?> • <?= htmlspecialchars($appt['date']) ?>, <?= htmlspecialchars($appt['time']) ?>
                                                 </div>
                                                 <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: <?= htmlspecialchars($appt['department']) ?></div>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <?php
-                                            $status = strtolower($appt['status'] ?? 'pending');
+                                            <?php 
+                                                $status = strtolower($appt['status'] ?? 'pending');
                                             ?>
-                                            <?php if ($status === 'pending'): ?>
-                                                <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="approve" class="px-3 py-1.5 text-sm rounded-md text-white bg-green-600 hover:bg-green-700">Approve</button>
-                                                </form>
+                                            <?php if (!in_array($status, ['canceled','past'], true)): ?>
                                                 <form method="get" style="display:inline;">
                                                     <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                                                     <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">
@@ -267,32 +267,13 @@ if ($view_id) {
                                                     <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
                                                     <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
                                                 </form>
-                                            <?php elseif ($status === 'approved'): ?>
-                                                <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
-                                                <form method="get" style="display:inline;">
-                                                    <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
-                                                    <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button type="submit" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-blue-700">Reschedule</button>
-                                                </form>
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
-                                                </form>
-                                                <span class="px-3 py-1.5 text-sm rounded-md bg-green-100 text-green-700">Approved</span>
-                                            <?php elseif ($status === 'rescheduled'): ?>
-                                                <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="approve" class="px-3 py-1.5 text-sm rounded-md text-white bg-green-600 hover:bg-green-700">Approve</button>
-                                                </form>
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
-                                                </form>
-                                                <span class="px-3 py-1.5 text-sm rounded-md bg-blue-100 text-blue-700">Rescheduled</span>
+                                                <?php 
+                                                    $badgeClass = $status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                                                    $label = ucfirst($status);
+                                                ?>
+                                                <span class="px-3 py-1.5 text-sm rounded-md <?= $badgeClass ?>"><?= htmlspecialchars($label) ?></span>
                                             <?php else: ?>
-                                                <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
-                                                <span class="px-3 py-1.5 text-sm rounded-md bg-red-100 text-red-600">
+                                                <span class="px-3 py-1.5 text-sm rounded-md <?= ($status === 'canceled') ? 'bg-red-100 text-red-600' : 'bg-gray-200 text-gray-700' ?>">
                                                     <?= ucfirst($status) ?>
                                                 </span>
                                             <?php endif; ?>
@@ -306,51 +287,6 @@ if ($view_id) {
             </main>
         </div>
     </div>
-    <?php if ($view_appt): ?>
-        <!-- Modal for viewing appointment details -->
-        <div class="fixed inset-0 flex items-center justify-center z-50 modal-bg">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Appointment Details</h3>
-                    <a href="admin-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="text-gray-400 hover:text-gray-600">
-                        <i data-feather="x" class="h-5 w-5"></i>
-                    </a>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Patient Name</label>
-                        <p class="text-gray-900"><?= htmlspecialchars($view_appt['patientName'] ?? 'N/A') ?></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <p class="text-gray-900"><?= htmlspecialchars($view_appt['phone'] ?? 'Not provided') ?></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Visit</label>
-                        <p class="text-gray-900"><?= htmlspecialchars($view_appt['reason'] ?? 'Not provided') ?></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
-                        <p class="text-gray-900"><?= !empty($view_appt['notes']) ? htmlspecialchars($view_appt['notes']) : 'No additional notes' ?></p>
-                    </div>
-                    <div class="border-t pt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Appointment Details</label>
-                        <p class="text-gray-900">Dr. <?= htmlspecialchars($view_appt['doctorName']) ?></p>
-                        <p class="text-sm text-gray-600"><?= htmlspecialchars($view_appt['doctorSpecialty']) ?></p>
-                        <p class="text-sm text-gray-600 mt-1"><?= htmlspecialchars($view_appt['date']) ?> at <?= htmlspecialchars($view_appt['time']) ?></p>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 mt-6">
-                    <a href="admin-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Close</a>
-                </div>
-            </div>
-        </div>
-        <style>
-            body {
-                overflow: hidden;
-            }
-        </style>
-    <?php endif; ?>
     <?php if ($reschedule_appt): ?>
         <!-- Modal for rescheduling -->
         <div class="fixed inset-0 flex items-center justify-center z-50 modal-bg">
@@ -362,7 +298,7 @@ if ($view_id) {
                     <input type="date" name="new_date" class="border rounded px-3 py-2 w-full mb-4" value="<?= htmlspecialchars($reschedule_appt['date']) ?>" required min="<?= date('Y-m-d') ?>">
                     <input type="time" name="new_time" class="border rounded px-3 py-2 w-full mb-4" value="<?= htmlspecialchars($reschedule_appt['time']) ?>" required>
                     <div class="flex justify-end gap-2">
-                        <a href="admin-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancel</a>
+                        <a href="../html/patient-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancel</a>
                         <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
                     </div>
                 </form>
@@ -374,10 +310,11 @@ if ($view_id) {
             }
         </style>
     <?php endif; ?>
-    <script src="assets/js/mobile-menu.js"></script>
+    <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
     </script>
 </body>
 
 </html>
+

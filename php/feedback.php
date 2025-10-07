@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->bind_param("ssssissi", $name, $email, $phone, $service, $rating, $feedback, $newsletter, $privacy);
 
     if ($stmt->execute()) {
-        header("Location: index.html");
+        header("Location: ../html/index.html");
     } else {
         echo "Error: " . $stmt->error;
     }

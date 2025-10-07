@@ -19,5 +19,6 @@ header("Pragma: no-cache");
 header("Expires: 0");
 
 // Redirect to admin login page
-header("Location: admin-login.html");
+header("Location: ../html/admin-login.html");
 exit;
+
