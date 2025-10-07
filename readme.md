@@ -58,7 +58,7 @@ UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `admin` (`full_name`, `email`, `password`)
-VALUES ('Dr Chen', 'drchen@example.com', 'Hashed password: $2y$12$WlxtoPW3NSpPDxRMztqWhe21Qwzn6shEFo97M/..oWF1JCOLLJXae');
+VALUES ('Dr Chen', 'drchen@example.com', '$2y$12$WlxtoPW3NSpPDxRMztqWhe21Qwzn6shEFo97M/..oWF1JCOLLJXae');
 
 After running those sql commands, then go to ur browser and then acces the website using the path
 (http://localhost/hospital/index.html)
