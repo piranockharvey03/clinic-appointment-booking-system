@@ -122,11 +122,11 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="../html/patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="../html/patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
@@ -148,15 +148,15 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="../html/patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="user" class="mr-3 h-5 w-5"></i>
                                 Profile
                             </a>
-                            <a href="../html/patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="../php/logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -278,7 +278,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                     <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg leading-6 font-medium text-gray-900">Upcoming Appointments</h3>
-                            <a href="../html/patient-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
+                            <a href="patient-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
                         </div>
                     </div>
                     <div class="divide-y divide-gray-200">
@@ -318,7 +318,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                             <span class="px-3 py-1.5 text-xs font-semibold rounded-full border <?= $badgeClass ?>">
                                                 <?= ucfirst($status) ?>
                                             </span>
-                                            <a href="../html/patient-appointments.php" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            <a href="patient-appointments.php" class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                 View Details
                                             </a>
                                         </div>

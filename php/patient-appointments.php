@@ -161,11 +161,11 @@ if ($reschedule_id) {
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="../html/patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="../html/patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="patient-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
@@ -187,15 +187,15 @@ if ($reschedule_id) {
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="../html/patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="user" class="mr-3 h-5 w-5"></i>
                                 Profile
                             </a>
-                            <a href="../html/patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="../php/logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -298,7 +298,7 @@ if ($reschedule_id) {
                     <input type="date" name="new_date" class="border rounded px-3 py-2 w-full mb-4" value="<?= htmlspecialchars($reschedule_appt['date']) ?>" required min="<?= date('Y-m-d') ?>">
                     <input type="time" name="new_time" class="border rounded px-3 py-2 w-full mb-4" value="<?= htmlspecialchars($reschedule_appt['time']) ?>" required>
                     <div class="flex justify-end gap-2">
-                        <a href="../html/patient-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancel</a>
+                        <a href="patient-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancel</a>
                         <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
                     </div>
                 </form>

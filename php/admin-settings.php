@@ -50,21 +50,21 @@ $fullName = $_SESSION['user_name'];
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="../html/admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="../html/admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="../html/admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="../html/admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
