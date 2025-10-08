@@ -60,5 +60,4 @@ UNIQUE KEY `email` (`email`)
 INSERT INTO `admin` (`full_name`, `email`, `password`)
 VALUES ('Dr Chen', 'drchen@example.com', '$2y$12$WlxtoPW3NSpPDxRMztqWhe21Qwzn6shEFo97M/..oWF1JCOLLJXae');
 
-After running those sql commands, then go to ur browser and then acces the website using the path
-(http://localhost/hospital/index.html)
+
