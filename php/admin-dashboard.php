@@ -257,6 +257,76 @@ $recentAppointments = array_slice($appointments, 0, 5);
     <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
+
+        // Show login success popup
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create popup element
+            const popup = document.createElement('div');
+            popup.id = 'login-success-popup';
+            popup.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #10B981;
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 8px;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                    z-index: 1000;
+                    font-weight: 600;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    animation: slideInRight 0.5s ease-out;
+                ">
+                    <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    Login Successful!
+                </div>
+            `;
+
+            // Add keyframes animation
+            if (!document.querySelector('#login-popup-styles')) {
+                const style = document.createElement('style');
+                style.id = 'login-popup-styles';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes fadeOut {
+                        from {
+                            opacity: 1;
+                        }
+                        to {
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(popup);
+
+            // Remove popup after 3 seconds with fade effect
+            setTimeout(() => {
+                popup.style.animation = 'fadeOut 0.5s ease-in forwards';
+                setTimeout(() => {
+                    if (popup.parentNode) {
+                        popup.parentNode.removeChild(popup);
+                    }
+                }, 500);
+            }, 3000);
+        });
     </script>
 </body>
 </html>
