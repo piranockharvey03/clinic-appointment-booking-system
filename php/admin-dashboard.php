@@ -258,6 +258,75 @@ $recentAppointments = array_slice($appointments, 0, 5);
     <script>
         feather.replace();
 
+        // Back button and authentication check
+        (function() {
+            // Check authentication status
+            function checkAuthentication() {
+                // Make an AJAX request to verify session is still valid
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', 'check-session.php', true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 401 || xhr.responseText === 'unauthorized') {
+                            // Session expired or invalid, redirect to login
+                            window.location.href = '../html/admin-login.html';
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+            // Detect back/forward navigation
+            window.addEventListener('popstate', function(event) {
+                // Check authentication when user navigates
+                checkAuthentication();
+            });
+
+            // Check authentication on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add a state to history to enable popstate detection
+                if (window.history && window.history.pushState) {
+                    window.history.pushState(null, null, window.location.href);
+                }
+
+                // Initial authentication check
+                checkAuthentication();
+
+                // Set up periodic authentication checks (every 30 seconds)
+                setInterval(checkAuthentication, 30000);
+            });
+
+            // Disable right-click context menu for additional security
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+
+            // Disable common keyboard shortcuts that could access developer tools
+            document.addEventListener('keydown', function(e) {
+                // Disable F12 (developer tools)
+                if (e.keyCode === 123) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Disable Ctrl+Shift+I (developer tools)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Disable Ctrl+Shift+C (inspector)
+                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Disable Ctrl+U (view source)
+                if (e.ctrlKey && e.keyCode === 85) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        })();
+
         // Show login success popup
         document.addEventListener('DOMContentLoaded', function() {
             // Create popup element
