@@ -18,6 +18,6 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Redirect to login page
-header("Location: ../html/login.html");
+// Redirect to login page with logout success parameter
+header("Location: ../html/login.html?logout=success");
 exit;

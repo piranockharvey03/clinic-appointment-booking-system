@@ -50,6 +50,15 @@
                                 <div class="mt-1">
                                     <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 </div>
+                                <!-- Email Validation Status -->
+                                <div id="email-validation-status" class="mt-2 p-2 rounded-md transition-all duration-200">
+                                    <div class="flex items-center text-xs">
+                                        <div id="email-icon" class="w-4 h-4 rounded-full mr-2 flex items-center justify-center">
+                                            <i data-feather="minus" class="h-3 w-3"></i>
+                                        </div>
+                                        <span id="email-validation-text" class="font-medium">Enter email to validate format</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div>
@@ -64,12 +73,66 @@
                                 <div class="mt-1">
                                     <input id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 </div>
+
+                                <!-- Password Strength Indicator -->
+                                <div class="mt-2">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-medium text-gray-700">Password Strength</span>
+                                        <span id="strength-text" class="text-xs font-medium text-gray-500">Very Weak</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="strength-bar" class="h-2 rounded-full transition-all duration-300" style="width: 0%; background-color: #ef4444;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Password Requirements -->
+                                <div id="password-requirements" class="mt-3 p-3 bg-gray-50 rounded-md">
+                                    <div class="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                                        <i data-feather="shield" class="h-3 w-3 mr-2"></i>
+                                        Password Requirements
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div id="length-check" class="flex items-center text-xs transition-all duration-200">
+                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
+                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                            </div>
+                                            <span class="text-gray-600">At least 8 characters</span>
+                                        </div>
+                                        <div id="uppercase-check" class="flex items-center text-xs transition-all duration-200">
+                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
+                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                            </div>
+                                            <span class="text-gray-600">One uppercase letter (A-Z)</span>
+                                        </div>
+                                        <div id="number-check" class="flex items-center text-xs transition-all duration-200">
+                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
+                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                            </div>
+                                            <span class="text-gray-600">One number (0-9)</span>
+                                        </div>
+                                        <div id="special-check" class="flex items-center text-xs transition-all duration-200">
+                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
+                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                            </div>
+                                            <span class="text-gray-600">One special character (!@#$%^&*)</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="space-y-1">
                                 <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
                                 <div class="mt-1">
                                     <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                </div>
+                                <!-- Password Match Status -->
+                                <div id="password-match-status" class="mt-2 p-2 rounded-md transition-all duration-200">
+                                    <div class="flex items-center text-xs">
+                                        <div id="match-icon" class="w-4 h-4 rounded-full mr-2 flex items-center justify-center">
+                                            <i data-feather="minus" class="h-3 w-3"></i>
+                                        </div>
+                                        <span id="password-match-text" class="font-medium">Enter password to check match</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -138,6 +201,326 @@
 
     <script>
         feather.replace();
+
+        // Password validation elements
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const strengthBar = document.getElementById('strength-bar');
+        const strengthText = document.getElementById('strength-text');
+        const lengthCheck = document.getElementById('length-check');
+        const uppercaseCheck = document.getElementById('uppercase-check');
+        const numberCheck = document.getElementById('number-check');
+        const specialCheck = document.getElementById('special-check');
+        const passwordMatchStatus = document.getElementById('password-match-status');
+        const matchIcon = document.getElementById('match-icon');
+        const passwordMatchText = document.getElementById('password-match-text');
+        const registerForm = document.querySelector('form');
+
+        // Email validation elements
+        const emailField = document.getElementById('email');
+        const emailValidationStatus = document.getElementById('email-validation-status');
+        const emailIcon = document.getElementById('email-icon');
+        const emailValidationText = document.getElementById('email-validation-text');
+
+        // Email validation functions
+        function validateEmailFormat(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Password requirements validation functions
+        function validatePasswordLength(password) {
+            return password.length >= 8;
+        }
+
+        function validatePasswordUppercase(password) {
+            return /[A-Z]/.test(password);
+        }
+
+        function validatePasswordNumber(password) {
+            return /\d/.test(password);
+        }
+
+        function validatePasswordSpecial(password) {
+            return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+        }
+
+        function validatePasswordMatch(password, confirmPassword) {
+            return password === confirmPassword && confirmPassword !== '';
+        }
+
+        // Calculate password strength
+        function calculatePasswordStrength(password) {
+            let score = 0;
+
+            if (password.length >= 8) score += 25;
+            if (password.length >= 12) score += 15;
+            if (/[A-Z]/.test(password)) score += 20;
+            if (/\d/.test(password)) score += 20;
+            if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 20;
+
+            return Math.min(score, 100);
+        }
+
+        // Get strength level info
+        function getStrengthLevel(score) {
+            if (score < 30) return { text: 'Very Weak', color: '#ef4444' };
+            if (score < 50) return { text: 'Weak', color: '#f97316' };
+            if (score < 70) return { text: 'Fair', color: '#eab308' };
+            if (score < 90) return { text: 'Good', color: '#22c55e' };
+            return { text: 'Strong', color: '#16a34a' };
+        }
+
+        // Update email validation status
+        function updateEmailValidation() {
+            const email = emailField.value;
+
+            if (email === '') {
+                emailValidationStatus.classList.remove('bg-green-50', 'bg-red-50');
+                emailValidationStatus.classList.add('bg-gray-50');
+                emailIcon.style.backgroundColor = '#e5e7eb';
+                emailIcon.style.color = '#6b7280';
+                emailIcon.querySelector('i').setAttribute('data-feather', 'minus');
+                emailValidationText.textContent = 'Enter email to validate format';
+                emailValidationText.classList.remove('text-green-700', 'text-red-600');
+                emailValidationText.classList.add('text-gray-600');
+            } else if (validateEmailFormat(email)) {
+                emailValidationStatus.classList.remove('bg-gray-50', 'bg-red-50');
+                emailValidationStatus.classList.add('bg-green-50');
+                emailIcon.style.backgroundColor = '#dcfce7';
+                emailIcon.style.color = '#16a34a';
+                emailIcon.querySelector('i').setAttribute('data-feather', 'check');
+                emailValidationText.textContent = 'Valid email format ✓';
+                emailValidationText.classList.remove('text-gray-600', 'text-red-600');
+                emailValidationText.classList.add('text-green-700');
+            } else {
+                emailValidationStatus.classList.remove('bg-gray-50', 'bg-green-50');
+                emailValidationStatus.classList.add('bg-red-50');
+                emailIcon.style.backgroundColor = '#fecaca';
+                emailIcon.style.color = '#dc2626';
+                emailIcon.querySelector('i').setAttribute('data-feather', 'x');
+                emailValidationText.textContent = 'Invalid email format';
+                emailValidationText.classList.remove('text-gray-600', 'text-green-700');
+                emailValidationText.classList.add('text-red-600');
+            }
+
+            feather.replace();
+        }
+
+        // Update password requirements visual indicators
+        function updatePasswordRequirements() {
+            const password = passwordField.value;
+
+            // Update strength indicator
+            const strength = calculatePasswordStrength(password);
+            const strengthLevel = getStrengthLevel(strength);
+
+            strengthBar.style.width = strength + '%';
+            strengthBar.style.backgroundColor = strengthLevel.color;
+            strengthText.textContent = strengthLevel.text;
+            strengthText.style.color = strengthLevel.color;
+
+            // Length check
+            updateRequirementIndicator(lengthCheck, validatePasswordLength(password), 'check');
+
+            // Uppercase check
+            updateRequirementIndicator(uppercaseCheck, validatePasswordUppercase(password), 'check');
+
+            // Number check
+            updateRequirementIndicator(numberCheck, validatePasswordNumber(password), 'check');
+
+            // Special character check
+            updateRequirementIndicator(specialCheck, validatePasswordSpecial(password), 'check');
+
+            // Update password match status
+            updatePasswordMatchStatus();
+
+            // Re-render feather icons
+            feather.replace();
+        }
+
+        // Update all validations (password + email)
+        function updateAllValidations() {
+            updatePasswordRequirements();
+            updateEmailValidation();
+        }
+
+        // Update requirement indicator styling
+        function updateRequirementIndicator(element, isValid, validIcon) {
+            const iconDiv = element.querySelector('div');
+            const icon = element.querySelector('i');
+
+            if (isValid) {
+                iconDiv.style.backgroundColor = '#dcfce7';
+                iconDiv.style.color = '#16a34a';
+                icon.setAttribute('data-feather', validIcon);
+                element.classList.remove('text-gray-600');
+                element.classList.add('text-green-700');
+            } else {
+                iconDiv.style.backgroundColor = '#e5e7eb';
+                iconDiv.style.color = '#6b7280';
+                icon.setAttribute('data-feather', 'x');
+                element.classList.remove('text-green-700');
+                element.classList.add('text-gray-600');
+            }
+        }
+
+        // Update password match status
+        function updatePasswordMatchStatus() {
+            const password = passwordField.value;
+            const confirmPassword = confirmPasswordField.value;
+
+            if (confirmPassword === '') {
+                passwordMatchStatus.classList.remove('bg-green-50', 'bg-red-50');
+                passwordMatchStatus.classList.add('bg-gray-50');
+                matchIcon.style.backgroundColor = '#e5e7eb';
+                matchIcon.style.color = '#6b7280';
+                matchIcon.querySelector('i').setAttribute('data-feather', 'minus');
+                passwordMatchText.textContent = 'Enter password to check match';
+                passwordMatchText.classList.remove('text-green-700', 'text-red-600');
+                passwordMatchText.classList.add('text-gray-600');
+            } else if (validatePasswordMatch(password, confirmPassword)) {
+                passwordMatchStatus.classList.remove('bg-gray-50', 'bg-red-50');
+                passwordMatchStatus.classList.add('bg-green-50');
+                matchIcon.style.backgroundColor = '#dcfce7';
+                matchIcon.style.color = '#16a34a';
+                matchIcon.querySelector('i').setAttribute('data-feather', 'check');
+                passwordMatchText.textContent = 'Passwords match perfectly!';
+                passwordMatchText.classList.remove('text-gray-600', 'text-red-600');
+                passwordMatchText.classList.add('text-green-700');
+            } else {
+                passwordMatchStatus.classList.remove('bg-gray-50', 'bg-green-50');
+                passwordMatchStatus.classList.add('bg-red-50');
+                matchIcon.style.backgroundColor = '#fecaca';
+                matchIcon.style.color = '#dc2626';
+                matchIcon.querySelector('i').setAttribute('data-feather', 'x');
+                passwordMatchText.textContent = 'Passwords do not match';
+                passwordMatchText.classList.remove('text-gray-600', 'text-green-700');
+                passwordMatchText.classList.add('text-red-600');
+            }
+
+            feather.replace();
+        }
+
+        // Validate form before submission
+        function validateForm(event) {
+            const password = passwordField.value;
+            const confirmPassword = confirmPasswordField.value;
+            const email = emailField.value;
+
+            // Check all password requirements
+            const isLengthValid = validatePasswordLength(password);
+            const isUppercaseValid = validatePasswordUppercase(password);
+            const isNumberValid = validatePasswordNumber(password);
+            const isSpecialValid = validatePasswordSpecial(password);
+            const doPasswordsMatch = validatePasswordMatch(password, confirmPassword);
+
+            // Check email format
+            const isEmailValid = validateEmailFormat(email);
+
+            // If any requirement is not met, prevent form submission
+            if (!isLengthValid || !isUppercaseValid || !isNumberValid || !isSpecialValid || !doPasswordsMatch || !isEmailValid) {
+                event.preventDefault();
+
+                // Show error message with smooth animation
+                let errorMessage = 'Please ensure your password meets all requirements and that both password fields match.';
+                if (!isEmailValid) {
+                    errorMessage = 'Please enter a valid email address.';
+                }
+
+                showErrorMessage(errorMessage);
+
+                // Focus on problematic field
+                if (!isEmailValid) {
+                    emailField.focus();
+                    emailField.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        emailField.style.animation = '';
+                    }, 500);
+                } else if (!isLengthValid || !isUppercaseValid || !isNumberValid || !isSpecialValid) {
+                    passwordField.focus();
+                    passwordField.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        passwordField.style.animation = '';
+                    }, 500);
+                } else {
+                    confirmPasswordField.focus();
+                    confirmPasswordField.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        confirmPasswordField.style.animation = '';
+                    }, 500);
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        // Show error message with animation
+        function showErrorMessage(message) {
+            // Remove existing error message
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // Create error message element
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message mt-4 p-3 bg-red-50 border border-red-200 rounded-md animate-pulse';
+            errorDiv.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-feather="alert-circle" class="h-4 w-4 text-red-400"></i>
+                    </div>
+                    <div class="ml-2">
+                        <p class="text-sm text-red-700">${message}</p>
+                    </div>
+                </div>
+            `;
+
+            // Insert before the form submit button
+            const submitButton = registerForm.querySelector('button[type="submit"]');
+            registerForm.insertBefore(errorDiv, submitButton);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.style.opacity = '0';
+                    errorDiv.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        if (errorDiv.parentNode) {
+                            errorDiv.parentNode.removeChild(errorDiv);
+                        }
+                    }, 300);
+                }
+            }, 5000);
+
+            feather.replace();
+        }
+
+        // Event listeners
+        passwordField.addEventListener('input', updateAllValidations);
+        confirmPasswordField.addEventListener('input', updatePasswordMatchStatus);
+        emailField.addEventListener('input', updateEmailValidation);
+        registerForm.addEventListener('submit', validateForm);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial validation state
+            updateAllValidations();
+
+            // Add custom CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-5px); }
+                    75% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+        });
     </script>
 </body>
 </html>

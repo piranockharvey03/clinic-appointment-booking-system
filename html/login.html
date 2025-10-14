@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,7 @@
         }
     </style>
 </head>
+
 <body class="font-sans antialiased">
     <div class="min-h-screen flex">
         <!-- Left Column - Form -->
@@ -31,7 +33,8 @@
                         Sign in to your account
                     </h2>
                     <p class="mt-2 text-sm text-gray-600">
-                        Or <a href="register.html" class="font-medium text-blue-600 hover:text-blue-500">register for a new account</a>
+                        Or <a href="register.html" class="font-medium text-blue-600 hover:text-blue-500">register for a
+                            new account</a>
                     </p>
                 </div>
 
@@ -41,30 +44,37 @@
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
                                 <div class="mt-1">
-                                    <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <input id="email" name="email" type="email" autocomplete="email" required
+                                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 </div>
                             </div>
 
                             <div class="space-y-1">
                                 <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                                 <div class="mt-1">
-                                    <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <input id="password" name="password" type="password" autocomplete="current-password"
+                                        required
+                                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                 </div>
                             </div>
 
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
-                                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                                    <input id="remember-me" name="remember-me" type="checkbox"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember
+                                        me</label>
                                 </div>
 
                                 <div class="text-sm">
-                                    <a href="forgot-password.html" class="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</a>
+                                    <a href="forgot-password.html"
+                                        class="font-medium text-blue-600 hover:text-blue-500">Forgot your password?</a>
                                 </div>
                             </div>
 
                             <div>
-                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <button type="submit"
+                                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                     Sign in
                                 </button>
                             </div>
@@ -72,8 +82,8 @@
 
                         <div class="mt-6">
                             <p class="text-center text-xs text-gray-500">
-                                By signing in, you agree to our 
-                                <a href="terms.html" class="text-blue-600 hover:text-blue-500">Terms of Service</a> and 
+                                By signing in, you agree to our
+                                <a href="terms.html" class="text-blue-600 hover:text-blue-500">Terms of Service</a> and
                                 <a href="privacy.html" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
                             </p>
                         </div>
@@ -87,7 +97,8 @@
             <div class="absolute inset-0 flex items-center justify-center p-12">
                 <div class="bg-white bg-opacity-90 p-8 rounded-lg max-w-md">
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Patient Portal</h3>
-                    <p class="text-gray-600 mb-6">Access your medical records, book appointments, and communicate with your healthcare providers.</p>
+                    <p class="text-gray-600 mb-6">Access your medical records, book appointments, and communicate with
+                        your healthcare providers.</p>
                     <div class="space-y-4">
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
@@ -121,6 +132,84 @@
 
     <script>
         feather.replace();
+
+        // Check for logout success parameter and show popup
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('logout') === 'success') {
+                // Create popup element
+                const popup = document.createElement('div');
+                popup.id = 'logout-success-popup';
+                popup.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #059669;
+                        color: white;
+                        padding: 16px 24px;
+                        border-radius: 8px;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                        z-index: 1000;
+                        font-weight: 600;
+                        font-size: 14px;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        animation: slideInRight 0.5s ease-out;
+                    ">
+                        <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        You have been logged out successfully!
+                    </div>
+                `;
+
+                // Add keyframes animation
+                if (!document.querySelector('#logout-popup-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'logout-popup-styles';
+                    style.textContent = `
+                        @keyframes slideInRight {
+                            from {
+                                transform: translateX(100%);
+                                opacity: 0;
+                            }
+                            to {
+                                transform: translateX(0);
+                                opacity: 1;
+                            }
+                        }
+                        @keyframes fadeOut {
+                            from {
+                                opacity: 1;
+                            }
+                            to {
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                document.body.appendChild(popup);
+
+                // Remove popup after 3 seconds with fade effect
+                setTimeout(() => {
+                    popup.style.animation = 'fadeOut 0.5s ease-in forwards';
+                    setTimeout(() => {
+                        if (popup.parentNode) {
+                            popup.parentNode.removeChild(popup);
+                        }
+                    }, 500);
+                }, 3000);
+
+                // Clean URL after showing popup
+                const cleanUrl = window.location.href.split('?')[0];
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        });
     </script>
 </body>
+
 </html>

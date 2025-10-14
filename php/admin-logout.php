@@ -18,7 +18,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header("Expires: 0");
 
-// Redirect to admin login page
-header("Location: ../html/admin-login.html");
+// Redirect to admin login page with logout success parameter
+header("Location: ../html/admin-login.html?logout=success");
 exit;
 
