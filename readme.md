@@ -58,6 +58,6 @@ UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `admin` (`full_name`, `email`, `password`)
-VALUES ('Dr Chen', 'drchen@example.com', '$2y$12$WlxtoPW3NSpPDxRMztqWhe21Qwzn6shEFo97M/..oWF1JCOLLJXae');
+VALUES ('Admin', 'admin@.com', '$2y$12$NZMY5ff1cOYntTre7ReZie.FBpj6QGhlsgx6ds0rg9MfaQo/YlWai');
 
 
