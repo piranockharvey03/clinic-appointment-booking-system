@@ -31,8 +31,11 @@ $stats = [
 try {
     $conn = getDBConnection();
     
-    // Get all appointments (in production, filter by patient_id)
-    $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
+    // Get patient appointments only (filter by logged-in patient)
+    $stmt = $conn->prepare("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments WHERE patient_id = ? ORDER BY created_at DESC");
+    $stmt->bind_param("i", $_SESSION['user_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
     
     if ($result) {
         while ($row = $result->fetch_assoc()) {
