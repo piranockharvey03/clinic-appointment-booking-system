@@ -19,29 +19,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
     try {
         $conn = getDBConnection();
         $apptId = $_POST['appt_id'];
-        
+
+        // Get appointment details for notification
+        $apptResult = $conn->query("SELECT patient_name, appointment_date, appointment_time, doctor_name FROM appointments WHERE appointment_id = '$apptId'");
+        $appointment = $apptResult ? $apptResult->fetch_assoc() : null;
+        $apptResult?->free();
+
         if ($_POST['action'] === 'approve') {
             $stmt = $conn->prepare("UPDATE appointments SET status = 'approved' WHERE appointment_id = ?");
             $stmt->bind_param("s", $apptId);
             $stmt->execute();
             $stmt->close();
+
+            // Create patient notification for approval
+            if ($appointment) {
+                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been approved.";
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (appointment_id, patient_name, notification_type, message) VALUES (?, ?, 'approved', ?)");
+                $notificationStmt->bind_param("sss", $apptId, $appointment['patient_name'], $message);
+                $notificationStmt->execute();
+                $notificationStmt->close();
+            }
+
+            // Create admin notification for approval
+            $adminMessage = "Appointment approved: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'];
+            $adminNotificationStmt = $conn->prepare("INSERT INTO notifications (type, message, appointment_id) VALUES ('approved', ?, ?)");
+            $adminNotificationStmt->bind_param("ss", $adminMessage, $apptId);
+            $adminNotificationStmt->execute();
+            $adminNotificationStmt->close();
         } elseif ($_POST['action'] === 'cancel') {
             $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled' WHERE appointment_id = ?");
             $stmt->bind_param("s", $apptId);
             $stmt->execute();
             $stmt->close();
+
+            // Create patient notification for cancellation
+            if ($appointment) {
+                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been canceled.";
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (appointment_id, patient_name, notification_type, message) VALUES (?, ?, 'canceled', ?)");
+                $notificationStmt->bind_param("sss", $apptId, $appointment['patient_name'], $message);
+                $notificationStmt->execute();
+                $notificationStmt->close();
+            }
+
+            // Create admin notification for cancellation
+            $adminMessage = "Appointment canceled: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'];
+            $adminNotificationStmt = $conn->prepare("INSERT INTO notifications (type, message, appointment_id) VALUES ('canceled', ?, ?)");
+            $adminNotificationStmt->bind_param("ss", $adminMessage, $apptId);
+            $adminNotificationStmt->execute();
+            $adminNotificationStmt->close();
         } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
             $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'rescheduled' WHERE appointment_id = ?");
             $stmt->bind_param("sss", $_POST['new_date'], $_POST['new_time'], $apptId);
             $stmt->execute();
             $stmt->close();
+
+            // Create patient notification for rescheduling
+            if ($appointment) {
+                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " has been rescheduled to " . $_POST['new_date'] . " at " . $_POST['new_time'] . ".";
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (appointment_id, patient_name, notification_type, message) VALUES (?, ?, 'rescheduled', ?)");
+                $notificationStmt->bind_param("sss", $apptId, $appointment['patient_name'], $message);
+                $notificationStmt->execute();
+                $notificationStmt->close();
+            }
+
+            // Create admin notification for rescheduling
+            $adminMessage = "Appointment rescheduled: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " to " . $_POST['new_date'] . " at " . $_POST['new_time'];
+            $adminNotificationStmt = $conn->prepare("INSERT INTO notifications (type, message, appointment_id) VALUES ('rescheduled', ?, ?)");
+            $adminNotificationStmt->bind_param("ss", $adminMessage, $apptId);
+            $adminNotificationStmt->execute();
+            $adminNotificationStmt->close();
         }
-        
+
         closeDBConnection($conn);
     } catch (Exception $e) {
         error_log("Admin appointment action error: " . $e->getMessage());
     }
-    
+
     // Redirect to avoid form resubmission
     header("Location: admin-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
     exit;
@@ -222,15 +275,18 @@ if ($view_id) {
                             </div>
                             <div class="relative">
                                 <i data-feather="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
-                                <input class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search doctor or department" />
+                                <input id="appointmentSearch" class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search doctor or department" />
                             </div>
                         </div>
                         <div class="divide-y divide-gray-200">
                             <?php if (empty($filtered)) : ?>
-                                <div class="p-6 text-sm text-gray-600">No appointments in this category.</div>
+                                <div id="noAppointments" class="p-6 text-sm text-gray-600">No appointments in this category.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
-                                    <div class="appointment-card p-4 flex items-center justify-between">
+                                    <div class="appointment-card p-4 flex items-center justify-between" 
+                                         data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>" 
+                                         data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
+                                         data-doctor-specialty="<?= htmlspecialchars(strtolower($appt['doctorSpecialty'])) ?>">
                                         <div class="flex items-center">
                                             <?php if (!empty($appt['doctorPhoto'])): ?>
                                                 <img class="h-12 w-12 rounded-full" src="<?= htmlspecialchars($appt['doctorPhoto']) ?>" alt="Doctor">
@@ -377,6 +433,86 @@ if ($view_id) {
     <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
+
+        // Appointment search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('appointmentSearch');
+            const appointmentCards = document.querySelectorAll('.appointment-card');
+            const noAppointmentsMsg = document.getElementById('noAppointments');
+
+            function filterAppointments() {
+                const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+                appointmentCards.forEach(card => {
+                    const doctorName = card.getAttribute('data-doctor-name') || '';
+                    const department = card.getAttribute('data-department') || '';
+                    const doctorSpecialty = card.getAttribute('data-doctor-specialty') || '';
+
+                    // Check if search term matches doctor name, department, or specialty
+                    const matchesSearch = 
+                        doctorName.includes(searchTerm) || 
+                        department.includes(searchTerm) || 
+                        doctorSpecialty.includes(searchTerm);
+
+                    if (matchesSearch || searchTerm === '') {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Show/hide "no results" message and handle empty states
+                const visibleCards = Array.from(appointmentCards).filter(card => 
+                    card.style.display !== 'none'
+                );
+                
+                const noResultsMsg = document.getElementById('noSearchResults');
+                const noAppointmentsMsg = document.getElementById('noAppointments');
+                
+                if (appointmentCards.length === 0) {
+                    // No appointments at all
+                    if (noAppointmentsMsg) {
+                        noAppointmentsMsg.style.display = 'block';
+                    }
+                } else if (visibleCards.length === 0 && searchTerm !== '') {
+                    // Appointments exist but none match search
+                    if (noAppointmentsMsg) {
+                        noAppointmentsMsg.style.display = 'none';
+                    }
+                    if (!noResultsMsg) {
+                        const noResultsDiv = document.createElement('div');
+                        noResultsDiv.id = 'noSearchResults';
+                        noResultsDiv.className = 'p-6 text-sm text-gray-600 text-center';
+                        noResultsDiv.innerHTML = `No appointments found for "<strong>${searchTerm}</strong>". <button onclick="clearSearch()" class="text-blue-600 hover:underline ml-1">Clear search</button>`;
+                        document.querySelector('.divide-y').appendChild(noResultsDiv);
+                    } else {
+                        noResultsMsg.innerHTML = `No appointments found for "<strong>${searchTerm}</strong>". <button onclick="clearSearch()" class="text-blue-600 hover:underline ml-1">Clear search</button>`;
+                    }
+                } else {
+                    // Some appointments are visible
+                    if (noAppointmentsMsg) {
+                        noAppointmentsMsg.style.display = 'none';
+                    }
+                    if (noResultsMsg) {
+                        noResultsMsg.remove();
+                    }
+                }
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', filterAppointments);
+
+                // Clear search function
+                window.clearSearch = function() {
+                    searchInput.value = '';
+                    filterAppointments();
+                    searchInput.focus();
+                };
+            }
+
+            // Initial filter (in case page loads with search term)
+            filterAppointments();
+        });
     </script>
 </body>
 

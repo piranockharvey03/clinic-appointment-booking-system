@@ -84,9 +84,8 @@ PHP files: ../assets/css/style.css, ../assets/js/script.js
 
 ## 📊 Database
 
-- **Config**: `php/db-config.php`
-- **Schema**: `database-schema.sql` (root)
-- **Setup Guide**: `DATABASE-SETUP-INSTRUCTIONS.md` (root)
+- **Schema**: Open the database folder and run the create-users_table.sql file in phpMyAdmin
+And then run the other sql files in the database folder in the same order.
 
 ## 🔐 Authentication Flow
 
@@ -112,11 +111,6 @@ PHP files: ../assets/css/style.css, ../assets/js/script.js
 | PHP file | `../html/page.html` | `file.php` | `../assets/` |
 | Root | `html/page.html` | `php/file.php` | `assets/` |
 
-## ⚡ Quick Fixes
-
-### Assets not loading?
-- Check path uses `../assets/` from HTML/PHP folders
-- Verify file exists in `assets/css/` or `assets/js/`
 
 ### Form not submitting?
 - Check action points to `../php/handler.php`
@@ -154,5 +148,4 @@ hospital/
 - [ ] Mobile menu works
 - [ ] Dark mode toggles
 
----
-**Last Updated**: 2025-10-07
+

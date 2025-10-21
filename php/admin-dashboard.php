@@ -77,8 +77,10 @@ $recentAppointments = array_slice($appointments, 0, 5);
     <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/dark-mode.js"></script>
 </head>
 
@@ -134,6 +136,28 @@ $recentAppointments = array_slice($appointments, 0, 5);
                     </button>
                     <h1 class="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
                     <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button id="notificationBtn" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
+                                <i data-feather="bell" class="h-6 w-6"></i>
+                                <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                            </button>
+                            <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-50">
+                                <div class="py-1">
+                                    <div class="px-4 py-2 bg-blue-600 text-white font-medium flex justify-between items-center">
+                                        <span>Notifications</span>
+                                        <button id="markAllReadBtn" class="text-xs bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded text-white" style="display: none;">
+                                            Mark All Read
+                                        </button>
+                                    </div>
+                                    <div id="notificationList" class="max-h-96 overflow-y-auto">
+                                        <div class="px-4 py-3 text-center text-gray-500">Loading notifications...</div>
+                                    </div>
+                                    <div class="px-4 py-2 bg-gray-100 text-right">
+                                        <a href="admin-appointments.php" class="text-sm text-blue-600 hover:underline">View all</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                         <i data-feather="user" class="h-6 w-6 text-blue-600"></i>
                     </div>
@@ -257,6 +281,198 @@ $recentAppointments = array_slice($appointments, 0, 5);
     <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
+
+        // Notification system
+        $(document).ready(function() {
+            const notificationBtn = $('#notificationBtn');
+            const notificationDropdown = $('#notificationDropdown');
+            const notificationBadge = $('#notificationBadge');
+            let notificationCheckInterval;
+
+            // Toggle dropdown
+            notificationBtn.on('click', function(e) {
+                e.stopPropagation();
+                notificationDropdown.toggleClass('hidden');
+                
+                // Check for notifications when dropdown is opened
+                if (!notificationDropdown.hasClass('hidden')) {
+                    checkNotifications();
+                }
+            });
+
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#notificationBtn, #notificationDropdown').length) {
+                    notificationDropdown.addClass('hidden');
+                }
+            });
+
+            // Function to check for new notifications
+            function checkNotifications() {
+                $.ajax({
+                    url: 'get-notifications.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            updateNotificationUI(response.notifications);
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to fetch notifications');
+                    }
+                });
+            }
+
+            // Update notification UI
+            function updateNotificationUI(notifications) {
+                const notificationList = $('#notificationList');
+                const markAllReadBtn = $('#markAllReadBtn');
+
+                if (notifications.length === 0) {
+                    notificationList.html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
+                    notificationBadge.addClass('hidden');
+                    markAllReadBtn.hide();
+                    return;
+                }
+
+                // Update badge
+                notificationBadge.text(notifications.length).removeClass('hidden');
+                markAllReadBtn.show();
+
+                // Update notification list
+                let html = '';
+                notifications.forEach(notification => {
+                    const statusIcon = getStatusIcon(notification.type);
+
+                    html += `
+                        <div class="border-b border-gray-200" data-notification-id="${notification.id}">
+                            <div class="px-4 py-3 hover:bg-gray-50">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start flex-1">
+                                        <div class="flex-shrink-0 mt-0.5">
+                                            ${statusIcon}
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium text-gray-900">${notification.message}</p>
+                                            <p class="text-xs text-gray-500 mt-1">${notification.time}</p>
+                                        </div>
+                                    </div>
+                                    <button class="mark-read-btn ml-2 p-1 text-gray-400 hover:text-green-600 focus:outline-none"
+                                            data-notification-id="${notification.id}"
+                                            title="Mark as read">
+                                        <i data-feather="check" class="h-4 w-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                notificationList.html(html);
+                feather.replace();
+
+                // Add event listeners for mark as read buttons
+                $('.mark-read-btn').on('click', function() {
+                    const notificationId = $(this).data('notification-id');
+                    markNotificationAsRead(notificationId);
+                });
+            }
+
+            // Helper functions for status icons (matching patient notifications)
+            function getStatusIcon(type) {
+                const icons = {
+                    'new_appointment': '<i data-feather="calendar" class="h-4 w-4 text-blue-500"></i>',
+                    'approved': '<i data-feather="check-circle" class="h-4 w-4 text-green-500"></i>',
+                    'canceled': '<i data-feather="x-circle" class="h-4 w-4 text-red-500"></i>',
+                    'rescheduled': '<i data-feather="refresh-cw" class="h-4 w-4 text-blue-500"></i>'
+                };
+                return icons[type] || '<i data-feather="info" class="h-4 w-4 text-gray-500"></i>';
+            }
+
+            // Mark notification as read
+            function markNotificationAsRead(notificationId) {
+                $.ajax({
+                    url: 'mark-notifications-read.php',
+                    type: 'POST',
+                    data: { notification_ids: [notificationId] },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Remove the notification from the UI
+                            $(`[data-notification-id="${notificationId}"]`).fadeOut(300, function() {
+                                $(this).remove();
+                                // Update badge count and mark all button visibility
+                                const remainingNotifications = $('.mark-read-btn').length;
+                                if (remainingNotifications === 0) {
+                                    $('#notificationList').html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
+                                    $('#notificationBadge').addClass('hidden');
+                                    $('#markAllReadBtn').hide();
+                                } else {
+                                    $('#notificationBadge').text(remainingNotifications);
+                                }
+                            });
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to mark notification as read');
+                    }
+                });
+            }
+
+            // Mark all notifications as read
+            function markAllNotificationsAsRead() {
+                const notificationIds = $('.mark-read-btn').map(function() {
+                    return $(this).data('notification-id');
+                }).get();
+
+                if (notificationIds.length === 0) return;
+
+                $.ajax({
+                    url: 'mark-notifications-read.php',
+                    type: 'POST',
+                    data: { notification_ids: notificationIds },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#notificationList').html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
+                            $('#notificationBadge').addClass('hidden');
+                            $('#markAllReadBtn').hide();
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to mark all notifications as read');
+                    }
+                });
+            }
+
+            // Add event listener for mark all as read button
+            $('#markAllReadBtn').on('click', markAllNotificationsAsRead);
+
+            // Play notification sound and show badge animation for new notifications
+            function showNewNotification(notification) {
+                // Update badge with animation
+                notificationBadge.removeClass('hidden').text(notification.count).addClass('animate__animated animate__bounce');
+                
+                // Remove animation class after it completes
+                setTimeout(() => {
+                    notificationBadge.removeClass('animate__bounce');
+                }, 1000);
+                
+                // Show desktop notification if supported
+                if (Notification.permission === 'granted') {
+                    new Notification('New Appointment', {
+                        body: notification.message,
+                        icon: '../assets/img/favicon.ico'
+                    });
+                }
+            }
+
+            // Request notification permission
+            if (Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        });
 
         // Back button and authentication check
         (function() {

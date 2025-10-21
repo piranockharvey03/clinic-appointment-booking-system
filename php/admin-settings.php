@@ -33,7 +33,7 @@ $fullName = $_SESSION['user_name'];
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
@@ -157,7 +157,8 @@ $fullName = $_SESSION['user_name'];
                     <div class="bg-white shadow rounded-lg p-6">
                         <h2 class="text-xl font-bold mb-6 text-gray-900">Account</h2>
                         <div class="space-y-4">
-                            <button class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
+                            <button onclick="showAdminPasswordModal()"
+                                    class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
                                 <i data-feather="key" class="inline h-5 w-5 mr-2"></i>
                                 Change Password
                             </button>
@@ -172,40 +173,182 @@ $fullName = $_SESSION['user_name'];
         </div>
     </div>
 
+    <!-- Password Change Modal -->
+    <div id="adminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Change Admin Password</h3>
+                    <button onclick="hideAdminPasswordModal()" class="text-gray-400 hover:text-gray-600">
+                        <i data-feather="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="return submitAdminPasswordChange()">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
+                        <input type="password" id="adminCurrentPassword" name="current_password" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                        <input type="password" id="adminNewPassword" name="new_password" required minlength="6"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
+                        <input type="password" id="adminConfirmPassword" name="confirm_password" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div id="adminPasswordError" class="text-red-600 text-sm mb-4 hidden"></div>
+                    <div id="adminPasswordSuccess" class="text-green-600 text-sm mb-4 hidden"></div>
+
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="hideAdminPasswordModal()"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                id="submitAdminPasswordChange">
+                            Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/mobile-menu.js"></script>
     <script src="../assets/js/dark-mode.js"></script>
     <script>
         feather.replace();
 
-        // Email Notifications Toggle
-        const emailToggle = document.getElementById('emailToggle');
-        const emailStatus = document.getElementById('emailStatus');
+        // Simple admin password modal functions
+        function showAdminPasswordModal() {
+            document.getElementById('adminPasswordModal').style.display = 'block';
+            document.getElementById('adminCurrentPassword').focus();
+        }
 
-        emailToggle.addEventListener('click', function() {
-            emailToggle.classList.toggle('active');
-            emailStatus.textContent = emailToggle.classList.contains('active') ? 'On' : 'Off';
-        });
+        function hideAdminPasswordModal() {
+            document.getElementById('adminPasswordModal').style.display = 'none';
+            document.getElementById('adminPasswordChangeForm').reset();
+            document.getElementById('adminPasswordError').style.display = 'none';
+            document.getElementById('adminPasswordSuccess').style.display = 'none';
+        }
 
-        // Auto-Approve Toggle
-        const autoApproveToggle = document.getElementById('autoApproveToggle');
-        const autoApproveStatus = document.getElementById('autoApproveStatus');
+        // Simple form submission
+        function submitAdminPasswordChange() {
+            const currentPassword = document.getElementById('adminCurrentPassword').value;
+            const newPassword = document.getElementById('adminNewPassword').value;
+            const confirmPassword = document.getElementById('adminConfirmPassword').value;
 
-        autoApproveToggle.addEventListener('click', function() {
-            autoApproveToggle.classList.toggle('active');
-            autoApproveStatus.textContent = autoApproveToggle.classList.contains('active') ? 'On' : 'Off';
-        });
+            // Basic validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                document.getElementById('adminPasswordError').textContent = 'All fields are required';
+                document.getElementById('adminPasswordError').style.display = 'block';
+                document.getElementById('adminPasswordSuccess').style.display = 'none';
+                return false;
+            }
 
-        // Maintenance Mode Toggle
-        const maintenanceToggle = document.getElementById('maintenanceToggle');
-        const maintenanceStatus = document.getElementById('maintenanceStatus');
+            if (newPassword !== confirmPassword) {
+                document.getElementById('adminPasswordError').textContent = 'New passwords do not match';
+                document.getElementById('adminPasswordError').style.display = 'block';
+                document.getElementById('adminPasswordSuccess').style.display = 'none';
+                return false;
+            }
 
-        maintenanceToggle.addEventListener('click', function() {
-            maintenanceToggle.classList.toggle('active');
-            maintenanceStatus.textContent = maintenanceToggle.classList.contains('active') ? 'On' : 'Off';
+            if (newPassword.length < 6) {
+                document.getElementById('adminPasswordError').textContent = 'Password must be at least 6 characters long';
+                document.getElementById('adminPasswordError').style.display = 'block';
+                document.getElementById('adminPasswordSuccess').style.display = 'none';
+                return false;
+            }
+
+            // Show loading state
+            const submitBtn = document.getElementById('submitAdminPasswordChange');
+            submitBtn.textContent = 'Changing...';
+            submitBtn.disabled = true;
+
+            // Send request (simple XMLHttpRequest)
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'change-password.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    submitBtn.textContent = 'Change Password';
+                    submitBtn.disabled = false;
+
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                document.getElementById('adminPasswordSuccess').textContent = response.message;
+                                document.getElementById('adminPasswordSuccess').style.display = 'block';
+                                document.getElementById('adminPasswordError').style.display = 'none';
+                                setTimeout(function() {
+                                    hideAdminPasswordModal();
+                                }, 2000);
+                            } else {
+                                document.getElementById('adminPasswordError').textContent = response.error;
+                                document.getElementById('adminPasswordError').style.display = 'block';
+                                document.getElementById('adminPasswordSuccess').style.display = 'none';
+                            }
+                        } catch (e) {
+                            document.getElementById('adminPasswordError').textContent = 'Invalid response from server';
+                            document.getElementById('adminPasswordError').style.display = 'block';
+                            document.getElementById('adminPasswordSuccess').style.display = 'none';
+                        }
+                    } else {
+                        document.getElementById('adminPasswordError').textContent = 'Failed to change password. Please try again.';
+                        document.getElementById('adminPasswordError').style.display = 'block';
+                        document.getElementById('adminPasswordSuccess').style.display = 'none';
+                    }
+                }
+            };
+
+            const params = 'current_password=' + encodeURIComponent(currentPassword) +
+                          '&new_password=' + encodeURIComponent(newPassword) +
+                          '&confirm_password=' + encodeURIComponent(confirmPassword);
+
+            xhr.send(params);
+
+            return false; // Prevent form submission
+        }
+
+        // Add event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Email Notifications Toggle
+            document.getElementById('emailToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('emailStatus').textContent = this.classList.contains('active') ? 'On' : 'Off';
+            });
+
+            // Auto-Approve Toggle
+            document.getElementById('autoApproveToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('autoApproveStatus').textContent = this.classList.contains('active') ? 'On' : 'Off';
+            });
+
+            // Maintenance Mode Toggle
+            document.getElementById('maintenanceToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('maintenanceStatus').textContent = this.classList.contains('active') ? 'On' : 'Off';
+            });
+
+            // Close modal when clicking outside
+            document.getElementById('adminPasswordModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideAdminPasswordModal();
+                }
+            });
         });
     </script>
 </body>
 
 </html>
-
-

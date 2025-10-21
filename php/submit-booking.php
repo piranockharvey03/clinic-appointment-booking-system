@@ -80,6 +80,17 @@ try {
     
     // Execute the statement
     if ($stmt->execute()) {
+        // Create a notification for the admin
+        $notificationMessage = "New appointment booked with " . $doctor['name'] . " on " . $date . " at " . $time;
+        $notificationStmt = $conn->prepare("
+            INSERT INTO notifications 
+            (type, message, appointment_id) 
+            VALUES ('new_appointment', ?, ?)
+        ");
+        $notificationStmt->bind_param("ss", $notificationMessage, $appointmentId);
+        $notificationStmt->execute();
+        $notificationStmt->close();
+        
         $stmt->close();
         closeDBConnection($conn);
         // Redirect to the appointments page

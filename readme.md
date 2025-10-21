@@ -20,44 +20,12 @@ mysql -h localhost -u root -p
 
 //then press enter when prompt to enter a password or input a password if you had already set one before. the run the next command below//
 
-CREATE DATABASE medicare;
+----NOTE
 
-USE medicare;
+Run the SQl scripts under the database folder or directory, but start with the create_users_table that will show how which specific database is to be used the run the others to add the table
 
-CREATE TABLE users (
-id INT AUTO_INCREMENT PRIMARY KEY,
-full_name VARCHAR(100) NOT NULL,
-email VARCHAR(100) NOT NULL UNIQUE,
-phone VARCHAR(20) NOT NULL,
-password VARCHAR(255) NOT NULL,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
-CREATE TABLE feedback (
-id int(11) NOT NULL AUTO_INCREMENT,
-name varchar(100) NOT NULL,
-email varchar(150) NOT NULL,
-phone varchar(20) DEFAULT NULL,
-service varchar(100) NOT NULL,
-rating int(11) NOT NULL,
-feedback text NOT NULL,
-newsletter tinyint(1) DEFAULT 0,
-privacy tinyint(1) NOT NULL,
-created_at timestamp NOT NULL DEFAULT current_timestamp(),
-PRIMARY KEY (id)
-);
 
-CREATE TABLE `admin` (
-`id` int(11) NOT NULL AUTO_INCREMENT,
-`full_name` varchar(100) NOT NULL,
-`email` varchar(100) NOT NULL,
-`password` varchar(255) NOT NULL,
-`created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-PRIMARY KEY (`id`),
-UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `admin` (`full_name`, `email`, `password`)
-VALUES ('Admin', 'admin@.com', '$2y$12$NZMY5ff1cOYntTre7ReZie.FBpj6QGhlsgx6ds0rg9MfaQo/YlWai');
 
 
