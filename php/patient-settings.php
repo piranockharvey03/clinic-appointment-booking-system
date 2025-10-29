@@ -49,7 +49,7 @@ $fullName = $_SESSION['user_name'];
 
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="sidebarOverlay"></div>
 
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
@@ -81,7 +81,7 @@ $fullName = $_SESSION['user_name'];
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white" id="profileLink">
                                 <i data-feather="user" class="mr-3 h-5 w-5"></i>
                                 Profile
                             </a>
@@ -241,14 +241,8 @@ $fullName = $_SESSION['user_name'];
     <script src="../assets/js/dark-mode.js"></script>
     <script>
         feather.replace();
-
-        // Simple password modal functions
-        function showPasswordModal() {
-            document.getElementById('passwordModal').style.display = 'block';
-            document.getElementById('currentPassword').focus();
-        }
-
-        function hidePasswordModal() {
+        
+        // Close mobile menu when clicking on navigation links
             document.getElementById('passwordModal').style.display = 'none';
             document.getElementById('passwordChangeForm').reset();
             document.getElementById('passwordError').style.display = 'none';

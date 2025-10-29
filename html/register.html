@@ -37,7 +37,7 @@
 
                 <div class="mt-8">
                     <div class="mt-6">
-                        <form action="../php/register.php" method="POST" class="space-y-6">
+                        <form id="registrationForm" class="space-y-6">
                             <div>
                                 <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
                                 <div class="mt-1">
@@ -407,54 +407,81 @@
             const password = passwordField.value;
             const confirmPassword = confirmPasswordField.value;
             const email = emailField.value;
+            const fullName = document.getElementById('full-name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const terms = document.getElementById('terms').checked;
 
-            // Check all password requirements
-            const isLengthValid = validatePasswordLength(password);
-            const isUppercaseValid = validatePasswordUppercase(password);
-            const isNumberValid = validatePasswordNumber(password);
-            const isSpecialValid = validatePasswordSpecial(password);
-            const doPasswordsMatch = validatePasswordMatch(password, confirmPassword);
-
-            // Check email format
-            const isEmailValid = validateEmailFormat(email);
-
-            // If any requirement is not met, prevent form submission
-            if (!isLengthValid || !isUppercaseValid || !isNumberValid || !isSpecialValid || !doPasswordsMatch || !isEmailValid) {
+            // Check all fields are filled
+            if (!fullName) {
+                showErrorMessage('Please enter your full name');
+                document.getElementById('full-name').focus();
                 event.preventDefault();
-
-                // Show error message with smooth animation
-                let errorMessage = 'Please ensure your password meets all requirements and that both password fields match.';
-                if (!isEmailValid) {
-                    errorMessage = 'Please enter a valid email address.';
-                }
-
-                showErrorMessage(errorMessage);
-
-                // Focus on problematic field
-                if (!isEmailValid) {
-                    emailField.focus();
-                    emailField.style.animation = 'shake 0.5s ease-in-out';
-                    setTimeout(() => {
-                        emailField.style.animation = '';
-                    }, 500);
-                } else if (!isLengthValid || !isUppercaseValid || !isNumberValid || !isSpecialValid) {
-                    passwordField.focus();
-                    passwordField.style.animation = 'shake 0.5s ease-in-out';
-                    setTimeout(() => {
-                        passwordField.style.animation = '';
-                    }, 500);
-                } else {
-                    confirmPasswordField.focus();
-                    confirmPasswordField.style.animation = 'shake 0.5s ease-in-out';
-                    setTimeout(() => {
-                        confirmPasswordField.style.animation = '';
-                    }, 500);
-                }
-
                 return false;
             }
 
-            return true;
+            // Check email format
+            if (!validateEmailFormat(email)) {
+                showErrorMessage('Please enter a valid email address');
+                emailField.focus();
+                event.preventDefault();
+                return false;
+            }
+
+            // Check phone number
+            if (!phone) {
+                showErrorMessage('Please enter your phone number');
+                document.getElementById('phone').focus();
+                event.preventDefault();
+                return false;
+            }
+
+            // Check password requirements
+            if (!validatePasswordLength(password)) {
+                showErrorMessage('Password must be at least 8 characters long');
+                passwordField.focus();
+                event.preventDefault();
+                return false;
+            }
+
+            if (!validatePasswordUppercase(password)) {
+                showErrorMessage('Password must contain at least one uppercase letter');
+                passwordField.focus();
+                event.preventDefault();
+                return false;
+            }
+
+            if (!validatePasswordNumber(password)) {
+                showErrorMessage('Password must contain at least one number');
+                passwordField.focus();
+                event.preventDefault();
+                return false;
+            }
+
+            if (!validatePasswordSpecial(password)) {
+                showErrorMessage('Password must contain at least one special character');
+                passwordField.focus();
+                event.preventDefault();
+                return false;
+            }
+
+            // Check password match
+            if (!validatePasswordMatch(password, confirmPassword)) {
+                showErrorMessage('Passwords do not match');
+                confirmPasswordField.focus();
+                event.preventDefault();
+                return false;
+            }
+
+            // Check terms and conditions
+            if (!terms) {
+                showErrorMessage('You must agree to the terms and conditions');
+                event.preventDefault();
+                return false;
+            }
+
+            // If all validations pass, handle the form submission asynchronously
+            handleFormSubmit(event);
+            return false;
         }
 
         // Show error message with animation
@@ -480,8 +507,8 @@
             `;
 
             // Insert before the form submit button
-            const submitButton = registerForm.querySelector('button[type="submit"]');
-            registerForm.insertBefore(errorDiv, submitButton);
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.parentNode.insertBefore(errorDiv, submitButton);
 
             // Remove after 5 seconds
             setTimeout(() => {
@@ -498,28 +525,190 @@
 
             feather.replace();
         }
+        
+        // Show success message with animation
+        function showSuccessMessage(message, redirectUrl = null) {
+            // Remove existing messages
+            const existingMessage = document.querySelector('.success-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            // Create success message element
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message mt-4 p-3 bg-green-50 border border-green-200 rounded-md';
+            successDiv.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-feather="check-circle" class="h-4 w-4 text-green-400"></i>
+                    </div>
+                    <div class="ml-2">
+                        <p class="text-sm text-green-700">${message}</p>
+                    </div>
+                </div>
+            `;
+
+            // Insert before the form submit button
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.parentNode.insertBefore(successDiv, submitButton);
+            
+            // Scroll to show the success message
+            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Redirect if URL is provided
+            if (redirectUrl) {
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1500);
+            }
+            
+            feather.replace();
+        }
+        
+        // Handle form submission asynchronously
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            try {
+                // Disable submit button and show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                `;
+                
+                // Submit form data
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message and redirect
+                    showSuccessMessage(result.message, result.redirect);
+                } else {
+                    // Show error message
+                    showErrorMessage(result.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showErrorMessage('An error occurred. Please try again later.');
+            } finally {
+                // Re-enable submit button and restore original text
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+        }
+
+        // Get form elements
+        const registerForm = document.getElementById('registrationForm');
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const emailField = document.getElementById('email');
 
         // Event listeners
         passwordField.addEventListener('input', updateAllValidations);
         confirmPasswordField.addEventListener('input', updatePasswordMatchStatus);
         emailField.addEventListener('input', updateEmailValidation);
-        registerForm.addEventListener('submit', validateForm);
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initial validation state
-            updateAllValidations();
-
-            // Add custom CSS animations
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    25% { transform: translateX(-5px); }
-                    75% { transform: translateX(5px); }
+        
+        // Add form submission event listener
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+            
+            try {
+                // Disable submit button and show loading state
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                `;
+                
+                // Submit form data
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success message and redirect
+                    showSuccessMessage(result.message, result.redirect);
+                } else if (result.error === 'duplicate_entry') {
+                    // Show error message for duplicate entry
+                    showErrorMessage('Email address already exists. Please try again.');
+                } else {
+                    // Show error message
+                    showErrorMessage(result.message || 'Registration failed. Please try again.');
                 }
-            `;
-            document.head.appendChild(style);
+            } catch (error) {
+                console.error('Registration error:', error);
+                showErrorMessage('An error occurred. Please try again later.');
+            } finally {
+                // Re-enable submit button and restore original text
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+        });
+        
+        // Initialize password strength and validation
+        updateAllValidations();
+        updatePasswordMatchStatus();
+        updateEmailValidation();
+        
+        // Add animations to CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            .animate-shake {
+                animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            }
+            button:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+            .success-message {
+                transition: opacity 0.3s ease-in-out;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+        `;
+        document.head.appendChild(style);
         });
     </script>
 </body>

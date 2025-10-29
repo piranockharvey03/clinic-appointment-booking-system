@@ -34,29 +34,114 @@ $error = '';
 
 // Handle profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_profile'])) {
-    $phone = trim($_POST['phone'] ?? '');
-    $dob = trim($_POST['dob'] ?? '');
-    $gender = trim($_POST['gender'] ?? '');
-    $address = trim($_POST['address'] ?? '');
-    $insurance = trim($_POST['insurance'] ?? '');
-
-    $stmt = $conn->prepare("UPDATE users SET phone=?, dob=?, gender=?, address=?, insurance=? WHERE id=?");
-    $stmt->bind_param("sssssi", $phone, $dob, $gender, $address, $insurance, $userId);
-    if ($stmt->execute()) {
-        $success = true;
-    } else {
-        $error = "Failed to update profile.";
+    try {
+        // Get all available fields from the form
+        $updates = [];
+        $types = '';
+        $values = [];
+        
+        // Check each field and add to updates if it exists in the form
+        $fields = [
+            'phone' => 's',
+            'gender' => 's',
+            'address' => 's',
+            'insurance' => 's'
+        ];
+        
+        foreach ($fields as $field => $type) {
+            if (isset($_POST[$field])) {
+                $updates[] = "$field = ?";
+                $types .= $type;
+                $values[] = trim($_POST[$field]);
+            }
+        }
+        
+        if (!empty($updates)) {
+            // Add user ID to values
+            $types .= 'i';
+            $values[] = $userId;
+            
+            // Build and execute the update query
+            $query = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
+            $stmt = $conn->prepare($query);
+            
+            if ($stmt === false) {
+                throw new Exception("Database error: " . $conn->error);
+            }
+            
+            // Bind parameters dynamically
+            $stmt->bind_param($types, ...$values);
+            
+            if ($stmt->execute()) {
+                $success = true;
+                // Refresh the page to show updated data
+                header("Location: patient-profile.php");
+                exit();
+            } else {
+                throw new Exception("Failed to update profile: " . $stmt->error);
+            }
+            $stmt->close();
+        }
+    } catch (Exception $e) {
+        $error = $e->getMessage();
+        error_log("Profile update error: " . $error);
     }
-    $stmt->close();
 }
 
+// Initialize profile variables with default values
+$fullName = '';
+$email = '';
+$phone = '';
+$gender = '';
+$address = '';
+$insurance = '';
+
 // Fetch user profile from database
-$stmt = $conn->prepare("SELECT full_name, email, phone, dob, gender, address, insurance FROM users WHERE id=?");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$stmt->bind_result($fullName, $email, $phone, $dob, $gender, $address, $insurance);
-$stmt->fetch();
-$stmt->close();
+try {
+    // First, get the list of columns that exist in the users table
+    $result = $conn->query("SHOW COLUMNS FROM users");
+    $columns = [];
+    while($row = $result->fetch_assoc()) {
+        $columns[] = $row['Field'];
+    }
+    
+    // Build the query with only existing columns
+    $selectFields = [];
+    $selectFields[] = in_array('full_name', $columns) ? 'full_name' : "'' as full_name";
+    $selectFields[] = in_array('email', $columns) ? 'email' : "'' as email";
+    $selectFields[] = in_array('phone', $columns) ? 'phone' : "'' as phone";
+    $selectFields[] = in_array('gender', $columns) ? 'gender' : "'' as gender";
+    $selectFields[] = in_array('address', $columns) ? 'address' : "'' as address";
+    $selectFields[] = in_array('insurance', $columns) ? 'insurance' : "'' as insurance";
+    
+    $query = "SELECT " . implode(', ', $selectFields) . " FROM users WHERE id=?";
+    
+    $stmt = $conn->prepare($query);
+    if ($stmt === false) {
+        throw new Exception("Database error: " . $conn->error);
+    }
+    
+    $stmt->bind_param("i", $userId);
+    if (!$stmt->execute()) {
+        throw new Exception("Failed to fetch profile: " . $stmt->error);
+    }
+    
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $userData = $result->fetch_assoc();
+        $fullName = $userData['full_name'] ?? '';
+        $email = $userData['email'] ?? '';
+        $phone = $userData['phone'] ?? '';
+        $gender = $userData['gender'] ?? '';
+        $address = $userData['address'] ?? '';
+        $insurance = $userData['insurance'] ?? '';
+    }
+    $stmt->close();
+    
+} catch (Exception $e) {
+    $error = "Error loading profile: " . $e->getMessage();
+    error_log($error);
+}
 ?>
 <html lang="en">
 
