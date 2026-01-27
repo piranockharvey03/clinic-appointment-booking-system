@@ -1,0 +1,225 @@
+/* Dark Mode Global Styles */
+/* Include this CSS file on all pages for consistent dark mode styling */
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background-color: #cbd5e0;
+    border-radius: 34px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-switch::before {
+    content: '';
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    top: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: #3b82f6;
+}
+
+.toggle-switch.active::before {
+    transform: translateX(24px);
+}
+
+/* Dark Mode Base Styles */
+body.dark-mode {
+    background-color: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+
+/* Background Colors */
+.dark-mode .bg-gray-50 {
+    background-color: #0f172a !important;
+}
+
+.dark-mode .bg-gray-100 {
+    background-color: #1e293b !important;
+}
+
+.dark-mode .bg-white {
+    background-color: #1e293b !important;
+}
+
+.dark-mode .bg-blue-50 {
+    background-color: #1e293b !important;
+}
+
+.dark-mode .bg-blue-800 {
+    background-color: #1e3a5f !important;
+}
+
+.dark-mode .bg-blue-900 {
+    background-color: #0f172a !important;
+}
+
+.dark-mode .bg-green-50 {
+    background-color: #1e293b !important;
+}
+
+.dark-mode .bg-red-50 {
+    background-color: #1e293b !important;
+}
+
+.dark-mode .bg-yellow-50 {
+    background-color: #1e293b !important;
+}
+
+/* Text Colors */
+.dark-mode .text-gray-900 {
+    color: #f1f5f9 !important;
+}
+
+.dark-mode .text-gray-800 {
+    color: #e2e8f0 !important;
+}
+
+.dark-mode .text-gray-700 {
+    color: #cbd5e1 !important;
+}
+
+.dark-mode .text-gray-600 {
+    color: #94a3b8 !important;
+}
+
+.dark-mode .text-gray-500 {
+    color: #94a3b8 !important;
+}
+
+.dark-mode .text-gray-400 {
+    color: #64748b !important;
+}
+
+.dark-mode .text-blue-100 {
+    color: #cbd5e1 !important;
+}
+
+.dark-mode .text-blue-600 {
+    color: #60a5fa !important;
+}
+
+.dark-mode .text-green-600 {
+    color: #4ade80 !important;
+}
+
+.dark-mode .text-red-600 {
+    color: #f87171 !important;
+}
+
+.dark-mode .text-yellow-600 {
+    color: #fbbf24 !important;
+}
+
+/* Border Colors */
+.dark-mode .border-gray-200 {
+    border-color: #334155 !important;
+}
+
+.dark-mode .border-gray-300 {
+    border-color: #475569 !important;
+}
+
+.dark-mode .border-blue-700 {
+    border-color: #334155 !important;
+}
+
+.dark-mode .border-red-300 {
+    border-color: #7f1d1d !important;
+}
+
+/* Shadows */
+.dark-mode .shadow,
+.dark-mode .shadow-sm,
+.dark-mode .shadow-md,
+.dark-mode .shadow-lg {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Hover States */
+.dark-mode .hover\:bg-gray-50:hover {
+    background-color: #334155 !important;
+}
+
+.dark-mode .hover\:bg-blue-700:hover {
+    background-color: #334155 !important;
+}
+
+.dark-mode .hover\:bg-red-50:hover {
+    background-color: #450a0a !important;
+}
+
+.dark-mode .hover\:text-gray-500:hover {
+    color: #94a3b8 !important;
+}
+
+.dark-mode .hover\:text-white:hover {
+    color: #fff !important;
+}
+
+/* Form Elements */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #475569 !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* Cards and Containers */
+.dark-mode .rounded-lg,
+.dark-mode .rounded-md {
+    background-color: #1e293b;
+}
+
+/* Tables */
+.dark-mode table {
+    color: #e2e8f0;
+}
+
+.dark-mode th {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+}
+
+.dark-mode td {
+    border-color: #334155 !important;
+}
+
+.dark-mode tr:hover {
+    background-color: #334155 !important;
+}
+
+/* Badges */
+.dark-mode .badge,
+.dark-mode .inline-flex {
+    background-color: #334155 !important;
+}
+
+/* Buttons */
+.dark-mode button {
+    border-color: #475569 !important;
+}
+
+.dark-mode .text-blue-600.hover\:text-blue-800:hover {
+    color: #93c5fd !important;
+}
