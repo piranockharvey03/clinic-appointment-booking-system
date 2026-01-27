@@ -81,20 +81,24 @@ hospital/
 ## 🎯 Structure Benefits
 
 ### 1. **Separation of Concerns**
+
 - **config/** - All configuration in one place
 - **app/** - Backend logic organized by feature
 - **public/** - Frontend files separate from backend
 
 ### 2. **Security**
+
 - Sensitive files (config, app logic) are separate from public files
 - Easier to configure web server to restrict access to non-public directories
 
 ### 3. **Maintainability**
+
 - Feature-based organization (admin, patient, auth)
 - Easy to locate and update related files
 - Clear distinction between user types
 
 ### 4. **Scalability**
+
 - Easy to add new features in appropriate directories
 - Can add new user roles by creating new directories
 - Simple to implement access control
@@ -104,6 +108,7 @@ hospital/
 After reorganization, you'll need to update file paths in your code:
 
 ### PHP Files (require/include statements)
+
 ```php
 // OLD: require_once 'db-config.php';
 // NEW: require_once __DIR__ . '/../../config/db-config.php';
@@ -113,6 +118,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/hospital/config/db-config.php';
 ```
 
 ### HTML Files (links and form actions)
+
 ```html
 <!-- OLD: href="../assets/css/style.css" -->
 <!-- NEW: href="assets/css/style.css" -->
@@ -122,6 +128,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/hospital/config/db-config.php';
 ```
 
 ### Redirects in PHP
+
 ```php
 // OLD: header('Location: ../html/login.html');
 // NEW: header('Location: ../../public/login.html');
@@ -140,6 +147,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/hospital/config/db-config.php';
 For production, configure your web server document root to `public/` directory:
 
 ### Apache (.htaccess in root)
+
 ```apache
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -149,6 +157,7 @@ For production, configure your web server document root to `public/` directory:
 ```
 
 ### Nginx
+
 ```nginx
 location / {
     root /path/to/hospital/public;
