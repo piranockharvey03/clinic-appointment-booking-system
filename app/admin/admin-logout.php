@@ -12,11 +12,11 @@ if (isset($_COOKIE[session_name()])) {
 // Clear all cookies for this domain
 if (isset($_SERVER['HTTP_COOKIE'])) {
     $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-    foreach($cookies as $cookie) {
+    foreach ($cookies as $cookie) {
         $parts = explode('=', $cookie);
         $name = trim($parts[0]);
-        setcookie($name, '', time()-1000);
-        setcookie($name, '', time()-1000, '/');
+        setcookie($name, '', time() - 1000);
+        setcookie($name, '', time() - 1000, '/');
     }
 }
 
@@ -35,6 +35,5 @@ header("Pragma: no-cache");
 header("Expires: 0");
 
 // Redirect to admin login page with logout success parameter
-header("Location: ../html/admin-login.html?logout=success");
+header("Location: ../../public/admin-login.html?logout=success");
 exit;
-?>

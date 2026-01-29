@@ -9,22 +9,27 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not a patient
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
-    header('Location: ../html/login.html');
+    header('Location: ../../public/login.html');
     exit;
 }
 
-// Database connection (copied from register.php)
-$host = "localhost";
-$dbname = "medicare";
-$username = "root";
-$password = "";
-$conn = new mysqli($host, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Database connection
+try {
+    $host = "localhost";
+    $dbname = "medicare";
+    $username = "root";
+    $password = "";
+    $conn = new mysqli($host, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        throw new Exception("Database connection failed. Please try again later.");
+    }
+} catch (Exception $e) {
+    error_log("DB Connection Error: " . $e->getMessage());
+    die("<div style='padding: 20px; margin: 20px; background: #fee; border-left: 4px solid #c33; color: #c33;'>Unable to connect to the database. Please contact support.</div>");
 }
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name'])) {
-    header('Location: ../html/login.html');
+    header('Location: ../../public/login.html');
     exit;
 }
 
@@ -39,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_profile'])) {
         $updates = [];
         $types = '';
         $values = [];
-        
+
         // Check each field and add to updates if it exists in the form
         $fields = [
             'phone' => 's',
@@ -47,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_profile'])) {
             'address' => 's',
             'insurance' => 's'
         ];
-        
+
         foreach ($fields as $field => $type) {
             if (isset($_POST[$field])) {
                 $updates[] = "$field = ?";
@@ -55,23 +60,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_profile'])) {
                 $values[] = trim($_POST[$field]);
             }
         }
-        
+
         if (!empty($updates)) {
             // Add user ID to values
             $types .= 'i';
             $values[] = $userId;
-            
+
             // Build and execute the update query
             $query = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
             $stmt = $conn->prepare($query);
-            
+
             if ($stmt === false) {
                 throw new Exception("Database error: " . $conn->error);
             }
-            
+
             // Bind parameters dynamically
             $stmt->bind_param($types, ...$values);
-            
+
             if ($stmt->execute()) {
                 $success = true;
                 // Refresh the page to show updated data
@@ -101,10 +106,10 @@ try {
     // First, get the list of columns that exist in the users table
     $result = $conn->query("SHOW COLUMNS FROM users");
     $columns = [];
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
         $columns[] = $row['Field'];
     }
-    
+
     // Build the query with only existing columns
     $selectFields = [];
     $selectFields[] = in_array('full_name', $columns) ? 'full_name' : "'' as full_name";
@@ -113,19 +118,19 @@ try {
     $selectFields[] = in_array('gender', $columns) ? 'gender' : "'' as gender";
     $selectFields[] = in_array('address', $columns) ? 'address' : "'' as address";
     $selectFields[] = in_array('insurance', $columns) ? 'insurance' : "'' as insurance";
-    
+
     $query = "SELECT " . implode(', ', $selectFields) . " FROM users WHERE id=?";
-    
+
     $stmt = $conn->prepare($query);
     if ($stmt === false) {
         throw new Exception("Database error: " . $conn->error);
     }
-    
+
     $stmt->bind_param("i", $userId);
     if (!$stmt->execute()) {
         throw new Exception("Failed to fetch profile: " . $stmt->error);
     }
-    
+
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
         $userData = $result->fetch_assoc();
@@ -137,7 +142,6 @@ try {
         $insurance = $userData['insurance'] ?? '';
     }
     $stmt->close();
-    
 } catch (Exception $e) {
     $error = "Error loading profile: " . $e->getMessage();
     error_log($error);
@@ -149,7 +153,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Profile | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -197,7 +201,7 @@ try {
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
@@ -222,21 +226,9 @@ try {
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../html/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
-                            </a>
-                            <a href="../html/patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
-                                Medical Records
-                            </a>
-                            <a href="../html/patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
-                                Prescriptions
-                            </a>
-                            <a href="../html/patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
-                                Messages
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
@@ -270,7 +262,7 @@ try {
                             <i data-feather="bell" class="h-6 w-6"></i>
                         </button>
                         <div class="relative">
-                                <img class="h-8 w-8 rounded-full" src="http://static.photos/people/200x200/1" alt="User profile">
+                            <button class="flex items-center space-x-2">
                                 <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
                                 <i data-feather="chevron-down" class="h-4 w-4"></i>
                             </button>
@@ -286,12 +278,9 @@ try {
                         <div class="mb-4 p-3 rounded bg-red-100 text-red-800"><?php echo htmlspecialchars($error); ?></div>
                     <?php endif; ?>
                     <form method="post" class="space-y-8">
-                        <div class="flex items-center space-x-6 mb-8">
-                            <img class="h-24 w-24 rounded-full object-cover border-2 border-blue-600" src="http://static.photos/people/200x200/1" alt="Profile photo">
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900"><?php echo htmlspecialchars($fullName); ?></h2>
-                                <p class="text-gray-500"><?php echo htmlspecialchars($email); ?></p>
-                            </div>
+                        <div class="mb-8">
+                            <h2 class="text-2xl font-bold text-gray-900"><?php echo htmlspecialchars($fullName); ?></h2>
+                            <p class="text-gray-500"><?php echo htmlspecialchars($email); ?></p>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
@@ -338,8 +327,25 @@ try {
     <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
+
+        // Add spinner animation
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = document.getElementById('profileBtn');
+            const spinner = document.getElementById('profileSpinner');
+            const text = document.getElementById('profileText');
+
+            if (!this.checkValidity()) return;
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Saving...';
+        });
     </script>
 </body>
 
 </html>
-

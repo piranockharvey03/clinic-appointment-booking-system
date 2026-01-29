@@ -9,7 +9,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not an admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: ../html/admin-login.html');
+    header('Location: ../../public/admin-login.html');
     exit;
 }
 
@@ -22,7 +22,7 @@ $fullName = $_SESSION['user_name'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Settings | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -158,7 +158,7 @@ $fullName = $_SESSION['user_name'];
                         <h2 class="text-xl font-bold mb-6 text-gray-900">Account</h2>
                         <div class="space-y-4">
                             <button onclick="showAdminPasswordModal()"
-                                    class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
+                                class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
                                 <i data-feather="key" class="inline h-5 w-5 mr-2"></i>
                                 Change Password
                             </button>
@@ -188,20 +188,20 @@ $fullName = $_SESSION['user_name'];
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
                         <input type="password" id="adminCurrentPassword" name="current_password" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                         <input type="password" id="adminNewPassword" name="new_password" required minlength="6"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
                         <input type="password" id="adminConfirmPassword" name="confirm_password" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div id="adminPasswordError" class="text-red-600 text-sm mb-4 hidden"></div>
@@ -209,12 +209,12 @@ $fullName = $_SESSION['user_name'];
 
                     <div class="flex justify-end gap-3">
                         <button type="button" onclick="hideAdminPasswordModal()"
-                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
                             Cancel
                         </button>
                         <button type="submit"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                id="submitAdminPasswordChange">
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            id="submitAdminPasswordChange">
                             Change Password
                         </button>
                     </div>
@@ -313,8 +313,8 @@ $fullName = $_SESSION['user_name'];
             };
 
             const params = 'current_password=' + encodeURIComponent(currentPassword) +
-                          '&new_password=' + encodeURIComponent(newPassword) +
-                          '&confirm_password=' + encodeURIComponent(confirmPassword);
+                '&new_password=' + encodeURIComponent(newPassword) +
+                '&confirm_password=' + encodeURIComponent(confirmPassword);
 
             xhr.send(params);
 

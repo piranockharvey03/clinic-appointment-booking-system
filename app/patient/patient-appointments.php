@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db-config.php';
+require_once '../../config/db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -10,7 +10,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not a patient
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
-    header('Location: ../html/login.html');
+    header('Location: ../../public/login.html');
     exit;
 }
 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
     try {
         $conn = getDBConnection();
         $apptId = $_POST['appt_id'];
-        
+
         if ($_POST['action'] === 'cancel') {
             $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled' WHERE appointment_id = ?");
             $stmt->bind_param("s", $apptId);
@@ -31,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             $stmt->execute();
             $stmt->close();
         }
-        
+
         closeDBConnection($conn);
     } catch (Exception $e) {
         error_log("Patient appointment action error: " . $e->getMessage());
     }
-    
+
     // Redirect to avoid form resubmission
     header("Location: patient-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
     exit;
@@ -51,7 +51,7 @@ try {
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $appointments[] = [
@@ -73,7 +73,7 @@ try {
         }
         $result->free();
     }
-    
+
     closeDBConnection($conn);
 } catch (Exception $e) {
     error_log("Failed to load appointments: " . $e->getMessage());
@@ -111,7 +111,7 @@ if ($reschedule_id) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointments | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -147,7 +147,7 @@ if ($reschedule_id) {
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
             <!-- ...existing sidebar code... -->
@@ -172,21 +172,9 @@ if ($reschedule_id) {
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../html/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
-                            </a>
-                            <a href="../html/patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
-                                Medical Records
-                            </a>
-                            <a href="../html/patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
-                                Prescriptions
-                            </a>
-                            <a href="../html/patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
-                                Messages
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
@@ -207,7 +195,7 @@ if ($reschedule_id) {
                 </div>
             </div>
         </div>
-          <!--piranockharvey03--> 
+        <!--piranockharvey03-->
         <div class="main-content flex-1 overflow-auto w-full">
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -215,7 +203,7 @@ if ($reschedule_id) {
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                     <h1 class="text-lg font-semibold text-gray-900">Appointments</h1>
-                    <a href="../html/patient-book.html" class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <a href="../../public/patient-book.html" class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
                         <i data-feather="plus" class="mr-1 h-4 w-4"></i>
                         New
                     </a>
@@ -227,7 +215,7 @@ if ($reschedule_id) {
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                             <div class="flex items-center gap-2">
                                 <a href="?tab=pending" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Pending</a>
-                                <a href="?tab=approved" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Approved</a>
+                                <a href="?tab=approved" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Confirmed</a>
                                 <a href="?tab=rescheduled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'rescheduled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Rescheduled</a>
                                 <a href="?tab=canceled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'canceled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Canceled</a>
                             </div>
@@ -238,7 +226,7 @@ if ($reschedule_id) {
                         </div>
                         <div class="divide-y divide-gray-200">
                             <?php if (empty($filtered)) : ?>
-                                <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../html/patient-book.html">Book your appointment here</a>.</div>
+                                <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../../public/patient-book.html">Book your appointment here</a>.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
                                     <div class="appointment-card p-4 flex items-center justify-between">
@@ -257,10 +245,10 @@ if ($reschedule_id) {
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <?php 
-                                                $status = strtolower($appt['status'] ?? 'pending');
+                                            <?php
+                                            $status = strtolower($appt['status'] ?? 'pending');
                                             ?>
-                                            <?php if (!in_array($status, ['canceled','past'], true)): ?>
+                                            <?php if (!in_array($status, ['canceled', 'past'], true)): ?>
                                                 <form method="get" style="display:inline;">
                                                     <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                                                     <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">
@@ -270,9 +258,9 @@ if ($reschedule_id) {
                                                     <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
                                                     <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
                                                 </form>
-                                                <?php 
-                                                    $badgeClass = $status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
-                                                    $label = ucfirst($status);
+                                                <?php
+                                                $badgeClass = $status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                                                $label = ucfirst($status);
                                                 ?>
                                                 <span class="px-3 py-1.5 text-sm rounded-md <?= $badgeClass ?>"><?= htmlspecialchars($label) ?></span>
                                             <?php else: ?>
@@ -320,4 +308,3 @@ if ($reschedule_id) {
 </body>
 
 </html>
-

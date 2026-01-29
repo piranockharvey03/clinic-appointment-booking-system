@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db-config.php';
+require_once '../../config/db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -10,7 +10,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not a patient
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
-    header('Location: ../html/login.html');
+    header('Location: ../../public/login.html');
     exit;
 }
 
@@ -30,13 +30,13 @@ $stats = [
 
 try {
     $conn = getDBConnection();
-    
+
     // Get patient appointments only (filter by logged-in patient)
     $stmt = $conn->prepare("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments WHERE patient_id = ? ORDER BY created_at DESC");
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $patientAppointments[] = [
@@ -55,7 +55,7 @@ try {
                 'status' => $row['status'],
                 'createdAt' => $row['created_at']
             ];
-            
+
             // Count statistics
             $status = strtolower($row['status']);
             if ($status === 'pending') $stats['pending']++;
@@ -66,9 +66,9 @@ try {
         }
         $result->free();
     }
-    
+
     $stats['total'] = count($patientAppointments);
-    
+
     closeDBConnection($conn);
 } catch (Exception $e) {
     error_log("Failed to load appointments: " . $e->getMessage());
@@ -88,7 +88,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Dashboard | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -107,7 +107,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
@@ -135,21 +135,9 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../html/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
-                            </a>
-                            <a href="../html/patient-records.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
-                                Medical Records
-                            </a>
-                            <a href="../html/patient-prescriptions.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-plus" class="mr-3 h-5 w-5"></i>
-                                Prescriptions
-                            </a>
-                            <a href="../html/patient-messages.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
-                                Messages
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
@@ -205,7 +193,6 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                         </div>
                         <div class="relative">
                             <button class="flex items-center space-x-2">
-                                <img class="h-8 w-8 rounded-full" src="http://static.photos/people/200x200/1" alt="User profile">
                                 <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
                                 <i data-feather="chevron-down" class="h-4 w-4"></i>
                             </button>
@@ -213,7 +200,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                     </div>
                 </div>
             </header>
-  <!--piranockharvey03--> 
+            <!--piranockharvey03-->
             <!-- Dashboard content -->
             <main class="p-4 sm:px-6 lg:px-8">
                 <!-- Welcome banner -->
@@ -223,7 +210,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                             <h2 class="text-2xl font-bold text-white">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                             <p class="mt-1 text-blue-100">Here's what's happening with your health today.</p>
                         </div>
-                        <a href="../html/patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
+                        <a href="../../public/patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
                             Book Appointment
                             <i data-feather="plus" class="ml-2"></i>
                         </a>
@@ -255,7 +242,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                     <i data-feather="check-circle" class="h-6 w-6 text-white"></i>
                                 </div>
                                 <div class="ml-5 w-0 flex-1">
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Approved</dt>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Confirmed</dt>
                                     <dd class="flex items-baseline">
                                         <div class="text-2xl font-semibold text-gray-900"><?= $stats['approved'] ?></div>
                                     </dd>
@@ -354,7 +341,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                 <i data-feather="calendar" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
                                 <p class="text-lg font-medium">No upcoming appointments</p>
                                 <p class="text-sm mt-1 mb-4">Book your first appointment to get started</p>
-                                <a href="../html/patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                <a href="../../public/patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
                                     <i data-feather="plus" class="h-4 w-4 mr-2"></i>
                                     Book Appointment
                                 </a>
@@ -475,7 +462,9 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                 $.ajax({
                     url: 'mark-patient-notifications-read.php',
                     type: 'POST',
-                    data: { notification_ids: [notificationId] },
+                    data: {
+                        notification_ids: [notificationId]
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -511,7 +500,9 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                 $.ajax({
                     url: 'mark-patient-notifications-read.php',
                     type: 'POST',
-                    data: { notification_ids: notificationIds },
+                    data: {
+                        notification_ids: notificationIds
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -564,7 +555,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                     if (xhr.readyState === 4) {
                         if (xhr.status === 401 || xhr.responseText === 'unauthorized') {
                             // Session expired or invalid, redirect to login
-                            window.location.href = '../html/login.html';
+                            window.location.href = '../../public/login.html';
                         }
                     }
                 };
@@ -695,4 +686,3 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
 </body>
 
 </html>
-

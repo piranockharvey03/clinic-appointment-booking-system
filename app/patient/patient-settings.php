@@ -9,7 +9,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not a patient
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
-    header('Location: ../html/login.html');
+    header('Location: ../../public/login.html');
     exit;
 }
 
@@ -22,7 +22,7 @@ $fullName = $_SESSION['user_name'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -75,7 +75,7 @@ $fullName = $_SESSION['user_name'];
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../html/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
@@ -113,7 +113,6 @@ $fullName = $_SESSION['user_name'];
                         </button>
                         <div class="relative">
                             <button class="flex items-center space-x-2">
-                                <img class="h-8 w-8 rounded-full" src="http://static.photos/people/200x200/1" alt="User profile">
                                 <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
                             </button>
                         </div>
@@ -172,7 +171,7 @@ $fullName = $_SESSION['user_name'];
                         <h2 class="text-xl font-bold mb-6 text-gray-900">Account</h2>
                         <div class="space-y-4">
                             <button onclick="showPasswordModal()"
-                                    class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
+                                class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
                                 <i data-feather="key" class="inline h-5 w-5 mr-2"></i>
                                 Change Password
                             </button>
@@ -202,20 +201,20 @@ $fullName = $_SESSION['user_name'];
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
                         <input type="password" id="currentPassword" name="current_password" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                         <input type="password" id="newPassword" name="new_password" required minlength="6"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
                         <input type="password" id="confirmPassword" name="confirm_password" required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div id="passwordError" class="text-red-600 text-sm mb-4 hidden"></div>
@@ -223,13 +222,14 @@ $fullName = $_SESSION['user_name'];
 
                     <div class="flex justify-end gap-3">
                         <button type="button" onclick="hidePasswordModal()"
-                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
                             Cancel
                         </button>
                         <button type="submit"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                                id="submitPasswordChange">
-                            Change Password
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 inline-flex items-center gap-2 transition-all"
+                            id="submitPasswordChange">
+                            <span class="hidden" id="passwordSpinner" style="border: 2px solid rgba(255,255,255,0.3); border-top: 2px solid #fff; border-radius: 50%; width: 14px; height: 14px; animation: spin 0.6s linear infinite;"></span>
+                            <span id="passwordText">Change Password</span>
                         </button>
                     </div>
                 </form>
@@ -241,12 +241,12 @@ $fullName = $_SESSION['user_name'];
     <script src="../assets/js/dark-mode.js"></script>
     <script>
         feather.replace();
-        
+
         // Close mobile menu when clicking on navigation links
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('passwordChangeForm').reset();
-            document.getElementById('passwordError').style.display = 'none';
-            document.getElementById('passwordSuccess').style.display = 'none';
+        document.getElementById('passwordModal').style.display = 'none';
+        document.getElementById('passwordChangeForm').reset();
+        document.getElementById('passwordError').style.display = 'none';
+        document.getElementById('passwordSuccess').style.display = 'none';
         }
 
         // Simple form submission
@@ -321,8 +321,8 @@ $fullName = $_SESSION['user_name'];
             };
 
             const params = 'current_password=' + encodeURIComponent(currentPassword) +
-                          '&new_password=' + encodeURIComponent(newPassword) +
-                          '&confirm_password=' + encodeURIComponent(confirmPassword);
+                '&new_password=' + encodeURIComponent(newPassword) +
+                '&confirm_password=' + encodeURIComponent(confirmPassword);
 
             xhr.send(params);
 
@@ -356,6 +356,24 @@ $fullName = $_SESSION['user_name'];
                     hidePasswordModal();
                 }
             });
+        });
+
+        // Add spinner animation
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const btn = document.getElementById('submitPasswordChange');
+            const spinner = document.getElementById('passwordSpinner');
+            const text = document.getElementById('passwordText');
+
+            if (!this.checkValidity()) return;
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Changing...';
         });
     </script>
 </body>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
@@ -15,6 +15,22 @@
             background-image: linear-gradient(rgba(59, 130, 246, 0.8), rgba(29, 78, 216, 0.8)), url('http://static.photos/medical/1200x630/1');
             background-size: cover;
             background-position: center;
+        }
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -37,7 +53,7 @@
 
                 <div class="mt-8">
                     <div class="mt-6">
-                        <form action="../php/admin-login.php" method="POST" class="space-y-6">
+                        <form action="../app/admin/admin-login.php" method="POST" class="space-y-6">
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
                                 <div class="mt-1">
@@ -70,9 +86,10 @@
                             </div>
 
                             <div>
-                                <button type="submit"
-                                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    Sign in
+                                <button type="submit" id="adminLoginBtn"
+                                    class="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                                    <span class="spinner hidden" id="adminLoginSpinner"></span>
+                                    <span id="adminLoginText">Sign in</span>
                                 </button>
                             </div>
                         </form>
@@ -198,6 +215,34 @@
                 window.history.replaceState({}, document.title, cleanUrl);
             }
         });
+        
+        // Display error messages from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'bg-red-50 border-l-4 border-red-400 p-4 mb-4 rounded';
+            errorDiv.innerHTML = `
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">${decodeURIComponent(error)}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Insert error before the form
+            const form = document.querySelector('form');
+            form.parentNode.insertBefore(errorDiv, form);
+            
+            // Remove error from URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     </script>
 </body>
 

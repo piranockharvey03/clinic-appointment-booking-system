@@ -19,6 +19,19 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out forwards;
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -424,7 +437,7 @@
             </div>
             
             <div class="max-w-2xl mx-auto">
-                <form id="feedbackForm" class="space-y-6" action="../php/feedback.php" method="POST">
+                <form id="feedbackForm" class="space-y-6" action="../app/includes/feedback.php" method="POST">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
@@ -566,6 +579,85 @@
     <script>
         AOS.init();
         feather.replace();
+        
+        // Display error/success messages from URL on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            const success = urlParams.get('success');
+            
+            if (error) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'fixed top-20 right-4 z-50 max-w-md bg-red-50 border-l-4 border-red-400 p-4 rounded shadow-lg animate-slide-in';
+                errorDiv.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-red-800">${decodeURIComponent(error)}</p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-red-400 hover:text-red-600">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(errorDiv);
+                
+                // Auto-remove after 6 seconds
+                setTimeout(() => {
+                    if (errorDiv.parentNode) {
+                        errorDiv.style.transition = 'opacity 0.5s';
+                        errorDiv.style.opacity = '0';
+                        setTimeout(() => errorDiv.remove(), 500);
+                    }
+                }, 6000);
+                
+                // Scroll to feedback form
+                document.getElementById('feedbackForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            if (success) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'fixed top-20 right-4 z-50 max-w-md bg-green-50 border-l-4 border-green-400 p-4 rounded shadow-lg animate-slide-in';
+                successDiv.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800">${decodeURIComponent(success)}</p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-green-400 hover:text-green-600">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(successDiv);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.style.transition = 'opacity 0.5s';
+                        successDiv.style.opacity = '0';
+                        setTimeout(() => successDiv.remove(), 500);
+                    }
+                }, 5000);
+            }
+            
+            // Remove error/success from URL
+            if (error || success) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
         
         // Feedback form functionality
         document.addEventListener('DOMContentLoaded', function() {

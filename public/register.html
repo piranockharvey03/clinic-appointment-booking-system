@@ -15,6 +15,22 @@
             background-size: cover;
             background-position: center;
         }
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -37,7 +53,7 @@
 
                 <div class="mt-8">
                     <div class="mt-6">
-                        <form id="registrationForm" class="space-y-6">
+                        <form id="registrationForm" action="../app/auth/register.php" method="POST" class="space-y-6">
                             <div>
                                 <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
                                 <div class="mt-1">
@@ -144,8 +160,9 @@
                             </div>
 
                             <div>
-                                <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    Register
+                                <button type="submit" id=\"registerBtn\" class=\"w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all\">
+                                    <span class=\"spinner hidden\" id=\"registerSpinner\"></span>
+                                    <span id=\"registerText\">Register</span>
                                 </button>
                             </div>
                         </form>
@@ -565,61 +582,6 @@
             feather.replace();
         }
         
-        // Handle form submission asynchronously
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            
-            // Get form data
-            const form = event.target;
-            const formData = new FormData(form);
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.innerHTML;
-            
-            try {
-                // Disable submit button and show loading state
-                submitButton.disabled = true;
-                submitButton.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                `;
-                
-                // Submit form data
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Show success message and redirect
-                    showSuccessMessage(result.message, result.redirect);
-                } else {
-                    // Show error message
-                    showErrorMessage(result.message || 'Registration failed. Please try again.');
-                }
-            } catch (error) {
-                console.error('Registration error:', error);
-                showErrorMessage('An error occurred. Please try again later.');
-            } finally {
-                // Re-enable submit button and restore original text
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonText;
-            }
-        }
-
-        // Get form elements
-        const registerForm = document.getElementById('registrationForm');
-        const passwordField = document.getElementById('password');
-        const confirmPasswordField = document.getElementById('confirm-password');
-        const emailField = document.getElementById('email');
-
         // Event listeners
         passwordField.addEventListener('input', updateAllValidations);
         confirmPasswordField.addEventListener('input', updatePasswordMatchStatus);
@@ -709,6 +671,22 @@
             }
         `;
         document.head.appendChild(style);
+        
+        // Handle form submission with loading state
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('registerBtn');
+            const spinner = document.getElementById('registerSpinner');
+            const text = document.getElementById('registerText');
+            
+            // Check if form is valid before showing spinner
+            if (!this.checkValidity()) {
+                return; // Let browser handle validation
+            }
+            
+            // Disable button and show spinner
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            text.textContent = 'Creating account...';
         });
     </script>
 </body>

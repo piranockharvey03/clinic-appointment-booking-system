@@ -35,6 +35,6 @@ header("Pragma: no-cache");
 header("Expires: 0");
 
 // Redirect to login page with logout success parameter
-header("Location: ../html/login.html?logout=success");
+header("Location: ../../public/login.html?logout=success");
 exit;
 ?>

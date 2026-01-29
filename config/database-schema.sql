@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` VARCHAR(255) NOT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  INDEX `idx_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create admin table (for administrators)
@@ -30,7 +31,8 @@ CREATE TABLE IF NOT EXISTS `admin` (
   `password` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`)
+  UNIQUE KEY `email` (`email`),
+  INDEX `idx_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Create appointments table
@@ -57,7 +59,8 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   KEY `idx_patient_id` (`patient_id`),
   KEY `idx_status` (`status`),
   KEY `idx_appointment_date` (`appointment_date`),
-  KEY `idx_doctor_id` (`doctor_id`)
+  KEY `idx_doctor_id` (`doctor_id`),
+  CONSTRAINT `fk_appointments_patient` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create notifications table (for admin users)
@@ -70,12 +73,14 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     read_at TIMESTAMP NULL DEFAULT NULL,
     INDEX idx_appointment (appointment_id),
-    INDEX idx_read_status (is_read)
-);
+    INDEX idx_read_status (is_read),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create patient notifications table (for patient users)
 CREATE TABLE IF NOT EXISTS patient_notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    patient_id INT(11) NOT NULL,
     appointment_id VARCHAR(50) NOT NULL,
     patient_name VARCHAR(255) NOT NULL,
     notification_type VARCHAR(50) NOT NULL,
@@ -83,9 +88,12 @@ CREATE TABLE IF NOT EXISTS patient_notifications (
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     read_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_patient_id (patient_id),
     INDEX idx_appointment (appointment_id),
-    INDEX idx_read_status (is_read)
-);
+    INDEX idx_read_status (is_read),
+    INDEX idx_created_at (created_at),
+    CONSTRAINT `fk_patient_notifications_user` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Add comments to explain the tables
 ALTER TABLE notifications COMMENT 'Stores system notifications, primarily for admin users';

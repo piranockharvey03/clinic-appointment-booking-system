@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db-config.php';
+require_once '../../config/db-config.php';
 
 // Only allow admin access
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
@@ -46,9 +46,7 @@ try {
     closeDBConnection($conn);
 
     echo json_encode(['success' => true, 'notifications' => $notifications]);
-
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Failed to fetch notifications']);
 }
-?>

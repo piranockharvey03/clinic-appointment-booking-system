@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db-config.php';
+require_once '../../config/db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -10,7 +10,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not an admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: ../html/admin-login.html');
+    header('Location: ../../public/admin-login.html');
     exit;
 }
 
@@ -26,10 +26,10 @@ $stats = [
 
 try {
     $conn = getDBConnection();
-    
+
     // Get all appointments
     $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
-    
+
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $appointments[] = [
@@ -48,7 +48,7 @@ try {
                 'status' => $row['status'],
                 'createdAt' => $row['created_at']
             ];
-            
+
             // Count statistics
             $status = strtolower($row['status']);
             if (isset($stats[$status])) {
@@ -57,9 +57,9 @@ try {
         }
         $result->free();
     }
-    
+
     $stats['total'] = count($appointments);
-    
+
     closeDBConnection($conn);
 } catch (Exception $e) {
     error_log("Failed to load appointments: " . $e->getMessage());
@@ -67,14 +67,25 @@ try {
 
 // Get recent appointments (last 5)
 $recentAppointments = array_slice($appointments, 0, 5);
+
+// Get today's appointments
+$todayDate = date('Y-m-d');
+$todayAppointments = array_filter($appointments, function ($appt) use ($todayDate) {
+    return $appt['date'] === $todayDate;
+});
+// Sort today's appointments by time
+usort($todayAppointments, function ($a, $b) {
+    return strcmp($a['time'], $b['time']);
+});
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -87,7 +98,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
@@ -177,7 +188,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
                         <div class="flex items-center justify-between">
                             <div>
@@ -190,11 +201,11 @@ $recentAppointments = array_slice($appointments, 0, 5);
                         </div>
                         <a href="admin-appointments.php?tab=pending" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
-                    
+
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600 uppercase">Approved</p>
+                                <p class="text-sm font-medium text-gray-600 uppercase">Confirmed</p>
                                 <p class="text-3xl font-bold text-green-600 mt-2"><?= $stats['approved'] ?></p>
                             </div>
                             <div class="p-3 bg-green-100 rounded-full">
@@ -203,7 +214,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                         </div>
                         <a href="admin-appointments.php?tab=approved" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
-                    
+
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
                         <div class="flex items-center justify-between">
                             <div>
@@ -218,6 +229,106 @@ $recentAppointments = array_slice($appointments, 0, 5);
                     </div>
                 </div>
 
+                <!-- Today's Appointments -->
+                <div class="bg-white rounded-lg shadow-md mb-8">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-xl font-bold text-gray-900">Today's Appointments</h2>
+                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <?= date('M d, Y') ?>
+                                </span>
+                            </div>
+                            <?php if (count($todayAppointments) > 0): ?>
+                                <span class="text-sm text-gray-600">
+                                    <span class="font-semibold text-blue-600"><?= count($todayAppointments) ?></span> appointment<?= count($todayAppointments) !== 1 ? 's' : '' ?> today
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-200">
+                        <?php if (!empty($todayAppointments)): ?>
+                            <?php foreach ($todayAppointments as $appt): ?>
+                                <?php
+                                $status = strtolower($appt['status'] ?? 'pending');
+                                $statusColors = [
+                                    'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                    'approved' => 'bg-green-100 text-green-800 border-green-200',
+                                    'rescheduled' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                    'canceled' => 'bg-red-100 text-red-800 border-red-200'
+                                ];
+                                $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
+
+                                // Parse time to determine if it's upcoming or past
+                                $currentTime = date('H:i');
+                                $apptTime = date('H:i', strtotime($appt['time']));
+                                $isPast = $apptTime < $currentTime;
+                                $isUpcoming = !$isPast;
+                                ?>
+                                <div class="p-5 hover:bg-gray-50 transition-colors <?= $isPast ? 'opacity-60' : '' ?>">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-3">
+                                                <div class="h-12 w-12 rounded-full <?= $isUpcoming ? 'bg-blue-100' : 'bg-gray-100' ?> flex items-center justify-center flex-shrink-0">
+                                                    <i data-feather="user" class="h-6 w-6 <?= $isUpcoming ? 'text-blue-600' : 'text-gray-500' ?>"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <h3 class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($appt['patientName'] ?? 'Unknown Patient') ?></h3>
+                                                        <?php if ($isUpcoming && $status === 'approved'): ?>
+                                                            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-500 text-white animate-pulse">
+                                                                Upcoming
+                                                            </span>
+                                                        <?php elseif ($isPast): ?>
+                                                            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-400 text-white">
+                                                                Past
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <p class="text-sm text-gray-600 mt-1">
+                                                        <span class="font-medium">Dr. <?= htmlspecialchars($appt['doctorName'] ?? 'Unknown') ?></span>
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        <?= htmlspecialchars($appt['department'] ?? '') ?> •
+                                                        <?php if (!empty($appt['phone'])): ?>
+                                                            <i data-feather="phone" class="h-3 w-3 inline"></i>
+                                                            <?= htmlspecialchars($appt['phone']) ?>
+                                                        <?php endif; ?>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="text-right">
+                                                <div class="flex items-center gap-1 text-lg font-bold <?= $isUpcoming ? 'text-blue-600' : 'text-gray-500' ?>">
+                                                    <i data-feather="clock" class="h-5 w-5"></i>
+                                                    <?= htmlspecialchars($appt['time'] ?? '') ?>
+                                                </div>
+                                            </div>
+                                            <span class="px-3 py-1.5 text-xs font-semibold rounded-full border <?= $badgeClass ?>">
+                                                <?= ucfirst($status) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <?php if (!empty($appt['reason'])): ?>
+                                        <div class="mt-3 ml-15 pl-3 border-l-2 border-gray-200">
+                                            <p class="text-xs text-gray-600">
+                                                <span class="font-medium">Reason:</span> <?= htmlspecialchars($appt['reason']) ?>
+                                            </p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="p-12 text-center text-gray-500">
+                                <i data-feather="calendar" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
+                                <p class="text-lg font-medium">No appointments scheduled for today</p>
+                                <p class="text-sm mt-1">Check back later or view all appointments</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <!-- Recent Appointments -->
                 <div class="bg-white rounded-lg shadow-md">
                     <div class="p-6 border-b border-gray-200">
@@ -226,19 +337,19 @@ $recentAppointments = array_slice($appointments, 0, 5);
                             <a href="admin-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
                         </div>
                     </div>
-                      <!--piranockharvey03--> 
+                    <!--piranockharvey03-->
                     <div class="divide-y divide-gray-200">
                         <?php if (!empty($recentAppointments)): ?>
                             <?php foreach ($recentAppointments as $appt): ?>
-                                <?php 
-                                    $status = strtolower($appt['status'] ?? 'pending');
-                                    $statusColors = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                        'approved' => 'bg-green-100 text-green-800 border-green-200',
-                                        'rescheduled' => 'bg-purple-100 text-purple-800 border-purple-200',
-                                        'canceled' => 'bg-red-100 text-red-800 border-red-200'
-                                    ];
-                                    $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
+                                <?php
+                                $status = strtolower($appt['status'] ?? 'pending');
+                                $statusColors = [
+                                    'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                    'approved' => 'bg-green-100 text-green-800 border-green-200',
+                                    'rescheduled' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                    'canceled' => 'bg-red-100 text-red-800 border-red-200'
+                                ];
+                                $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
                                 ?>
                                 <div class="p-5 hover:bg-gray-50 transition-colors">
                                     <div class="flex items-center justify-between">
@@ -250,7 +361,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                                                 <div>
                                                     <h3 class="text-sm font-semibold text-gray-900"><?= htmlspecialchars($appt['patientName'] ?? 'Unknown Patient') ?></h3>
                                                     <p class="text-xs text-gray-500 mt-1">
-                                                        <span class="font-medium">Dr. <?= htmlspecialchars($appt['doctorName'] ?? 'Unknown') ?></span> • 
+                                                        <span class="font-medium">Dr. <?= htmlspecialchars($appt['doctorName'] ?? 'Unknown') ?></span> •
                                                         <?= htmlspecialchars($appt['department'] ?? '') ?>
                                                     </p>
                                                     <p class="text-xs text-gray-400 mt-0.5">
@@ -293,7 +404,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
             notificationBtn.on('click', function(e) {
                 e.stopPropagation();
                 notificationDropdown.toggleClass('hidden');
-                
+
                 // Check for notifications when dropdown is opened
                 if (!notificationDropdown.hasClass('hidden')) {
                     checkNotifications();
@@ -395,7 +506,9 @@ $recentAppointments = array_slice($appointments, 0, 5);
                 $.ajax({
                     url: 'mark-notifications-read.php',
                     type: 'POST',
-                    data: { notification_ids: [notificationId] },
+                    data: {
+                        notification_ids: [notificationId]
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -431,7 +544,9 @@ $recentAppointments = array_slice($appointments, 0, 5);
                 $.ajax({
                     url: 'mark-notifications-read.php',
                     type: 'POST',
-                    data: { notification_ids: notificationIds },
+                    data: {
+                        notification_ids: notificationIds
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -453,12 +568,12 @@ $recentAppointments = array_slice($appointments, 0, 5);
             function showNewNotification(notification) {
                 // Update badge with animation
                 notificationBadge.removeClass('hidden').text(notification.count).addClass('animate__animated animate__bounce');
-                
+
                 // Remove animation class after it completes
                 setTimeout(() => {
                     notificationBadge.removeClass('animate__bounce');
                 }, 1000);
-                
+
                 // Show desktop notification if supported
                 if (Notification.permission === 'granted') {
                     new Notification('New Appointment', {
@@ -485,7 +600,7 @@ $recentAppointments = array_slice($appointments, 0, 5);
                     if (xhr.readyState === 4) {
                         if (xhr.status === 401 || xhr.responseText === 'unauthorized') {
                             // Session expired or invalid, redirect to login
-                            window.location.href = '../html/admin-login.html';
+                            window.location.href = '../../public/admin-login.html';
                         }
                     }
                 };
@@ -614,5 +729,5 @@ $recentAppointments = array_slice($appointments, 0, 5);
         });
     </script>
 </body>
-</html>
 
+</html>

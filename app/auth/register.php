@@ -1,6 +1,6 @@
 <?php
 // Include database configuration
-require_once 'db-config.php';
+require_once '../../config/db-config.php';
 
 // Set content type to JSON
 header('Content-Type: application/json');
@@ -11,13 +11,13 @@ $response = ['success' => false, 'message' => ''];
 try {
     // Get database connection
     $conn = getDBConnection();
-    
+
     // Handle form submission
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Sanitize and validate input
-        $fullName = trim(filter_input(INPUT_POST, 'full-name', FILTER_SANITIZE_STRING));
+        $fullName = trim(htmlspecialchars($_POST['full-name'] ?? '', ENT_QUOTES, 'UTF-8'));
         $email = strtolower(trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL)));
-        $phone = trim(filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING));
+        $phone = trim(htmlspecialchars($_POST['phone'] ?? '', ENT_QUOTES, 'UTF-8'));
         $password = $_POST['password'];
         $confirmPassword = $_POST['confirm-password'];
 
@@ -67,7 +67,7 @@ try {
             $response = [
                 'success' => true,
                 'message' => 'Registration successful! Redirecting to login...',
-                'redirect' => '../html/login.html'
+                'redirect' => 'login.html'
             ];
         } else {
             // Check for duplicate entry error
@@ -91,7 +91,7 @@ try {
     // Close connections
     if (isset($stmt)) $stmt->close();
     if (isset($conn)) closeDBConnection($conn);
-    
+
     // Return JSON response
     echo json_encode($response);
     exit();

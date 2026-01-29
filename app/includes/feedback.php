@@ -1,50 +1,84 @@
 <?php
 
-// Database connection settings
-$host     = "localhost";   // or your server name
-$user     = "root";        // your DB username
-$password = "";            // your DB password
-$dbname   = "medicare";    // your DB name
+try {
+    // Database connection settings
+    $host     = "localhost";
+    $user     = "root";
+    $password = "";
+    $dbname   = "medicare";
 
-// Create connection
-$conn = new mysqli($host, $user, $password, $dbname);
+    // Create connection
+    $conn = new mysqli($host, $user, $password, $dbname);
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Only process POST requests
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Collect and sanitize form inputs
-    $name      = htmlspecialchars(trim($_POST['name']));
-    $email     = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $phone     = !empty($_POST['phone']) ? htmlspecialchars(trim($_POST['phone'])) : NULL;
-    $service   = htmlspecialchars(trim($_POST['service']));
-    $rating    = intval($_POST['rating']);
-    $feedback  = htmlspecialchars(trim($_POST['feedback']));
-    $newsletter = isset($_POST['newsletter']) ? 1 : 0;
-    $privacy   = isset($_POST['privacy']) ? 1 : 0;
-
-    // Validate required fields
-    if (empty($name) || empty($email) || empty($service) || empty($rating) || empty($feedback) || !$privacy) {
-        die("Please fill in all required fields and agree to the privacy policy.");
+    // Check connection
+    if ($conn->connect_error) {
+        throw new Exception("Database connection failed");
     }
 
-    // Prepare SQL statement (avoids SQL injection)
-    $stmt = $conn->prepare("
-        INSERT INTO feedback (name, email, phone, service, rating, feedback, newsletter, privacy)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ");
-    $stmt->bind_param("ssssissi", $name, $email, $phone, $service, $rating, $feedback, $newsletter, $privacy);
+    // Only process POST requests
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+        // Collect and sanitize form inputs
+        $name      = htmlspecialchars(trim($_POST['name'] ?? ''));
+        $email     = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
+        $phone     = !empty($_POST['phone']) ? htmlspecialchars(trim($_POST['phone'])) : NULL;
+        $service   = htmlspecialchars(trim($_POST['service'] ?? ''));
+        $rating    = intval($_POST['rating'] ?? 0);
+        $feedback  = htmlspecialchars(trim($_POST['feedback'] ?? ''));
+        $newsletter = isset($_POST['newsletter']) ? 1 : 0;
+        $privacy   = isset($_POST['privacy']) ? 1 : 0;
 
-    if ($stmt->execute()) {
-        header("Location: ../html/index.html");
+        // Validate required fields
+        if (empty($name)) {
+            throw new Exception("Please enter your name");
+        }
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("Please enter a valid email address");
+        }
+        if (empty($service)) {
+            throw new Exception("Please select a service");
+        }
+        if ($rating < 1 || $rating > 5) {
+            throw new Exception("Please provide a rating between 1 and 5");
+        }
+        if (empty($feedback)) {
+            throw new Exception("Please provide your feedback");
+        }
+        if (!$privacy) {
+            throw new Exception("You must agree to the privacy policy to submit feedback");
+        }
+
+        // Prepare SQL statement (avoids SQL injection)
+        $stmt = $conn->prepare("
+            INSERT INTO feedback (name, email, phone, service, rating, feedback, newsletter, privacy)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+
+        if ($stmt === false) {
+            throw new Exception("Failed to prepare statement");
+        }
+
+        $stmt->bind_param("ssssissi", $name, $email, $phone, $service, $rating, $feedback, $newsletter, $privacy);
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            $conn->close();
+            // Redirect with success message
+            header("Location: ../../public/index.html?success=" . urlencode("Thank you for your feedback!"));
+            exit();
+        } else {
+            throw new Exception("Failed to submit feedback. Please try again.");
+        }
     } else {
-        echo "Error: " . $stmt->error;
+        throw new Exception("Invalid request method");
     }
+} catch (Exception $e) {
+    error_log("Feedback submission error: " . $e->getMessage());
 
-    $stmt->close();
+    // Close connections if they exist
+    if (isset($stmt)) $stmt->close();
+    if (isset($conn)) $conn->close();
+
+    // Redirect back with error message
+    header("Location: ../../public/index.html?error=" . urlencode($e->getMessage()));
+    exit();
 }
-
-$conn->close();

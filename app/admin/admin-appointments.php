@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db-config.php';
+require_once '../../config/db-config.php';
 
 // Prevent caching of this page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -10,7 +10,7 @@ header("Expires: 0");
 
 // Redirect to login if not authenticated or not an admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: ../html/admin-login.html');
+    header('Location: ../../public/admin-login.html');
     exit;
 }
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
         $apptId = $_POST['appt_id'];
 
         // Get appointment details for notification
-        $apptResult = $conn->query("SELECT patient_name, appointment_date, appointment_time, doctor_name FROM appointments WHERE appointment_id = '$apptId'");
+        $apptResult = $conn->query("SELECT patient_id, patient_name, appointment_date, appointment_time, doctor_name FROM appointments WHERE appointment_id = '$apptId'");
         $appointment = $apptResult ? $apptResult->fetch_assoc() : null;
         $apptResult?->free();
 
@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             // Create patient notification for approval
             if ($appointment) {
                 $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been approved.";
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (appointment_id, patient_name, notification_type, message) VALUES (?, ?, 'approved', ?)");
-                $notificationStmt->bind_param("sss", $apptId, $appointment['patient_name'], $message);
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'approved', ?)");
+                $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
                 $notificationStmt->execute();
                 $notificationStmt->close();
             }
@@ -55,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             // Create patient notification for cancellation
             if ($appointment) {
                 $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been canceled.";
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (appointment_id, patient_name, notification_type, message) VALUES (?, ?, 'canceled', ?)");
-                $notificationStmt->bind_param("sss", $apptId, $appointment['patient_name'], $message);
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'canceled', ?)");
+                $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
                 $notificationStmt->execute();
                 $notificationStmt->close();
             }
@@ -76,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             // Create patient notification for rescheduling
             if ($appointment) {
                 $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " has been rescheduled to " . $_POST['new_date'] . " at " . $_POST['new_time'] . ".";
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (appointment_id, patient_name, notification_type, message) VALUES (?, ?, 'rescheduled', ?)");
-                $notificationStmt->bind_param("sss", $apptId, $appointment['patient_name'], $message);
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'rescheduled', ?)");
+                $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
                 $notificationStmt->execute();
                 $notificationStmt->close();
             }
@@ -85,6 +85,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             // Create admin notification for rescheduling
             $adminMessage = "Appointment rescheduled: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " to " . $_POST['new_date'] . " at " . $_POST['new_time'];
             $adminNotificationStmt = $conn->prepare("INSERT INTO notifications (type, message, appointment_id) VALUES ('rescheduled', ?, ?)");
+            $adminNotificationStmt->bind_param("ss", $adminMessage, $apptId);
+            $adminNotificationStmt->execute();
+            $adminNotificationStmt->close();
+        } elseif ($_POST['action'] === 'complete') {
+            $stmt = $conn->prepare("UPDATE appointments SET status = 'completed' WHERE appointment_id = ?");
+            $stmt->bind_param("s", $apptId);
+            $stmt->execute();
+            $stmt->close();
+
+            // Create patient notification for completion
+            if ($appointment) {
+                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been marked as completed.";
+                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'completed', ?)");
+                $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
+                $notificationStmt->execute();
+                $notificationStmt->close();
+            }
+
+            // Create admin notification for completion
+            $adminMessage = "Appointment completed: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'];
+            $adminNotificationStmt = $conn->prepare("INSERT INTO notifications (type, message, appointment_id) VALUES ('completed', ?, ?)");
             $adminNotificationStmt->bind_param("ss", $adminMessage, $apptId);
             $adminNotificationStmt->execute();
             $adminNotificationStmt->close();
@@ -105,7 +126,7 @@ $appointments = [];
 try {
     $conn = getDBConnection();
     $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
-    
+
     if ($result) {
         while ($row = $result->fetch_assoc()) {
             $appointments[] = [
@@ -127,7 +148,7 @@ try {
         }
         $result->free();
     }
-    
+
     closeDBConnection($conn);
 } catch (Exception $e) {
     error_log("Failed to load appointments: " . $e->getMessage());
@@ -142,6 +163,7 @@ function filter_appointments($appointments, $tab)
     if ($tab === 'approved') return array_filter($appointments, fn($a) => $statusOf($a) === 'approved');
     if ($tab === 'canceled') return array_filter($appointments, fn($a) => $statusOf($a) === 'canceled');
     if ($tab === 'rescheduled') return array_filter($appointments, fn($a) => $statusOf($a) === 'rescheduled');
+    if ($tab === 'completed') return array_filter($appointments, fn($a) => $statusOf($a) === 'completed');
     return $appointments;
 }
 $filtered = array_reverse(filter_appointments($appointments, $tab));
@@ -177,7 +199,7 @@ if ($view_id) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Appointments | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -207,13 +229,39 @@ if ($view_id) {
         .modal-bg {
             background: rgba(0, 0, 0, 0.3);
         }
+
+        .btn-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
             <!-- ...existing sidebar code... -->
@@ -253,7 +301,7 @@ if ($view_id) {
                 </div>
             </div>
         </div>
-          <!--piranockharvey03--> 
+        <!--piranockharvey03-->
         <div class="main-content flex-1 overflow-auto w-full">
             <header class="bg-white shadow-sm">
                 <div class="px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -266,27 +314,85 @@ if ($view_id) {
             <main class="p-4 sm:px-6 lg:px-8">
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="p-4 sm:p-6">
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                            <div class="flex items-center gap-2">
-                                <a href="?tab=pending" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Pending</a>
-                                <a href="?tab=approved" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Approved</a>
-                                <a href="?tab=rescheduled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'rescheduled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Rescheduled</a>
-                                <a href="?tab=canceled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'canceled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Canceled</a>
+                        <!-- Tabs -->
+                        <div class="flex flex-wrap items-center gap-2 mb-4">
+                            <a href="?tab=pending" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Pending</a>
+                            <a href="?tab=approved" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Confirmed</a>
+                            <a href="?tab=rescheduled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'rescheduled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Rescheduled</a>
+                            <a href="?tab=canceled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'canceled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Canceled</a>
+                            <a href="?tab=completed" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Completed</a>
+                            <button id="toggleFilters" class="ml-auto px-3 py-1.5 text-sm rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                                <i data-feather="sliders" class="h-4 w-4"></i>
+                                Filters
+                            </button>
+                        </div>
+
+                        <!-- Advanced Filters (collapsible) -->
+                        <div id="advancedFilters" class="hidden bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <!-- Patient Search -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Patient Name</label>
+                                    <div class="relative">
+                                        <i data-feather="user" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                                        <input id="patientSearch" type="text" class="pl-9 pr-3 py-2 w-full border border-gray-300 rounded-md text-sm" placeholder="Search patient..." />
+                                    </div>
+                                </div>
+
+                                <!-- Doctor/Department Search -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Doctor/Department</label>
+                                    <div class="relative">
+                                        <i data-feather="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                                        <input id="doctorSearch" type="text" class="pl-9 pr-3 py-2 w-full border border-gray-300 rounded-md text-sm" placeholder="Search doctor..." />
+                                    </div>
+                                </div>
+
+                                <!-- Date From -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Date From</label>
+                                    <div class="relative">
+                                        <i data-feather="calendar" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                                        <input id="dateFrom" type="date" class="pl-9 pr-3 py-2 w-full border border-gray-300 rounded-md text-sm" />
+                                    </div>
+                                </div>
+
+                                <!-- Date To -->
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Date To</label>
+                                    <div class="relative">
+                                        <i data-feather="calendar" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
+                                        <input id="dateTo" type="date" class="pl-9 pr-3 py-2 w-full border border-gray-300 rounded-md text-sm" />
+                                    </div>
+                                </div>
                             </div>
-                            <div class="relative">
-                                <i data-feather="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
-                                <input id="appointmentSearch" class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search doctor or department" />
+
+                            <!-- Filter Actions -->
+                            <div class="flex items-center gap-2 mt-3">
+                                <button id="clearFilters" class="px-3 py-1.5 text-sm rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
+                                    Clear All
+                                </button>
+                                <span id="filterCount" class="text-xs text-gray-600"></span>
                             </div>
+                        </div>
+
+                        <!-- Results Summary -->
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="text-sm text-gray-600">
+                                Showing <span id="visibleCount" class="font-semibold text-gray-900"><?= count($filtered) ?></span> of <span class="font-semibold text-gray-900"><?= count($filtered) ?></span> appointments
+                            </p>
                         </div>
                         <div class="divide-y divide-gray-200">
                             <?php if (empty($filtered)) : ?>
                                 <div id="noAppointments" class="p-6 text-sm text-gray-600">No appointments in this category.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
-                                    <div class="appointment-card p-4 flex items-center justify-between" 
-                                         data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>" 
-                                         data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
-                                         data-doctor-specialty="<?= htmlspecialchars(strtolower($appt['doctorSpecialty'])) ?>">
+                                    <div class="appointment-card p-4 flex items-center justify-between"
+                                        data-patient-name="<?= htmlspecialchars(strtolower($appt['patientName'])) ?>"
+                                        data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>"
+                                        data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
+                                        data-doctor-specialty="<?= htmlspecialchars(strtolower($appt['doctorSpecialty'])) ?>"
+                                        data-date="<?= htmlspecialchars($appt['date']) ?>">
                                         <div class="flex items-center">
                                             <?php if (!empty($appt['doctorPhoto'])): ?>
                                                 <img class="h-12 w-12 rounded-full" src="<?= htmlspecialchars($appt['doctorPhoto']) ?>" alt="Doctor">
@@ -312,7 +418,10 @@ if ($view_id) {
                                                 <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
                                                 <form method="post" style="display:inline;">
                                                     <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="approve" class="px-3 py-1.5 text-sm rounded-md text-white bg-green-600 hover:bg-green-700">Approve</button>
+                                                    <button name="action" value="approve" class="px-3 py-1.5 text-sm rounded-md text-white bg-green-600 hover:bg-green-700 flex items-center gap-1">
+                                                        <i data-feather="check" class="h-4 w-4"></i>
+                                                        Confirm
+                                                    </button>
                                                 </form>
                                                 <form method="get" style="display:inline;">
                                                     <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
@@ -325,6 +434,13 @@ if ($view_id) {
                                                 </form>
                                             <?php elseif ($status === 'approved'): ?>
                                                 <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
+                                                <form method="post" style="display:inline;">
+                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
+                                                    <button name="action" value="complete" class="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-1">
+                                                        <i data-feather="check-circle" class="h-4 w-4"></i>
+                                                        Complete
+                                                    </button>
+                                                </form>
                                                 <form method="get" style="display:inline;">
                                                     <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                                                     <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">
@@ -334,17 +450,30 @@ if ($view_id) {
                                                     <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
                                                     <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
                                                 </form>
-                                                <span class="px-3 py-1.5 text-sm rounded-md bg-green-100 text-green-700">Approved</span>
+                                                <span class="px-3 py-1.5 text-sm rounded-md bg-green-100 text-green-700 flex items-center gap-1">
+                                                    <i data-feather="check-circle" class="h-4 w-4"></i>
+                                                    Confirmed
+                                                </span>
                                             <?php elseif ($status === 'rescheduled'): ?>
                                                 <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
                                                 <form method="post" style="display:inline;">
                                                     <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="approve" class="px-3 py-1.5 text-sm rounded-md text-white bg-green-600 hover:bg-green-700">Approve</button>
+                                                    <button name="action" value="approve" class="px-3 py-1.5 text-sm rounded-md text-white bg-green-600 hover:bg-green-700 flex items-center gap-1">
+                                                        <i data-feather="check" class="h-4 w-4"></i>
+                                                        Confirm
+                                                    </button>
                                                 </form>
                                                 <form method="post" style="display:inline;">
                                                     <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
                                                     <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
                                                 </form>
+                                                <span class="px-3 py-1.5 text-sm rounded-md bg-purple-100 text-purple-700">Rescheduled</span>
+                                            <?php elseif ($status === 'completed'): ?>
+                                                <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
+                                                <span class="px-3 py-1.5 text-sm rounded-md bg-gray-100 text-gray-700 flex items-center gap-1">
+                                                    <i data-feather="check-circle" class="h-4 w-4"></i>
+                                                    Completed
+                                                </span>
                                                 <span class="px-3 py-1.5 text-sm rounded-md bg-blue-100 text-blue-700">Rescheduled</span>
                                             <?php else: ?>
                                                 <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
@@ -434,59 +563,115 @@ if ($view_id) {
     <script>
         feather.replace();
 
-        // Appointment search functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('appointmentSearch');
-            const appointmentCards = document.querySelectorAll('.appointment-card');
-            const noAppointmentsMsg = document.getElementById('noAppointments');
+            // Toggle advanced filters
+            const toggleFiltersBtn = document.getElementById('toggleFilters');
+            const advancedFilters = document.getElementById('advancedFilters');
 
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', function() {
+                    advancedFilters.classList.toggle('hidden');
+                    feather.replace();
+                });
+            }
+
+            // Get all filter inputs
+            const patientSearch = document.getElementById('patientSearch');
+            const doctorSearch = document.getElementById('doctorSearch');
+            const dateFrom = document.getElementById('dateFrom');
+            const dateTo = document.getElementById('dateTo');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            const appointmentCards = document.querySelectorAll('.appointment-card');
+            const visibleCountSpan = document.getElementById('visibleCount');
+            const filterCountSpan = document.getElementById('filterCount');
+            const totalCount = appointmentCards.length;
+
+            // Filter function
             function filterAppointments() {
-                const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                const patientTerm = (patientSearch?.value || '').toLowerCase().trim();
+                const doctorTerm = (doctorSearch?.value || '').toLowerCase().trim();
+                const fromDate = dateFrom?.value || '';
+                const toDate = dateTo?.value || '';
+
+                let visibleCount = 0;
+                let activeFilters = 0;
+
+                // Count active filters
+                if (patientTerm) activeFilters++;
+                if (doctorTerm) activeFilters++;
+                if (fromDate) activeFilters++;
+                if (toDate) activeFilters++;
 
                 appointmentCards.forEach(card => {
+                    const patientName = card.getAttribute('data-patient-name') || '';
                     const doctorName = card.getAttribute('data-doctor-name') || '';
                     const department = card.getAttribute('data-department') || '';
                     const doctorSpecialty = card.getAttribute('data-doctor-specialty') || '';
+                    const apptDate = card.getAttribute('data-date') || '';
 
-                    // Check if search term matches doctor name, department, or specialty
-                    const matchesSearch = 
-                        doctorName.includes(searchTerm) || 
-                        department.includes(searchTerm) || 
-                        doctorSpecialty.includes(searchTerm);
+                    // Check each filter
+                    const matchesPatient = !patientTerm || patientName.includes(patientTerm);
+                    const matchesDoctor = !doctorTerm ||
+                        doctorName.includes(doctorTerm) ||
+                        department.includes(doctorTerm) ||
+                        doctorSpecialty.includes(doctorTerm);
+                    const matchesDateFrom = !fromDate || apptDate >= fromDate;
+                    const matchesDateTo = !toDate || apptDate <= toDate;
 
-                    if (matchesSearch || searchTerm === '') {
+                    // Show card if all active filters match
+                    if (matchesPatient && matchesDoctor && matchesDateFrom && matchesDateTo) {
                         card.style.display = 'flex';
+                        visibleCount++;
                     } else {
                         card.style.display = 'none';
                     }
                 });
 
-                // Show/hide "no results" message and handle empty states
-                const visibleCards = Array.from(appointmentCards).filter(card => 
-                    card.style.display !== 'none'
-                );
-                
-                const noResultsMsg = document.getElementById('noSearchResults');
+                // Update visible count
+                if (visibleCountSpan) {
+                    visibleCountSpan.textContent = visibleCount;
+                }
+
+                // Update filter count badge
+                if (filterCountSpan) {
+                    if (activeFilters > 0) {
+                        filterCountSpan.textContent = `${activeFilters} filter${activeFilters !== 1 ? 's' : ''} active`;
+                        filterCountSpan.classList.add('font-semibold', 'text-blue-600');
+                    } else {
+                        filterCountSpan.textContent = '';
+                        filterCountSpan.classList.remove('font-semibold', 'text-blue-600');
+                    }
+                }
+
+                // Handle empty states
                 const noAppointmentsMsg = document.getElementById('noAppointments');
-                
-                if (appointmentCards.length === 0) {
+                let noResultsMsg = document.getElementById('noSearchResults');
+
+                if (totalCount === 0) {
                     // No appointments at all
                     if (noAppointmentsMsg) {
                         noAppointmentsMsg.style.display = 'block';
                     }
-                } else if (visibleCards.length === 0 && searchTerm !== '') {
-                    // Appointments exist but none match search
+                    if (noResultsMsg) {
+                        noResultsMsg.remove();
+                    }
+                } else if (visibleCount === 0) {
+                    // Appointments exist but none match filters
                     if (noAppointmentsMsg) {
                         noAppointmentsMsg.style.display = 'none';
                     }
                     if (!noResultsMsg) {
-                        const noResultsDiv = document.createElement('div');
-                        noResultsDiv.id = 'noSearchResults';
-                        noResultsDiv.className = 'p-6 text-sm text-gray-600 text-center';
-                        noResultsDiv.innerHTML = `No appointments found for "<strong>${searchTerm}</strong>". <button onclick="clearSearch()" class="text-blue-600 hover:underline ml-1">Clear search</button>`;
-                        document.querySelector('.divide-y').appendChild(noResultsDiv);
-                    } else {
-                        noResultsMsg.innerHTML = `No appointments found for "<strong>${searchTerm}</strong>". <button onclick="clearSearch()" class="text-blue-600 hover:underline ml-1">Clear search</button>`;
+                        noResultsMsg = document.createElement('div');
+                        noResultsMsg.id = 'noSearchResults';
+                        noResultsMsg.className = 'p-8 text-center';
+                        noResultsMsg.innerHTML = `
+                            <i data-feather="search" class="h-12 w-12 mx-auto mb-3 text-gray-300"></i>
+                            <p class="text-sm font-medium text-gray-900 mb-1">No appointments found</p>
+                            <p class="text-sm text-gray-600 mb-3">Try adjusting your filters to find what you're looking for</p>
+                            <button onclick="clearAllFilters()" class="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">Clear All Filters</button>
+                        `;
+                        document.querySelector('.divide-y').appendChild(noResultsMsg);
+                        feather.replace();
                     }
                 } else {
                     // Some appointments are visible
@@ -499,22 +684,64 @@ if ($view_id) {
                 }
             }
 
-            if (searchInput) {
-                searchInput.addEventListener('input', filterAppointments);
+            // Clear all filters
+            window.clearAllFilters = function() {
+                if (patientSearch) patientSearch.value = '';
+                if (doctorSearch) doctorSearch.value = '';
+                if (dateFrom) dateFrom.value = '';
+                if (dateTo) dateTo.value = '';
+                filterAppointments();
+            };
 
-                // Clear search function
-                window.clearSearch = function() {
-                    searchInput.value = '';
-                    filterAppointments();
-                    searchInput.focus();
-                };
-            }
+            // Attach event listeners
+            if (patientSearch) patientSearch.addEventListener('input', filterAppointments);
+            if (doctorSearch) doctorSearch.addEventListener('input', filterAppointments);
+            if (dateFrom) dateFrom.addEventListener('change', filterAppointments);
+            if (dateTo) dateTo.addEventListener('change', filterAppointments);
+            if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', clearAllFilters);
 
-            // Initial filter (in case page loads with search term)
+            // Initial filter
             filterAppointments();
+        });
+
+        // Add loading spinners to all form submission buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionForms = document.querySelectorAll('form[method="post"]');
+
+            actionForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.disabled = true;
+
+                        // Add spinner to button
+                        const spinner = document.createElement('span');
+                        spinner.className = 'btn-spinner mr-1';
+                        submitBtn.insertBefore(spinner, submitBtn.firstChild);
+
+                        // Update button text
+                        const btnText = submitBtn.querySelector('span') || submitBtn;
+                        const originalText = btnText.textContent;
+                        if (originalText.includes('Confirm')) btnText.textContent = ' Confirming...';
+                        else if (originalText.includes('Cancel')) btnText.textContent = ' Canceling...';
+                        else if (originalText.includes('Complete')) btnText.textContent = ' Completing...';
+                    }
+                });
+            });
+
+            // Handle reschedule form
+            const rescheduleForm = document.querySelector('form[action*="reschedule"]');
+            if (rescheduleForm) {
+                rescheduleForm.addEventListener('submit', function(e) {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="btn-spinner mr-1"></span> Saving...';
+                    }
+                });
+            }
         });
     </script>
 </body>
 
 </html>
-
