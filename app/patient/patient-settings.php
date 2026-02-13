@@ -89,7 +89,7 @@ $fullName = $_SESSION['user_name'];
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../auth/logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>

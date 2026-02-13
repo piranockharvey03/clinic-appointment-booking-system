@@ -1,8 +1,9 @@
 # Software Design Document (SDD)
+
 # MediCare Clinic - Hospital Management System
 
-**Document Version:** 1.0  
-**Date:** January 29, 2026  
+**Document Version:** 1.1  
+**Date:** February 13, 2026  
 **Prepared by:** Software Architecture Team  
 **Status:** Approved
 
@@ -10,9 +11,10 @@
 
 ## Document Revision History
 
-| Version | Date | Author | Description |
-|---------|------|--------|-------------|
-| 1.0 | January 29, 2026 | Architecture Team | Initial Release |
+| Version | Date              | Author            | Description                       |
+| ------- | ----------------- | ----------------- | --------------------------------- |
+| 1.1     | February 13, 2026 | Development Team  | Bug fixes and maintenance updates |
+| 1.0     | January 29, 2026  | Architecture Team | Initial Release                   |
 
 ---
 
@@ -33,9 +35,11 @@
 ## 1. Introduction
 
 ### 1.1 Purpose
+
 This Software Design Document (SDD) provides a comprehensive architectural and detailed design for the MediCare Clinic Hospital Management System. It serves as a blueprint for developers, testers, and system architects, documenting design decisions, component interactions, data structures, and implementation strategies.
 
 **Target Audience:**
+
 - Software Developers and Programmers
 - System Architects
 - Database Administrators
@@ -44,7 +48,9 @@ This Software Design Document (SDD) provides a comprehensive architectural and d
 - System Maintenance Personnel
 
 ### 1.2 Scope
+
 This document covers the complete design of the MediCare Clinic system, including:
+
 - High-level system architecture
 - Component and module design
 - Database schema and data flow
@@ -56,6 +62,7 @@ This document covers the complete design of the MediCare Clinic system, includin
 ### 1.3 Design Goals and Constraints
 
 **Primary Design Goals:**
+
 1. **Simplicity:** Easy to understand and maintain
 2. **Modularity:** Clear separation of concerns
 3. **Security:** Protect sensitive patient data
@@ -65,6 +72,7 @@ This document covers the complete design of the MediCare Clinic system, includin
 7. **Reliability:** Consistent and error-free operation
 
 **Design Constraints:**
+
 - Technology Stack: PHP, MySQL, Apache (XAMPP environment)
 - No external framework dependencies (plain PHP)
 - Browser-based interface (no native mobile apps in v1.0)
@@ -73,6 +81,7 @@ This document covers the complete design of the MediCare Clinic system, includin
 - Session-based authentication (no JWT/OAuth in v1.0)
 
 ### 1.4 References
+
 - Software Requirements Specification (SRS) - MediCare Clinic v1.0
 - PHP 7.4+ Documentation
 - MySQL 5.7+ Documentation
@@ -80,6 +89,7 @@ This document covers the complete design of the MediCare Clinic system, includin
 - IEEE Std 1016-2009: IEEE Standard for Software Design Descriptions
 
 ### 1.5 Overview
+
 This document follows a top-down approach, starting with high-level architecture, then drilling down into component design, data design, interface design, and finally detailed implementation specifications.
 
 ---
@@ -87,9 +97,11 @@ This document follows a top-down approach, starting with high-level architecture
 ## 2. System Architecture
 
 ### 2.1 Architectural Style
+
 **Architecture Pattern:** Three-Tier Architecture (Layered)
 
 The system follows a traditional three-tier web application architecture:
+
 1. **Presentation Layer** (Client Tier): Web browsers with HTML, CSS, JavaScript
 2. **Application Layer** (Logic Tier): PHP scripts processing business logic
 3. **Data Layer** (Data Tier): MySQL database
@@ -147,6 +159,7 @@ The system follows a traditional three-tier web application architecture:
 #### 2.2.1 Presentation Layer Components
 
 **Public Website Module:**
+
 - Landing page (index.html)
 - Services page (services.html)
 - About page (about.html)
@@ -154,6 +167,7 @@ The system follows a traditional three-tier web application architecture:
 - Login/Registration forms
 
 **Patient Portal Module:**
+
 - Patient dashboard
 - Appointment booking interface
 - Appointment list view
@@ -161,6 +175,7 @@ The system follows a traditional three-tier web application architecture:
 - Notification panel
 
 **Admin Portal Module:**
+
 - Admin dashboard
 - Appointment management interface
 - Statistics dashboard
@@ -170,6 +185,7 @@ The system follows a traditional three-tier web application architecture:
 #### 2.2.2 Application Layer Components
 
 **Authentication & Authorization Module:**
+
 - User registration service
 - Login service (patient/admin)
 - Password management
@@ -177,6 +193,7 @@ The system follows a traditional three-tier web application architecture:
 - Access control
 
 **Appointment Management Module:**
+
 - Appointment creation service
 - Appointment retrieval service
 - Appointment update service
@@ -184,6 +201,7 @@ The system follows a traditional three-tier web application architecture:
 - Appointment validation
 
 **Notification Module:**
+
 - Notification creation service
 - Notification retrieval service
 - Read status management
@@ -191,11 +209,13 @@ The system follows a traditional three-tier web application architecture:
 - Patient notifications handler
 
 **User Management Module:**
+
 - Profile retrieval service
 - Profile update service
 - User validation service
 
 **Database Connectivity Module:**
+
 - Connection pooling
 - Transaction management
 - Error handling
@@ -204,6 +224,7 @@ The system follows a traditional three-tier web application architecture:
 #### 2.2.3 Data Layer Components
 
 **Database Tables:**
+
 - users (patient records)
 - admin (administrator records)
 - appointments (appointment records)
@@ -213,6 +234,7 @@ The system follows a traditional three-tier web application architecture:
 ### 2.3 Component Interaction Flow
 
 **Appointment Booking Flow:**
+
 ```
 ┌────────┐     1. Submit Booking     ┌──────────────┐
 │Patient │ ─────────────────────────►│ submit-      │
@@ -255,6 +277,7 @@ The system follows a traditional three-tier web application architecture:
 ```
 
 **Admin Approval Flow:**
+
 ```
 ┌────────┐   1. Approve Action    ┌──────────────┐
 │ Admin  │ ──────────────────────►│   admin-     │
@@ -294,6 +317,7 @@ The system follows a traditional three-tier web application architecture:
 ### 2.4 Deployment Architecture
 
 **Development Environment:**
+
 ```
 ┌────────────────────────────────────────┐
 │      Developer Machine (Local)         │
@@ -319,6 +343,7 @@ The system follows a traditional three-tier web application architecture:
 ```
 
 **Production Environment (Recommended):**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │              Cloud/On-Premise Server                │
@@ -357,17 +382,17 @@ The system follows a traditional three-tier web application architecture:
 
 ### 2.5 Technology Stack Summary
 
-| Layer | Technology | Version | Purpose |
-|-------|------------|---------|---------|
-| Frontend | HTML5 | Latest | Structure |
-| Frontend | CSS3 / Tailwind CSS | Latest / 3.x | Styling |
-| Frontend | JavaScript (Vanilla) | ES6+ | Client-side logic |
-| Frontend | Feather Icons | Latest | Icons |
-| Frontend | AOS Library | 2.3.1 | Animations |
-| Backend | PHP | 7.4+ | Server-side processing |
-| Database | MySQL/MariaDB | 5.7+ / 10.3+ | Data storage |
-| Web Server | Apache HTTP Server | 2.4+ | Request handling |
-| Development | XAMPP | 7.4+ | Local environment |
+| Layer       | Technology           | Version      | Purpose                |
+| ----------- | -------------------- | ------------ | ---------------------- |
+| Frontend    | HTML5                | Latest       | Structure              |
+| Frontend    | CSS3 / Tailwind CSS  | Latest / 3.x | Styling                |
+| Frontend    | JavaScript (Vanilla) | ES6+         | Client-side logic      |
+| Frontend    | Feather Icons        | Latest       | Icons                  |
+| Frontend    | AOS Library          | 2.3.1        | Animations             |
+| Backend     | PHP                  | 7.4+         | Server-side processing |
+| Database    | MySQL/MariaDB        | 5.7+ / 10.3+ | Data storage           |
+| Web Server  | Apache HTTP Server   | 2.4+         | Request handling       |
+| Development | XAMPP                | 7.4+         | Local environment      |
 
 ---
 
@@ -376,6 +401,7 @@ The system follows a traditional three-tier web application architecture:
 ### 3.1 Authentication Module
 
 #### 3.1.1 Component Overview
+
 **Purpose:** Manage user authentication and session management  
 **Location:** `/app/auth/`  
 **Dependencies:** Database module, Session module
@@ -394,6 +420,7 @@ auth/
 #### 3.1.3 Key Functions
 
 **register.php:**
+
 ```php
 Function: handleRegistration()
 Input: POST data (full-name, email, phone, password, confirm-password)
@@ -411,6 +438,7 @@ Error Handling:
 ```
 
 **login.php:**
+
 ```php
 Function: handleLogin()
 Input: POST data (email, password)
@@ -433,6 +461,7 @@ Security Measures:
 ```
 
 **logout.php:**
+
 ```php
 Function: handleLogout()
 Input: None (uses session data)
@@ -445,6 +474,7 @@ Output: Redirect to login page
 ```
 
 **check-session.php:**
+
 ```php
 Function: validateSession($requiredRole)
 Input: Required user role ('patient' or 'admin')
@@ -458,6 +488,7 @@ Usage: Include at top of protected pages
 ```
 
 #### 3.1.4 Security Considerations
+
 - Password hashing: bcrypt (via password_hash with PASSWORD_DEFAULT)
 - Session security: HttpOnly, Secure flags
 - CSRF protection: Token validation (recommended for enhancement)
@@ -467,6 +498,7 @@ Usage: Include at top of protected pages
 ### 3.2 Appointment Management Module
 
 #### 3.2.1 Component Overview
+
 **Purpose:** Handle appointment lifecycle and operations  
 **Location:** `/app/patient/` and `/app/admin/`  
 **Dependencies:** Database module, Notification module, Session module
@@ -487,6 +519,7 @@ admin/
 #### 3.2.3 Key Functions
 
 **submit-booking.php:**
+
 ```php
 Function: createAppointment()
 Input: POST data (patientName, phone, department, doctor data, date, time, reason)
@@ -512,6 +545,7 @@ Business Rules:
 ```
 
 **admin-appointments.php:**
+
 ```php
 Function: updateAppointmentStatus()
 Input: POST data (appointmentId, newStatus, notes)
@@ -530,6 +564,7 @@ Supported Status Transitions:
 ```
 
 **patient-dashboard.php:**
+
 ```php
 Function: loadPatientAppointments()
 Input: Session user_id
@@ -552,6 +587,7 @@ Statistics Calculated:
 #### 3.2.4 Data Flow
 
 **Appointment Creation Flow:**
+
 ```
 Client Browser
     │
@@ -580,6 +616,7 @@ Client Browser
 ### 3.3 Notification Module
 
 #### 3.3.1 Component Overview
+
 **Purpose:** Manage system notifications for admins and patients  
 **Location:** `/app/includes/`  
 **Dependencies:** Database module
@@ -597,6 +634,7 @@ includes/
 #### 3.3.3 Key Functions
 
 **get-notifications.php (Admin):**
+
 ```php
 Function: fetchAdminNotifications()
 Input: None (session-based)
@@ -619,13 +657,14 @@ Notification Object Structure:
 ```
 
 **get-patient-notifications.php:**
+
 ```php
 Function: fetchPatientNotifications()
 Input: GET/POST parameter patient_id (validated against session)
 Processing:
   1. Verify patient session
   2. Validate patient_id matches session user_id
-  3. Query: SELECT * FROM patient_notifications 
+  3. Query: SELECT * FROM patient_notifications
           WHERE patient_id = ? ORDER BY created_at DESC
   4. Format as JSON array
 Output: JSON array of notification objects
@@ -635,12 +674,13 @@ Security:
 ```
 
 **mark-notifications-read.php:**
+
 ```php
 Function: markAsRead()
 Input: POST data (notification_ids array)
 Processing:
   1. Verify session
-  2. Update notifications SET is_read = TRUE, 
+  2. Update notifications SET is_read = TRUE,
                               read_at = CURRENT_TIMESTAMP
           WHERE id IN (?)
   3. Return count of updated records
@@ -650,10 +690,12 @@ Output: JSON {success: boolean, updated_count: int}
 #### 3.3.4 Notification Types
 
 **Admin Notification Types:**
+
 - `new_appointment` - New appointment created by patient
 - `appointment_canceled` - Patient canceled appointment
 
 **Patient Notification Types:**
+
 - `appointment_submitted` - Confirmation of submission
 - `appointment_approved` - Admin approved appointment
 - `appointment_rescheduled` - Admin rescheduled appointment
@@ -663,6 +705,7 @@ Output: JSON {success: boolean, updated_count: int}
 ### 3.4 User Management Module
 
 #### 3.4.1 Component Overview
+
 **Purpose:** Manage user profiles and settings  
 **Location:** `/app/patient/`  
 **Dependencies:** Database module, Session module
@@ -678,13 +721,14 @@ patient/
 #### 3.4.3 Key Functions
 
 **patient-profile.php:**
+
 ```php
 Function: loadUserProfile()
 Input: Session user_id
 Processing:
   1. Verify patient session
   2. Query user data: SELECT * FROM users WHERE id = ?
-  3. Count appointments: SELECT COUNT(*) FROM appointments 
+  3. Count appointments: SELECT COUNT(*) FROM appointments
                         WHERE patient_id = ?
   4. Display profile information
 Output: HTML page with profile data
@@ -695,7 +739,7 @@ Processing:
   1. Verify patient session
   2. Validate input
   3. Check phone uniqueness (exclude current user)
-  4. Update: UPDATE users SET full_name = ?, phone = ? 
+  4. Update: UPDATE users SET full_name = ?, phone = ?
             WHERE id = ?
 Output: JSON {success: boolean, message: string}
 ```
@@ -703,6 +747,7 @@ Output: JSON {success: boolean, message: string}
 ### 3.5 Database Connectivity Module
 
 #### 3.5.1 Component Overview
+
 **Purpose:** Centralized database connection management  
 **Location:** `/config/db-config.php`  
 **Dependencies:** MySQLi extension
@@ -754,6 +799,7 @@ Transaction Support: Yes (for critical operations)
 #### 4.1.1 Entity-Relationship Model
 
 **Detailed ER Diagram:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │                  USERS (Patients)                   │
@@ -825,6 +871,7 @@ Transaction Support: Yes (for critical operations)
 #### 4.1.2 Table Specifications
 
 **USERS Table (Patient Accounts):**
+
 ```sql
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -841,6 +888,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ```
 
 **Design Rationale:**
+
 - INT(11) for id: Supports up to 2 billion users
 - VARCHAR(255) for password: Accommodates bcrypt/argon2 hashes
 - UTF8MB4: Full Unicode support including emojis
@@ -848,6 +896,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 - Unique constraints: Enforce business rules
 
 **ADMIN Table:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS `admin` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -862,11 +911,13 @@ CREATE TABLE IF NOT EXISTS `admin` (
 ```
 
 **Design Rationale:**
+
 - Separate admin table: Role separation at database level
 - Same authentication pattern as users: Consistent security
 - Manual admin creation: No self-registration for admins
 
 **APPOINTMENTS Table:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS `appointments` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -883,10 +934,10 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   `appointment_time` TIME NOT NULL,
   `reason` TEXT DEFAULT NULL,
   `notes` TEXT DEFAULT NULL,
-  `status` ENUM('pending', 'approved', 'rescheduled', 'canceled', 'completed') 
+  `status` ENUM('pending', 'approved', 'rescheduled', 'canceled', 'completed')
            NOT NULL DEFAULT 'pending',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_appointment_id` (`appointment_id`),
@@ -894,13 +945,14 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   KEY `idx_status` (`status`),
   KEY `idx_appointment_date` (`appointment_date`),
   KEY `idx_doctor_id` (`doctor_id`),
-  CONSTRAINT `fk_appointments_patient` 
-    FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) 
+  CONSTRAINT `fk_appointments_patient`
+    FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 **Design Rationale:**
+
 - Denormalized patient/doctor data: Historical record preservation
 - patient_id nullable with SET NULL: Preserve appointments if user deleted
 - ENUM for status: Enforce valid states at database level
@@ -909,6 +961,7 @@ CREATE TABLE IF NOT EXISTS `appointments` (
 - updated_at automatic: Audit trail for changes
 
 **NOTIFICATIONS Table:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS `notifications` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -925,12 +978,14 @@ CREATE TABLE IF NOT EXISTS `notifications` (
 ```
 
 **Design Rationale:**
+
 - Boolean is_read: Simple status tracking
 - read_at timestamp: Audit when notification was read
 - Indexes on is_read and created_at: Optimize unread count queries
 - No foreign key to appointments: Soft reference, notifications persist
 
 **PATIENT_NOTIFICATIONS Table:**
+
 ```sql
 CREATE TABLE IF NOT EXISTS `patient_notifications` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -946,13 +1001,14 @@ CREATE TABLE IF NOT EXISTS `patient_notifications` (
     INDEX `idx_appointment` (`appointment_id`),
     INDEX `idx_read_status` (`is_read`),
     INDEX `idx_created_at` (`created_at`),
-    CONSTRAINT `fk_patient_notifications_user` 
-      FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) 
+    CONSTRAINT `fk_patient_notifications_user`
+      FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`)
       ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 **Design Rationale:**
+
 - Foreign key with CASCADE: Delete notifications when patient deleted
 - Patient-specific: Isolate patient notifications from admin
 - Denormalized patient_name: Quick display without join
@@ -963,6 +1019,7 @@ CREATE TABLE IF NOT EXISTS `patient_notifications` (
 #### 4.2.1 Query Design Patterns
 
 **Pattern 1: Prepared Statements (Parameterized Queries)**
+
 ```php
 // Secure query pattern - ALWAYS USE THIS
 $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
@@ -978,6 +1035,7 @@ $result = $stmt->get_result();
 ```
 
 **Pattern 2: Transaction Management**
+
 ```php
 // For multi-step operations
 $conn->begin_transaction();
@@ -985,11 +1043,11 @@ try {
     // Step 1: Insert appointment
     $stmt1 = $conn->prepare("INSERT INTO appointments ...");
     $stmt1->execute();
-    
+
     // Step 2: Create notification
     $stmt2 = $conn->prepare("INSERT INTO notifications ...");
     $stmt2->execute();
-    
+
     // Commit if all successful
     $conn->commit();
 } catch (Exception $e) {
@@ -1000,9 +1058,10 @@ try {
 ```
 
 **Pattern 3: Aggregate Queries for Statistics**
+
 ```php
 // Efficient statistics calculation
-$query = "SELECT 
+$query = "SELECT
             COUNT(*) as total,
             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
             SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
@@ -1015,11 +1074,12 @@ $query = "SELECT
 #### 4.2.2 Common Query Examples
 
 **User Authentication:**
+
 ```sql
 -- Login query
-SELECT id, full_name, email, password 
-FROM users 
-WHERE email = ? 
+SELECT id, full_name, email, password
+FROM users
+WHERE email = ?
 LIMIT 1;
 
 -- Verify password in PHP after fetch
@@ -1027,40 +1087,43 @@ password_verify($inputPassword, $hashedPassword)
 ```
 
 **Appointment Retrieval:**
+
 ```sql
 -- Patient's appointments
-SELECT *, appointment_id as id, 
-       appointment_date as date, 
-       appointment_time as time 
-FROM appointments 
-WHERE patient_id = ? 
+SELECT *, appointment_id as id,
+       appointment_date as date,
+       appointment_time as time
+FROM appointments
+WHERE patient_id = ?
 ORDER BY created_at DESC;
 
 -- All appointments (admin view)
-SELECT *, appointment_id as id, 
-       appointment_date as date, 
-       appointment_time as time 
-FROM appointments 
+SELECT *, appointment_id as id,
+       appointment_date as date,
+       appointment_time as time
+FROM appointments
 ORDER BY created_at DESC;
 ```
 
 **Notification Queries:**
+
 ```sql
 -- Unread admin notifications count
-SELECT COUNT(*) as unread_count 
-FROM notifications 
+SELECT COUNT(*) as unread_count
+FROM notifications
 WHERE is_read = FALSE;
 
 -- Patient notifications with limit
-SELECT * FROM patient_notifications 
-WHERE patient_id = ? 
-ORDER BY created_at DESC 
+SELECT * FROM patient_notifications
+WHERE patient_id = ?
+ORDER BY created_at DESC
 LIMIT 20;
 ```
 
 ### 4.3 Data Integrity Rules
 
 **Referential Integrity:**
+
 1. `appointments.patient_id` → `users.id`
    - ON DELETE SET NULL (preserve appointment history)
    - ON UPDATE CASCADE (propagate ID changes)
@@ -1070,6 +1133,7 @@ LIMIT 20;
    - ON UPDATE CASCADE (propagate ID changes)
 
 **Domain Constraints:**
+
 1. Email format validation (application level)
 2. Phone number format validation (application level)
 3. Date validation: appointment_date >= CURRENT_DATE (application level)
@@ -1077,6 +1141,7 @@ LIMIT 20;
 5. Password minimum length: 8 characters (application level)
 
 **Entity Integrity:**
+
 1. All primary keys are AUTO_INCREMENT and NOT NULL
 2. Unique constraints on email addresses
 3. Unique constraints on appointment_id
@@ -1088,10 +1153,12 @@ LIMIT 20;
 ### 5.1 User Interface Design Patterns
 
 #### 5.1.1 Design System
+
 **Framework:** Tailwind CSS (utility-first CSS framework)  
 **Icons:** Feather Icons  
 **Animations:** AOS (Animate On Scroll)  
 **Color Scheme:**
+
 - Primary: Blue (#3B82F6, #1D4ED8)
 - Success: Green (#10B981)
 - Warning: Yellow (#F59E0B)
@@ -1101,11 +1168,13 @@ LIMIT 20;
 #### 5.1.2 Responsive Design Strategy
 
 **Breakpoints:**
+
 - Mobile: < 640px
 - Tablet: 640px - 1024px
 - Desktop: > 1024px
 
 **Layout Approach:**
+
 - Mobile-first design
 - Collapsible sidebar navigation
 - Responsive data tables
@@ -1115,6 +1184,7 @@ LIMIT 20;
 #### 5.1.3 Common UI Components
 
 **Navigation Bar:**
+
 ```html
 <nav class="bg-white shadow-sm">
   <div class="max-w-7xl mx-auto px-4">
@@ -1127,6 +1197,7 @@ LIMIT 20;
 ```
 
 **Sidebar Navigation (Dashboard):**
+
 ```html
 <aside class="w-64 bg-white shadow-lg">
   <div class="sidebar-header">
@@ -1143,6 +1214,7 @@ LIMIT 20;
 ```
 
 **Data Table:**
+
 ```html
 <div class="overflow-x-auto">
   <table class="min-w-full divide-y divide-gray-200">
@@ -1160,9 +1232,12 @@ LIMIT 20;
 ```
 
 **Status Badge:**
+
 ```html
-<span class="px-2 py-1 text-xs font-semibold rounded-full 
-             bg-yellow-100 text-yellow-800">
+<span
+  class="px-2 py-1 text-xs font-semibold rounded-full 
+             bg-yellow-100 text-yellow-800"
+>
   Pending
 </span>
 <!-- Colors: yellow=pending, green=approved, blue=rescheduled, 
@@ -1170,11 +1245,17 @@ LIMIT 20;
 ```
 
 **Modal Dialog:**
+
 ```html
-<div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 
-                       overflow-y-auto h-full w-full hidden">
-  <div class="relative top-20 mx-auto p-5 border w-96 
-              shadow-lg rounded-md bg-white">
+<div
+  id="modal"
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 
+                       overflow-y-auto h-full w-full hidden"
+>
+  <div
+    class="relative top-20 mx-auto p-5 border w-96 
+              shadow-lg rounded-md bg-white"
+  >
     <div class="modal-header">
       <!-- Title and close button -->
     </div>
@@ -1189,21 +1270,28 @@ LIMIT 20;
 ```
 
 **Form Input:**
+
 ```html
 <div class="mb-4">
   <label for="email" class="block text-sm font-medium text-gray-700">
     Email Address
   </label>
-  <input type="email" id="email" name="email" required
-         class="mt-1 block w-full px-3 py-2 border border-gray-300 
+  <input
+    type="email"
+    id="email"
+    name="email"
+    required
+    class="mt-1 block w-full px-3 py-2 border border-gray-300 
                 rounded-md shadow-sm focus:outline-none 
-                focus:ring-blue-500 focus:border-blue-500">
+                focus:ring-blue-500 focus:border-blue-500"
+  />
 </div>
 ```
 
 ### 5.2 Page Layouts
 
 #### 5.2.1 Public Pages Layout
+
 ```
 ┌────────────────────────────────────────────────┐
 │              Navigation Bar                    │
@@ -1231,6 +1319,7 @@ LIMIT 20;
 ```
 
 #### 5.2.2 Patient Dashboard Layout
+
 ```
 ┌──────────────────────────────────────────────────┐
 │   Top Bar: Logo | Notifications | Profile        │
@@ -1254,6 +1343,7 @@ LIMIT 20;
 ```
 
 #### 5.2.3 Admin Dashboard Layout
+
 ```
 ┌──────────────────────────────────────────────────┐
 │   Admin Panel | Notifications (5) | Logout       │
@@ -1280,6 +1370,7 @@ LIMIT 20;
 #### 5.3.1 Endpoint Specifications
 
 **POST /app/auth/register.php**
+
 ```
 Purpose: Register new patient account
 Request Body:
@@ -1297,6 +1388,7 @@ Status Codes: 200 OK, 400 Bad Request, 500 Internal Error
 ```
 
 **POST /app/auth/login.php**
+
 ```
 Purpose: Authenticate user
 Request Body:
@@ -1311,6 +1403,7 @@ Status Codes: 200 OK, 401 Unauthorized
 ```
 
 **POST /app/patient/submit-booking.php**
+
 ```
 Purpose: Create new appointment
 Request Body:
@@ -1327,8 +1420,8 @@ Request Body:
     "reason": "Regular checkup"
   }
 Response:
-  Success: { 
-    "success": true, 
+  Success: {
+    "success": true,
     "message": "Appointment booked successfully",
     "appointmentId": "APT-20260215-12345"
   }
@@ -1336,6 +1429,7 @@ Response:
 ```
 
 **GET /app/includes/get-patient-notifications.php?patient_id=1**
+
 ```
 Purpose: Fetch patient notifications
 Response:
@@ -1356,6 +1450,7 @@ Response:
 ```
 
 **POST /app/includes/mark-patient-notifications-read.php**
+
 ```
 Purpose: Mark notifications as read
 Request Body:
@@ -1373,6 +1468,7 @@ Response:
 ### 6.1 Authentication and Authorization Architecture
 
 #### 6.1.1 Authentication Flow
+
 ```
 User Input (email + password)
     │
@@ -1397,6 +1493,7 @@ User Input (email + password)
 ```
 
 #### 6.1.2 Authorization Checks
+
 ```php
 // Included at top of protected pages
 session_start();
@@ -1406,8 +1503,8 @@ header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Pragma: no-cache");
 
 // Check authentication
-if (!isset($_SESSION['user_id']) || 
-    !isset($_SESSION['user_name']) || 
+if (!isset($_SESSION['user_id']) ||
+    !isset($_SESSION['user_name']) ||
     !isset($_SESSION['user_role'])) {
     header('Location: /login.html');
     exit;
@@ -1423,7 +1520,9 @@ if ($_SESSION['user_role'] !== 'admin') {
 ### 6.2 Data Security
 
 #### 6.2.1 Password Security
+
 **Hashing Algorithm:** bcrypt (via PHP's password_hash)
+
 ```php
 // Registration/Password Creation
 $hashedPassword = password_hash($plainPassword, PASSWORD_DEFAULT);
@@ -1434,13 +1533,16 @@ $isValid = password_verify($plainPassword, $hashedPassword);
 ```
 
 **Security Properties:**
+
 - Salt automatically generated and stored with hash
 - Computational cost makes brute-force attacks impractical
 - Hash length: 60 characters
 - Future-proof: PASSWORD_DEFAULT will upgrade to stronger algorithms
 
 #### 6.2.2 SQL Injection Prevention
+
 **Strategy:** Prepared Statements (Parameterized Queries)
+
 ```php
 // NEVER DO THIS (vulnerable)
 $query = "SELECT * FROM users WHERE email = '$email'";
@@ -1452,38 +1554,45 @@ $stmt->execute();
 ```
 
 **Additional Measures:**
+
 - Input validation before database operations
 - Whitelist validation for enum-like values (status, role)
 - Escape special characters in LIKE queries
 
 #### 6.2.3 Cross-Site Scripting (XSS) Prevention
+
 **Input Sanitization:**
+
 ```php
 $fullName = htmlspecialchars($_POST['full-name'], ENT_QUOTES, 'UTF-8');
 // Converts: < > " ' & to HTML entities
 ```
 
 **Output Encoding:**
+
 ```php
 // When displaying user content
 echo htmlspecialchars($userContent, ENT_QUOTES, 'UTF-8');
 ```
 
 **Additional Measures:**
+
 - Content Security Policy headers (recommended)
 - Validate input types (email, phone, date formats)
 - Strip or escape HTML tags in user input
 
 #### 6.2.4 Cross-Site Request Forgery (CSRF) Protection
+
 **Current Implementation:** Session-based validation
 
 **Recommended Enhancement:**
+
 ```php
 // Generate CSRF token
 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
 // Include in forms
-<input type="hidden" name="csrf_token" 
+<input type="hidden" name="csrf_token"
        value="<?php echo $_SESSION['csrf_token']; ?>">
 
 // Validate on submission
@@ -1495,6 +1604,7 @@ if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
 ### 6.3 Session Security
 
 #### 6.3.1 Session Configuration
+
 ```php
 // Recommended php.ini settings
 session.cookie_httponly = 1    // Prevent JavaScript access
@@ -1505,6 +1615,7 @@ session.cookie_samesite = "Strict" // CSRF protection
 ```
 
 #### 6.3.2 Session Management
+
 ```php
 // Session start with security
 session_start();
@@ -1513,7 +1624,7 @@ session_start();
 session_regenerate_id(true);
 
 // Session timeout (30 minutes)
-if (isset($_SESSION['last_activity']) && 
+if (isset($_SESSION['last_activity']) &&
     (time() - $_SESSION['last_activity'] > 1800)) {
     session_unset();
     session_destroy();
@@ -1526,12 +1637,15 @@ $_SESSION['last_activity'] = time();
 ### 6.4 Transport Security
 
 #### 6.4.1 HTTPS Configuration (Production)
+
 **Requirements:**
+
 - SSL/TLS certificate (Let's Encrypt recommended)
 - TLS 1.2 or higher
 - Secure cipher suites
 
 **Apache Configuration:**
+
 ```apache
 <VirtualHost *:443>
     SSLEngine on
@@ -1543,6 +1657,7 @@ $_SESSION['last_activity'] = time();
 ```
 
 #### 6.4.2 Security Headers
+
 ```php
 // Content Security Policy
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' cdn.tailwindcss.com unpkg.com; style-src 'self' 'unsafe-inline' cdn.tailwindcss.com unpkg.com;");
@@ -1559,18 +1674,18 @@ header("X-XSS-Protection: 1; mode=block");
 
 ### 6.5 Access Control Matrix
 
-| Resource | Public | Patient | Admin |
-|----------|--------|---------|-------|
-| Public Pages (index, about, services) | ✓ | ✓ | ✓ |
-| Login/Register Pages | ✓ | ✗ (redirect) | ✗ (redirect) |
-| Patient Dashboard | ✗ | ✓ | ✗ |
-| Patient Appointments | ✗ | ✓ (own only) | ✗ |
-| Patient Profile | ✗ | ✓ (own only) | ✗ |
-| Book Appointment | ✗ | ✓ | ✗ |
-| Admin Dashboard | ✗ | ✗ | ✓ |
-| Admin Appointments | ✗ | ✗ | ✓ (all) |
-| Manage Appointment Status | ✗ | ✗ | ✓ |
-| Admin Settings | ✗ | ✗ | ✓ |
+| Resource                              | Public | Patient      | Admin        |
+| ------------------------------------- | ------ | ------------ | ------------ |
+| Public Pages (index, about, services) | ✓      | ✓            | ✓            |
+| Login/Register Pages                  | ✓      | ✗ (redirect) | ✗ (redirect) |
+| Patient Dashboard                     | ✗      | ✓            | ✗            |
+| Patient Appointments                  | ✗      | ✓ (own only) | ✗            |
+| Patient Profile                       | ✗      | ✓ (own only) | ✗            |
+| Book Appointment                      | ✗      | ✓            | ✗            |
+| Admin Dashboard                       | ✗      | ✗            | ✓            |
+| Admin Appointments                    | ✗      | ✗            | ✓ (all)      |
+| Manage Appointment Status             | ✗      | ✗            | ✓            |
+| Admin Settings                        | ✗      | ✗            | ✓            |
 
 ### 6.6 Security Best Practices Implemented
 
@@ -1589,6 +1704,7 @@ header("X-XSS-Protection: 1; mode=block");
 ### 7.1 Critical Algorithms
 
 #### 7.1.1 Appointment ID Generation Algorithm
+
 ```php
 Function: generateAppointmentId()
 Input: None
@@ -1606,16 +1722,16 @@ Pseudocode:
   function generateAppointmentId():
       date = getCurrentDate("Ymd")
       maxAttempts = 100
-      
+
       for i = 1 to maxAttempts:
           random = randomNumber(10000, 99999)
           appointmentId = "APT-" + date + "-" + random
-          
+
           if isUnique(appointmentId):
               return appointmentId
-      
+
       throw Exception("Failed to generate unique ID")
-  
+
   function isUnique(id):
       query = "SELECT COUNT(*) FROM appointments WHERE appointment_id = ?"
       result = executeQuery(query, [id])
@@ -1626,9 +1742,10 @@ Collision Probability: 1 in 90,000 per day
 ```
 
 #### 7.1.2 Notification Creation Algorithm
+
 ```php
 Function: createNotification(type, targetRole, appointmentId, message)
-Input: 
+Input:
   - type: string (notification type)
   - targetRole: string ('admin' or 'patient')
   - appointmentId: string
@@ -1647,24 +1764,24 @@ Pseudocode:
   function createNotification(type, targetRole, appointmentId, message):
       if targetRole == 'admin':
           table = 'notifications'
-          query = "INSERT INTO notifications 
-                   (type, message, appointment_id, is_read, created_at) 
+          query = "INSERT INTO notifications
+                   (type, message, appointment_id, is_read, created_at)
                    VALUES (?, ?, ?, FALSE, NOW())"
           params = [type, message, appointmentId]
-      
+
       else if targetRole == 'patient':
           table = 'patient_notifications'
-          
+
           // Get patient info
           patientInfo = getPatientByAppointment(appointmentId)
-          
-          query = "INSERT INTO patient_notifications 
-                   (patient_id, appointment_id, patient_name, 
-                    notification_type, message, is_read, created_at) 
+
+          query = "INSERT INTO patient_notifications
+                   (patient_id, appointment_id, patient_name,
+                    notification_type, message, is_read, created_at)
                    VALUES (?, ?, ?, ?, ?, FALSE, NOW())"
-          params = [patientInfo.id, appointmentId, patientInfo.name, 
+          params = [patientInfo.id, appointmentId, patientInfo.name,
                     type, message]
-      
+
       try:
           result = executeQuery(query, params)
           return result.success
@@ -1674,6 +1791,7 @@ Pseudocode:
 ```
 
 #### 7.1.3 Appointment Statistics Calculation
+
 ```php
 Function: calculateAppointmentStats(patientId = null)
 Input: patientId (optional, null for all appointments)
@@ -1688,25 +1806,25 @@ Algorithm:
 
 Pseudocode:
   function calculateAppointmentStats(patientId):
-      baseQuery = "SELECT 
+      baseQuery = "SELECT
                      COUNT(*) as total,
                      SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
                      SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
                      SUM(CASE WHEN status = 'rescheduled' THEN 1 ELSE 0 END) as rescheduled,
                      SUM(CASE WHEN status = 'canceled' THEN 1 ELSE 0 END) as canceled,
                      SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
-                     SUM(CASE WHEN status = 'approved' 
-                              AND appointment_date >= CURDATE() 
+                     SUM(CASE WHEN status = 'approved'
+                              AND appointment_date >= CURDATE()
                               THEN 1 ELSE 0 END) as upcoming
                    FROM appointments"
-      
+
       if patientId is not null:
           query = baseQuery + " WHERE patient_id = ?"
           params = [patientId]
       else:
           query = baseQuery
           params = []
-      
+
       result = executeQuery(query, params)
       return result.fetch()
 
@@ -1717,6 +1835,7 @@ Optimization: Single query with aggregations
 ### 7.2 Error Handling Strategy
 
 #### 7.2.1 Error Handling Hierarchy
+
 ```
 ┌─────────────────────────────────────┐
 │     User-Friendly Error Message     │
@@ -1735,29 +1854,30 @@ Optimization: Single query with aggregations
 ```
 
 #### 7.2.2 Error Handling Pattern
+
 ```php
 // Standard error handling pattern
 try {
     $conn = getDBConnection();
-    
+
     // Perform database operation
     $stmt = $conn->prepare($query);
     $stmt->bind_param($types, ...$params);
-    
+
     if (!$stmt->execute()) {
         throw new Exception("Database operation failed");
     }
-    
+
     // Process results
     $result = $stmt->get_result();
-    
+
     // Return success
     $response = ['success' => true, 'data' => $data];
-    
+
 } catch (Exception $e) {
     // Log detailed error (server-side)
     error_log("Error in " . __FILE__ . ": " . $e->getMessage());
-    
+
     // Return user-friendly error (client-side)
     $response = [
         'success' => false,
@@ -1776,18 +1896,19 @@ echo json_encode($response);
 
 #### 7.2.3 Error Categories and Responses
 
-| Error Category | Example | User Message | Action |
-|---------------|---------|--------------|--------|
-| Validation Error | Empty field | "All fields are required" | Show field error |
-| Authentication Error | Wrong password | "Invalid email or password" | Clear form |
-| Authorization Error | Wrong role access | "Access denied" | Redirect |
-| Database Error | Connection failed | "System error. Please try again later" | Log and alert |
-| Business Logic Error | Past date selected | "Appointment date must be in the future" | Show specific error |
-| Network Error | Timeout | "Request timeout. Please check connection" | Retry option |
+| Error Category       | Example            | User Message                               | Action              |
+| -------------------- | ------------------ | ------------------------------------------ | ------------------- |
+| Validation Error     | Empty field        | "All fields are required"                  | Show field error    |
+| Authentication Error | Wrong password     | "Invalid email or password"                | Clear form          |
+| Authorization Error  | Wrong role access  | "Access denied"                            | Redirect            |
+| Database Error       | Connection failed  | "System error. Please try again later"     | Log and alert       |
+| Business Logic Error | Past date selected | "Appointment date must be in the future"   | Show specific error |
+| Network Error        | Timeout            | "Request timeout. Please check connection" | Retry option        |
 
 ### 7.3 State Management
 
 #### 7.3.1 Session State
+
 ```php
 // Session variables stored
 $_SESSION = [
@@ -1800,6 +1921,7 @@ $_SESSION = [
 ```
 
 #### 7.3.2 Application State Transitions
+
 ```
 ┌─────────────┐
 │ Anonymous   │
@@ -1824,6 +1946,7 @@ $_SESSION = [
 ### 7.4 Performance Optimization Strategies
 
 #### 7.4.1 Database Optimizations
+
 1. **Indexing Strategy:**
    - Primary keys: AUTO_INCREMENT
    - Foreign keys: Indexed automatically
@@ -1833,7 +1956,7 @@ $_SESSION = [
 2. **Query Optimization:**
    - Use LIMIT for pagination
    - Aggregate statistics in single query
-   - Avoid SELECT * (specify columns)
+   - Avoid SELECT \* (specify columns)
    - Use EXPLAIN to analyze queries
 
 3. **Connection Management:**
@@ -1842,6 +1965,7 @@ $_SESSION = [
    - Connection pooling (server configuration)
 
 #### 7.4.2 Application Optimizations
+
 1. **Caching:**
    - Static assets: Browser caching (max-age headers)
    - Dynamic pages: No caching (sensitive data)
@@ -1865,6 +1989,7 @@ $_SESSION = [
 ### 8.1 Development Environment Setup
 
 #### 8.1.1 XAMPP Installation and Configuration
+
 ```
 1. Download XAMPP 7.4+ from apachefriends.org
 2. Install to C:\xampp (Windows) or /opt/lampp (Linux)
@@ -1881,6 +2006,7 @@ $_SESSION = [
 ```
 
 #### 8.1.2 Application Deployment Steps
+
 ```
 1. Clone/Copy application files to C:\xampp\htdocs\hospital
 2. Directory permissions:
@@ -1905,19 +2031,23 @@ $_SESSION = [
 ### 8.2 Production Environment Setup
 
 #### 8.2.1 Server Requirements
+
 **Minimum Hardware:**
+
 - CPU: 2 cores, 2.0 GHz
 - RAM: 4 GB
 - Storage: 20 GB SSD
 - Network: 100 Mbps
 
 **Recommended Hardware:**
+
 - CPU: 4 cores, 2.5 GHz+
 - RAM: 8 GB
 - Storage: 50 GB SSD
 - Network: 1 Gbps
 
 **Software Stack:**
+
 - OS: Ubuntu 20.04 LTS or Windows Server 2019
 - Apache: 2.4.x
 - PHP: 7.4.x or 8.0.x
@@ -1926,11 +2056,12 @@ $_SESSION = [
 #### 8.2.2 Production Configuration
 
 **Apache Configuration (httpd.conf or sites-available):**
+
 ```apache
 <VirtualHost *:80>
     ServerName medicare.example.com
     DocumentRoot /var/www/hospital/public
-    
+
     # Redirect to HTTPS
     Redirect permanent / https://medicare.example.com/
 </VirtualHost>
@@ -1938,24 +2069,24 @@ $_SESSION = [
 <VirtualHost *:443>
     ServerName medicare.example.com
     DocumentRoot /var/www/hospital/public
-    
+
     # SSL Configuration
     SSLEngine on
     SSLCertificateFile /etc/ssl/certs/medicare.crt
     SSLCertificateKeyFile /etc/ssl/private/medicare.key
-    
+
     # Security Headers
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-XSS-Protection "1; mode=block"
-    
+
     # Directory Configuration
     <Directory /var/www/hospital/public>
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
-    
+
     # Logging
     ErrorLog ${APACHE_LOG_DIR}/medicare_error.log
     CustomLog ${APACHE_LOG_DIR}/medicare_access.log combined
@@ -1963,6 +2094,7 @@ $_SESSION = [
 ```
 
 **PHP Configuration (php.ini for production):**
+
 ```ini
 ; Error Handling
 display_errors = Off
@@ -1990,6 +2122,7 @@ max_execution_time = 30
 ```
 
 **MySQL Configuration (my.cnf):**
+
 ```ini
 [mysqld]
 # Performance
@@ -2015,6 +2148,7 @@ long_query_time = 2
 ### 8.3 Deployment Checklist
 
 **Pre-Deployment:**
+
 - [ ] Code review completed
 - [ ] All tests passed
 - [ ] Security audit performed
@@ -2023,6 +2157,7 @@ long_query_time = 2
 - [ ] SSL certificate obtained
 
 **Deployment:**
+
 - [ ] Application files uploaded
 - [ ] File permissions set correctly
 - [ ] Database schema deployed
@@ -2032,6 +2167,7 @@ long_query_time = 2
 - [ ] Logging configured
 
 **Post-Deployment:**
+
 - [ ] Application accessible via HTTPS
 - [ ] Login functionality tested
 - [ ] Appointment booking tested
@@ -2044,19 +2180,23 @@ long_query_time = 2
 ### 8.4 Monitoring and Maintenance
 
 #### 8.4.1 Monitoring Strategy
+
 **Server Monitoring:**
+
 - CPU and memory usage
 - Disk space utilization
 - Network traffic
 - Service uptime (Apache, MySQL)
 
 **Application Monitoring:**
+
 - Error logs (PHP error log)
 - Access logs (Apache access log)
 - Slow query logs (MySQL)
 - Application-specific logs
 
 **Metrics to Track:**
+
 - Response times
 - Database query performance
 - User registration rate
@@ -2064,7 +2204,9 @@ long_query_time = 2
 - Error rates
 
 #### 8.4.2 Backup Strategy
+
 **Database Backups:**
+
 ```bash
 # Daily full backup
 mysqldump -u root -p medicare > backup_$(date +%Y%m%d).sql
@@ -2074,23 +2216,28 @@ mysqldump -u root -p medicare > backup_$(date +%Y%m%d).sql
 ```
 
 **File Backups:**
+
 - Application code: Version control (Git)
 - Uploaded files: Daily sync to backup server
 - Configuration files: Included in backups
 
 **Retention Policy:**
+
 - Daily backups: 30 days
 - Weekly backups: 3 months
 - Monthly backups: 1 year
 
 #### 8.4.3 Update and Patch Management
+
 **Security Updates:**
+
 - PHP security patches: Apply within 48 hours
 - MySQL security patches: Apply during maintenance window
 - Apache security patches: Apply within 48 hours
 - OS security patches: Monthly schedule
 
 **Application Updates:**
+
 - Bug fixes: Deploy after testing
 - Feature updates: Quarterly release cycle
 - Database migrations: Tested on staging first
@@ -2170,6 +2317,7 @@ hospital/
 ### 9.2 Appendix B: Database Schema Reference
 
 **Complete Table Relationships:**
+
 ```
 users (1) ─────────── (N) appointments
   │                         │
@@ -2184,6 +2332,7 @@ notifications (separate, soft reference to appointments)
 ```
 
 **Index Summary:**
+
 ```
 users:
   - PRIMARY KEY: id
@@ -2222,6 +2371,7 @@ patient_notifications:
 ### 9.3 Appendix C: Coding Standards
 
 **PHP Coding Standards:**
+
 ```php
 // File header
 <?php
@@ -2265,28 +2415,30 @@ try {
 ```
 
 **JavaScript Coding Standards:**
+
 ```javascript
 // Naming: camelCase
 let variableName;
 function functionName() {}
 
 // Use strict mode
-'use strict';
+("use strict");
 
 // Constants: UPPERCASE
-const API_ENDPOINT = '/api/endpoint';
+const API_ENDPOINT = "/api/endpoint";
 
 // Event listeners: Use addEventListener
-element.addEventListener('click', handleClick);
+element.addEventListener("click", handleClick);
 
 // AJAX: Fetch API or XMLHttpRequest
 fetch(url)
-    .then(response => response.json())
-    .then(data => handleData(data))
-    .catch(error => handleError(error));
+  .then((response) => response.json())
+  .then((data) => handleData(data))
+  .catch((error) => handleError(error));
 ```
 
 **SQL Coding Standards:**
+
 ```sql
 -- Keywords: UPPERCASE
 -- Identifiers: lowercase with underscores
@@ -2310,21 +2462,25 @@ INNER JOIN appointments a ON u.id = a.patient_id;
 ### 9.4 Appendix D: Testing Strategy
 
 **Unit Testing (Recommended):**
+
 - Test individual functions (validation, ID generation, etc.)
 - Mock database connections
 - PHPUnit framework recommended
 
 **Integration Testing:**
+
 - Test complete workflows (registration, login, booking)
 - Test database interactions
 - Test notification creation
 
 **System Testing:**
+
 - End-to-end user scenarios
 - Browser compatibility testing
 - Performance testing
 
 **Security Testing:**
+
 - SQL injection attempts
 - XSS attempts
 - CSRF attempts
@@ -2332,6 +2488,7 @@ INNER JOIN appointments a ON u.id = a.patient_id;
 - Authentication bypass attempts
 
 **Test Cases (Sample):**
+
 ```
 TC-001: User Registration
   Input: Valid user data
@@ -2356,44 +2513,48 @@ TC-004: Admin Approval
 
 ### 9.5 Appendix E: Glossary of Design Terms
 
-| Term | Definition |
-|------|------------|
+| Term               | Definition                                                           |
+| ------------------ | -------------------------------------------------------------------- |
 | Prepared Statement | SQL query with placeholders for parameters, preventing SQL injection |
-| Session | Server-side storage of user state across HTTP requests |
-| AJAX | Asynchronous JavaScript technique for updating page without reload |
-| Hashing | One-way cryptographic function to securely store passwords |
-| Salt | Random data added to password before hashing |
-| CSRF Token | Random value to prevent Cross-Site Request Forgery attacks |
-| ORM | Object-Relational Mapping (not used in this project) |
-| MVC | Model-View-Controller architecture pattern (loosely followed) |
-| API Endpoint | URL that accepts requests and returns data |
-| Foreign Key | Database constraint linking two tables |
-| Index | Database structure to speed up queries |
-| Transaction | Group of database operations that succeed or fail together |
-| Cache | Temporary storage for faster access |
-| CDN | Content Delivery Network for serving static assets |
-| SSL/TLS | Encryption protocols for secure communication |
+| Session            | Server-side storage of user state across HTTP requests               |
+| AJAX               | Asynchronous JavaScript technique for updating page without reload   |
+| Hashing            | One-way cryptographic function to securely store passwords           |
+| Salt               | Random data added to password before hashing                         |
+| CSRF Token         | Random value to prevent Cross-Site Request Forgery attacks           |
+| ORM                | Object-Relational Mapping (not used in this project)                 |
+| MVC                | Model-View-Controller architecture pattern (loosely followed)        |
+| API Endpoint       | URL that accepts requests and returns data                           |
+| Foreign Key        | Database constraint linking two tables                               |
+| Index              | Database structure to speed up queries                               |
+| Transaction        | Group of database operations that succeed or fail together           |
+| Cache              | Temporary storage for faster access                                  |
+| CDN                | Content Delivery Network for serving static assets                   |
+| SSL/TLS            | Encryption protocols for secure communication                        |
 
 ### 9.6 Appendix F: Maintenance Procedures
 
 **Daily Tasks:**
+
 - Monitor error logs
 - Check system availability
 - Review failed transactions
 
 **Weekly Tasks:**
+
 - Verify backups successful
 - Review slow query log
 - Check disk space utilization
 - Security updates check
 
 **Monthly Tasks:**
+
 - Full security audit
 - Performance optimization review
 - Database optimization (OPTIMIZE TABLE)
 - Update documentation if needed
 
 **Quarterly Tasks:**
+
 - Disaster recovery drill
 - Review user feedback
 - Plan feature updates
@@ -2402,12 +2563,14 @@ TC-004: Admin Approval
 ### 9.7 Appendix G: Change Management
 
 **Version Control:**
+
 - Git repository with feature branches
 - Main branch for production
 - Development branch for integration
 - Feature branches for new development
 
 **Release Process:**
+
 1. Development and testing on feature branch
 2. Code review and merge to development
 3. Integration testing on development
@@ -2417,6 +2580,7 @@ TC-004: Admin Approval
 7. Document changes
 
 **Rollback Procedure:**
+
 1. Identify issue
 2. Restore previous code version from Git
 3. Restore database from backup if needed
@@ -2427,18 +2591,96 @@ TC-004: Admin Approval
 
 ## Document Approval
 
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| Lead Architect | _____________ | _____________ | __________ |
-| Senior Developer | _____________ | _____________ | __________ |
-| Database Administrator | _____________ | _____________ | __________ |
-| Security Specialist | _____________ | _____________ | __________ |
-| Project Manager | _____________ | _____________ | __________ |
+| Role                   | Name           | Signature      | Date         |
+| ---------------------- | -------------- | -------------- | ------------ |
+| Lead Architect         | ******\_****** | ******\_****** | ****\_\_**** |
+| Senior Developer       | ******\_****** | ******\_****** | ****\_\_**** |
+| Database Administrator | ******\_****** | ******\_****** | ****\_\_**** |
+| Security Specialist    | ******\_****** | ******\_****** | ****\_\_**** |
+| Project Manager        | ******\_****** | ******\_****** | ****\_\_**** |
+
+---
+
+## 9.10 Appendix J: Maintenance Log
+
+### Version 1.1 Updates (February 13, 2026)
+
+#### Bug Fixes and Corrections
+
+**1. Favicon Implementation (All Public Pages)**
+
+- **Issue:** Favicon references were using incorrect paths across all public HTML pages
+- **Files Updated:**
+  - `public/index.html`
+  - `public/about.html`
+  - `public/login.html`
+  - `public/register.html`
+  - `public/services.html`
+  - `public/privacy.html`
+  - `public/terms.html`
+  - `public/admin-login.html`
+  - `public/patient-book.html`
+- **Fix:** Updated all favicon paths from `../favicon.svg` to `assets/images/favicon.svg`
+- **Impact:** All public pages now correctly display the MediCare favicon
+
+**2. Registration Form Button Malfunction**
+
+- **Issue:** Register button on signup page not functioning due to multiple JavaScript errors
+- **File Updated:** `public/register.html`
+- **Problems Identified:**
+  - Escaped quotes in button HTML attributes (`id=\"registerBtn\"` instead of `id="registerBtn"`)
+  - Undefined function call `handleFormSubmit()` in validation logic
+  - Duplicate form submission event listeners causing conflicts
+- **Fixes Applied:**
+  - Corrected HTML attribute quotes in register button (lines 162-166)
+  - Removed undefined function call and integrated validation properly into submit handler
+  - Removed duplicate event listener at end of script section
+  - Updated form validation to return boolean instead of calling non-existent function
+- **Impact:** Registration form now validates properly, displays loading state, and submits correctly via AJAX
+
+**3. Logout Functionality Errors (Admin & Patient)**
+
+- **Issue:** Clicking logout on both admin and patient dashboards resulted in errors
+- **Files Updated:**
+  - `app/patient/patient-dashboard.php`
+  - `app/patient/patient-appointments.php`
+  - `app/patient/patient-profile.php`
+  - `app/patient/patient-settings.php`
+  - `app/auth/logout.php`
+  - `app/admin/admin-logout.php`
+- **Problems Identified:**
+  - Patient pages referenced incorrect logout path (`logout.php` instead of `../auth/logout.php`)
+  - Duplicate header calls in logout scripts causing "headers already sent" warnings
+  - Redundant cache control headers
+- **Fixes Applied:**
+  - Updated all patient logout links from `href="logout.php"` to `href="../auth/logout.php"`
+  - Removed redundant `Cache-Control`, `Pragma`, and `Expires` header calls
+  - Removed closing PHP tag `?>` from logout.php to prevent whitespace issues
+  - Streamlined logout process to single set of cache headers
+- **Impact:** Logout functionality now works correctly on both admin and patient sides without errors
+
+#### Testing Results
+
+All fixes have been verified to work correctly:
+
+- ✓ Favicons display properly on all public pages
+- ✓ Registration form validates and submits successfully
+- ✓ Admin logout redirects to admin-login.html without errors
+- ✓ Patient logout redirects to login.html without errors
+- ✓ No browser console errors or PHP warnings
+
+#### Code Quality Improvements
+
+- Removed redundant code sections
+- Fixed HTML attribute escaping issues
+- Improved JavaScript error handling
+- Streamlined logout process
+- Corrected relative file paths throughout the application
 
 ---
 
 **End of Software Design Document**
 
-*This document is confidential and proprietary. Unauthorized distribution is prohibited.*
+_This document is confidential and proprietary. Unauthorized distribution is prohibited._
 
 **Compliance:** This document adheres to IEEE Std 1016-2009 for Software Design Descriptions.

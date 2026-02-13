@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | MediCare Clinic</title>
-    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
@@ -160,9 +160,9 @@
                             </div>
 
                             <div>
-                                <button type="submit" id=\"registerBtn\" class=\"w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all\">
-                                    <span class=\"spinner hidden\" id=\"registerSpinner\"></span>
-                                    <span id=\"registerText\">Register</span>
+                                <button type="submit" id="registerBtn" class="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                                    <span class="spinner hidden" id="registerSpinner"></span>
+                                    <span id="registerText">Register</span>
                                 </button>
                             </div>
                         </form>
@@ -496,9 +496,8 @@
                 return false;
             }
 
-            // If all validations pass, handle the form submission asynchronously
-            handleFormSubmit(event);
-            return false;
+            // All validations passed
+            return true;
         }
 
         // Show error message with animation
@@ -591,6 +590,11 @@
         registerForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             
+            // Validate form first
+            if (!validateForm(event)) {
+                return;
+            }
+            
             // Get form data
             const form = event.target;
             const formData = new FormData(form);
@@ -671,23 +675,6 @@
             }
         `;
         document.head.appendChild(style);
-        
-        // Handle form submission with loading state
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('registerBtn');
-            const spinner = document.getElementById('registerSpinner');
-            const text = document.getElementById('registerText');
-            
-            // Check if form is valid before showing spinner
-            if (!this.checkValidity()) {
-                return; // Let browser handle validation
-            }
-            
-            // Disable button and show spinner
-            btn.disabled = true;
-            spinner.classList.remove('hidden');
-            text.textContent = 'Creating account...';
-        });
     </script>
 </body>
 </html>
