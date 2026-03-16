@@ -1,12 +1,6 @@
 <?php
-session_start();
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
-
-// Prevent caching of this page
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-header("Expires: 0");
 
 // Redirect to login if not authenticated or not a patient
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {
@@ -19,15 +13,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
     try {
         $conn = getDBConnection();
         $apptId = $_POST['appt_id'];
+        $patientId = (int)$_SESSION['user_id'];
 
         if ($_POST['action'] === 'cancel') {
-            $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled' WHERE appointment_id = ?");
-            $stmt->bind_param("s", $apptId);
+            $cancelReason = trim($_POST['cancel_reason'] ?? '');
+            $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled', cancel_reason = ? WHERE appointment_id = ? AND patient_id = ?");
+            $stmt->bind_param("ssi", $cancelReason, $apptId, $patientId);
             $stmt->execute();
             $stmt->close();
         } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
-            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ? WHERE appointment_id = ?");
-            $stmt->bind_param("sss", $_POST['new_date'], $_POST['new_time'], $apptId);
+            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'rescheduled' WHERE appointment_id = ? AND patient_id = ?");
+            $stmt->bind_param("sssi", $_POST['new_date'], $_POST['new_time'], $apptId, $patientId);
             $stmt->execute();
             $stmt->close();
         }
@@ -88,6 +84,7 @@ function filter_appointments($appointments, $tab)
     if ($tab === 'approved') return array_filter($appointments, fn($a) => $statusOf($a) === 'approved');
     if ($tab === 'rescheduled') return array_filter($appointments, fn($a) => $statusOf($a) === 'rescheduled');
     if ($tab === 'canceled') return array_filter($appointments, fn($a) => $statusOf($a) === 'canceled');
+    if ($tab === 'completed') return array_filter($appointments, fn($a) => $statusOf($a) === 'completed');
     return $appointments;
 }
 $filtered = array_reverse(filter_appointments($appointments, $tab));
@@ -213,15 +210,16 @@ if ($reschedule_id) {
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="p-4 sm:p-6">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <a href="?tab=pending" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Pending</a>
                                 <a href="?tab=approved" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Confirmed</a>
                                 <a href="?tab=rescheduled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'rescheduled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Rescheduled</a>
                                 <a href="?tab=canceled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'canceled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Canceled</a>
+                                <a href="?tab=completed" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Completed</a>
                             </div>
                             <div class="relative">
                                 <i data-feather="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
-                                <input class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search doctor or department" />
+                                <input id="patientApptSearch" class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search doctor or department" />
                             </div>
                         </div>
                         <div class="divide-y divide-gray-200">
@@ -229,7 +227,10 @@ if ($reschedule_id) {
                                 <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../../public/patient-book.html">Book your appointment here</a>.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
-                                    <div class="appointment-card p-4 flex items-center justify-between">
+                                    <div class="appointment-card p-4 flex items-center justify-between"
+                                        data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>"
+                                        data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
+                                        data-doctor-specialty="<?= htmlspecialchars(strtolower($appt['doctorSpecialty'])) ?>">
                                         <div class="flex items-center">
                                             <?php if (!empty($appt['doctorPhoto'])): ?>
                                                 <img class="h-12 w-12 rounded-full" src="<?= htmlspecialchars($appt['doctorPhoto']) ?>" alt="Doctor">
@@ -254,10 +255,7 @@ if ($reschedule_id) {
                                                     <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">
                                                     <button type="submit" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-blue-700">Reschedule</button>
                                                 </form>
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="cancel" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200" onclick="return confirm('Cancel this appointment?')">Cancel</button>
-                                                </form>
+                                                <button type="button" onclick="openPatientCancelModal('<?= htmlspecialchars($appt['id']) ?>')" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200">Cancel</button>
                                                 <?php
                                                 $badgeClass = $status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
                                                 $label = ucfirst($status);
@@ -301,9 +299,103 @@ if ($reschedule_id) {
             }
         </style>
     <?php endif; ?>
+    <!-- Patient Cancel Reason Modal -->
+    <div id="patientCancelReasonModal" class="fixed inset-0 flex items-center justify-center z-50 modal-bg" style="display:none;">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm relative">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Reason for Cancellation</h3>
+                <button type="button" onclick="closePatientCancelModal()" class="text-gray-400 hover:text-gray-600">
+                    <i data-feather="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Please select a reason for canceling this appointment:</p>
+            <div class="space-y-1 mb-4">
+                <?php foreach (['Cannot attend', 'Feeling better – no longer needed', 'Found another provider', 'Schedule conflict', 'Transportation or distance issues', 'Financial reasons', 'Other'] as $pcr): ?>
+                    <label class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 cursor-pointer">
+                        <input type="radio" name="patientCancelReasonChoice" value="<?= htmlspecialchars($pcr) ?>" class="h-4 w-4 text-red-600">
+                        <span class="text-sm text-gray-700"><?= htmlspecialchars($pcr) ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+            <p id="patientCancelReasonError" class="text-sm text-red-600 mb-3 hidden">Please select a reason to continue.</p>
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closePatientCancelModal()" class="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm">Keep Appointment</button>
+                <button type="button" id="confirmPatientCancelBtn" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm">Confirm Cancel</button>
+            </div>
+        </div>
+    </div>
+    <form method="post" id="patientCancelForm" style="display:none;">
+        <input type="hidden" name="action" value="cancel">
+        <input type="hidden" name="appt_id" value="" id="patientCancelApptIdInput">
+        <input type="hidden" name="cancel_reason" value="" id="patientCancelReasonValueInput">
+    </form>
     <script src="../assets/js/mobile-menu.js"></script>
+    <script src="../assets/js/custom-modal.js"></script>
     <script>
         feather.replace();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('patientApptSearch');
+            const cards = document.querySelectorAll('.appointment-card');
+            const noApptMsg = document.querySelector('.divide-y > .p-6');
+
+            function filterCards() {
+                const term = (searchInput.value || '').toLowerCase().trim();
+                let visible = 0;
+
+                cards.forEach(function(card) {
+                    const doctorName = card.getAttribute('data-doctor-name') || '';
+                    const department = card.getAttribute('data-department') || '';
+                    const specialty = card.getAttribute('data-doctor-specialty') || '';
+                    const matches = !term ||
+                        doctorName.includes(term) ||
+                        department.includes(term) ||
+                        specialty.includes(term);
+                    card.style.display = matches ? 'flex' : 'none';
+                    if (matches) visible++;
+                });
+
+                // Show/hide no-results message
+                let noResults = document.getElementById('noSearchResults');
+                if (cards.length > 0 && visible === 0 && term) {
+                    if (!noResults) {
+                        noResults = document.createElement('div');
+                        noResults.id = 'noSearchResults';
+                        noResults.className = 'p-6 text-sm text-gray-500 text-center';
+                        noResults.textContent = 'No appointments match your search.';
+                        document.querySelector('.divide-y').appendChild(noResults);
+                    }
+                } else if (noResults) {
+                    noResults.remove();
+                }
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', filterCards);
+            }
+        });
+
+        // Patient cancel reason modal
+        window.openPatientCancelModal = function(apptId) {
+            document.getElementById('patientCancelApptIdInput').value = apptId;
+            document.getElementById('patientCancelReasonModal').style.display = 'flex';
+            document.querySelectorAll('[name="patientCancelReasonChoice"]').forEach(r => r.checked = false);
+            document.getElementById('patientCancelReasonError').classList.add('hidden');
+            feather.replace();
+        };
+        window.closePatientCancelModal = function() {
+            document.getElementById('patientCancelReasonModal').style.display = 'none';
+        };
+        document.getElementById('confirmPatientCancelBtn').addEventListener('click', function() {
+            const selected = document.querySelector('[name="patientCancelReasonChoice"]:checked');
+            if (!selected) {
+                document.getElementById('patientCancelReasonError').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('patientCancelReasonValueInput').value = selected.value;
+            document.getElementById('patientCancelReasonModal').style.display = 'none';
+            document.getElementById('patientCancelForm').submit();
+        });
     </script>
 </body>
 

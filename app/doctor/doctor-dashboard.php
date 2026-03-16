@@ -1,16 +1,10 @@
 <?php
-session_start();
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
-// Prevent caching of this page
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-header("Expires: 0");
-
-// Redirect to login if not authenticated or not an admin
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header('Location: ../../public/admin-login.html');
+// Redirect to login if not authenticated or not a doctor
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
+    header('Location: ../../public/doctor-login.html');
     exit;
 }
 
@@ -27,8 +21,12 @@ $stats = [
 try {
     $conn = getDBConnection();
 
-    // Get all appointments
-    $result = $conn->query("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments ORDER BY created_at DESC");
+    // Get only this doctor's appointments
+    $doctorId = (string)$_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments WHERE doctor_id = ? ORDER BY created_at DESC");
+    $stmt->bind_param("s", $doctorId);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -57,6 +55,7 @@ try {
         }
         $result->free();
     }
+    $stmt->close();
 
     $stats['total'] = count($appointments);
 
@@ -84,7 +83,7 @@ usort($todayAppointments, function ($a, $b) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | MediCare Clinic</title>
+    <title>Doctor Dashboard | MediCare Clinic</title>
     <link rel="icon" type="image/svg+xml" href="../../public/assets/images/favicon.svg">
     <link rel="stylesheet" href="../assets/css/dark-mode.css">
     <link rel="stylesheet" href="../assets/css/responsive-sidebar.css">
@@ -115,21 +114,21 @@ usort($todayAppointments, function ($a, $b) {
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="doctor-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
                             </a>
-                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="doctor-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
-                            <a href="admin-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="doctor-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="settings" class="mr-3 h-5 w-5"></i>
                                 Settings
                             </a>
-                            <a href="admin-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="doctor-logout.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="log-out" class="mr-3 h-5 w-5"></i>
                                 Logout
                             </a>
@@ -145,7 +144,7 @@ usort($todayAppointments, function ($a, $b) {
                     <button class="md:hidden text-gray-600 hover:text-gray-900" id="mobileMenuBtn">
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+                    <h1 class="text-lg font-semibold text-gray-900">Doctor Dashboard</h1>
                     <div class="flex items-center space-x-4">
                         <div class="relative">
                             <button id="notificationBtn" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
@@ -164,7 +163,7 @@ usort($todayAppointments, function ($a, $b) {
                                         <div class="px-4 py-3 text-center text-gray-500">Loading notifications...</div>
                                     </div>
                                     <div class="px-4 py-2 bg-gray-100 text-right">
-                                        <a href="admin-appointments.php" class="text-sm text-blue-600 hover:underline">View all</a>
+                                        <a href="doctor-appointments.php" class="text-sm text-blue-600 hover:underline">View all</a>
                                     </div>
                                 </div>
                             </div>
@@ -199,7 +198,7 @@ usort($todayAppointments, function ($a, $b) {
                                 <i data-feather="clock" class="h-8 w-8 text-yellow-600"></i>
                             </div>
                         </div>
-                        <a href="admin-appointments.php?tab=pending" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                        <a href="doctor-appointments.php?tab=pending" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
@@ -212,7 +211,7 @@ usort($todayAppointments, function ($a, $b) {
                                 <i data-feather="check-circle" class="h-8 w-8 text-green-600"></i>
                             </div>
                         </div>
-                        <a href="admin-appointments.php?tab=approved" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                        <a href="doctor-appointments.php?tab=approved" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
@@ -225,7 +224,7 @@ usort($todayAppointments, function ($a, $b) {
                                 <i data-feather="refresh-cw" class="h-8 w-8 text-purple-600"></i>
                             </div>
                         </div>
-                        <a href="admin-appointments.php?tab=rescheduled" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
+                        <a href="doctor-appointments.php?tab=rescheduled" class="text-xs text-blue-600 hover:underline mt-3 inline-block">View all →</a>
                     </div>
                 </div>
 
@@ -334,7 +333,7 @@ usort($todayAppointments, function ($a, $b) {
                     <div class="p-6 border-b border-gray-200">
                         <div class="flex items-center justify-between">
                             <h2 class="text-xl font-bold text-gray-900">Recent Appointments</h2>
-                            <a href="admin-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
+                            <a href="doctor-appointments.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium">View all →</a>
                         </div>
                     </div>
                     <!--piranockharvey03-->
@@ -588,75 +587,6 @@ usort($todayAppointments, function ($a, $b) {
                 Notification.requestPermission();
             }
         });
-
-        // Back button and authentication check
-        (function() {
-            // Check authentication status
-            function checkAuthentication() {
-                // Make an AJAX request to verify session is still valid
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', 'check-session.php', true);
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 401 || xhr.responseText === 'unauthorized') {
-                            // Session expired or invalid, redirect to login
-                            window.location.href = '../../public/admin-login.html';
-                        }
-                    }
-                };
-                xhr.send();
-            }
-
-            // Detect back/forward navigation
-            window.addEventListener('popstate', function(event) {
-                // Check authentication when user navigates
-                checkAuthentication();
-            });
-
-            // Check authentication on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Add a state to history to enable popstate detection
-                if (window.history && window.history.pushState) {
-                    window.history.pushState(null, null, window.location.href);
-                }
-
-                // Initial authentication check
-                checkAuthentication();
-
-                // Set up periodic authentication checks (every 30 seconds)
-                setInterval(checkAuthentication, 30000);
-            });
-
-            // Disable right-click context menu for additional security
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            });
-
-            // Disable common keyboard shortcuts that could access developer tools
-            document.addEventListener('keydown', function(e) {
-                // Disable F12 (developer tools)
-                if (e.keyCode === 123) {
-                    e.preventDefault();
-                    return false;
-                }
-                // Disable Ctrl+Shift+I (developer tools)
-                if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-                    e.preventDefault();
-                    return false;
-                }
-                // Disable Ctrl+Shift+C (inspector)
-                if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
-                    e.preventDefault();
-                    return false;
-                }
-                // Disable Ctrl+U (view source)
-                if (e.ctrlKey && e.keyCode === 85) {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-        })();
 
         // Show login success popup
         document.addEventListener('DOMContentLoaded', function() {

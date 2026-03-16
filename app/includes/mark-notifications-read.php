@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
 // Only allow admin access

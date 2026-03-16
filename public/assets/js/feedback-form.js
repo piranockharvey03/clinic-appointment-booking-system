@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Submit form via AJAX
             const formData = new FormData(form);
             
-            fetch('../php/feedback.php', {
+            fetch('../../app/includes/feedback.php', {
                 method: 'POST',
                 body: formData
             })
@@ -108,12 +108,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         ratingStars.forEach(s => s.classList.remove('text-yellow-400'));
                     }, 5000);
                 } else {
-                    alert('Error: ' + data.message);
+                    customAlert('Error: ' + data.message, 'Submission Error', 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('An error occurred while submitting your feedback. Please try again.');
+                customAlert('An error occurred while submitting your feedback. Please try again.', 'Error', 'error');
             })
             .finally(() => {
                 // Reset button state
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } else {
             // Show error message
-            alert('Please fill in all required fields correctly.');
+            customAlert('Please fill in all required fields correctly.', 'Validation Error', 'warning');
         }
     });
     

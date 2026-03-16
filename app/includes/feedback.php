@@ -1,19 +1,8 @@
 <?php
+require_once '../../config/db-config.php';
 
 try {
-    // Database connection settings
-    $host     = "localhost";
-    $user     = "root";
-    $password = "";
-    $dbname   = "medicare";
-
-    // Create connection
-    $conn = new mysqli($host, $user, $password, $dbname);
-
-    // Check connection
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed");
-    }
+    $conn = getDBConnection();
 
     // Only process POST requests
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -61,7 +50,7 @@ try {
 
         if ($stmt->execute()) {
             $stmt->close();
-            $conn->close();
+            closeDBConnection($conn);
             // Redirect with success message
             header("Location: ../../public/index.html?success=" . urlencode("Thank you for your feedback!"));
             exit();
@@ -76,7 +65,7 @@ try {
 
     // Close connections if they exist
     if (isset($stmt)) $stmt->close();
-    if (isset($conn)) $conn->close();
+    if (isset($conn)) closeDBConnection($conn);
 
     // Redirect back with error message
     header("Location: ../../public/index.html?error=" . urlencode($e->getMessage()));

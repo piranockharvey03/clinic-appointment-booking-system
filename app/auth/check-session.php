@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once '../../config/session-config.php';
 
 // Check if session is valid
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role'])) {
@@ -18,4 +18,3 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
 
 // Session is valid
 echo 'authenticated';
-?>

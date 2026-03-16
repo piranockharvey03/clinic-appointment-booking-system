@@ -5,7 +5,7 @@ require_once '../../config/db-config.php';
 header('Content-Type: application/json');
 
 // Check if patient is logged in
-session_start();
+require_once '../../config/session-config.php';
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-    <script src="https://unpkg.com/feather-icons"></script>
-
     <style>
         .register-bg {
-            background-image: linear-gradient(rgba(59, 130, 246, 0.8), rgba(29, 78, 216, 0.8)), url('http://static.photos/medical/1200x630/2');
-            background-size: cover;
-            background-position: center;
+            background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 50%, #2563eb 100%);
         }
         .spinner {
             border: 3px solid #f3f4f6;
@@ -33,193 +30,214 @@
         }
     </style>
 </head>
+
 <body class="font-sans antialiased">
     <div class="min-h-screen flex">
+
         <!-- Left Column - Form -->
         <div class="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
             <div class="mx-auto w-full max-w-sm lg:w-96">
+
                 <div>
                     <div class="flex items-center">
                         <i data-feather="heart" class="h-8 w-8 text-blue-600"></i>
                         <span class="ml-2 text-xl font-bold text-blue-600">MediCare</span>
                     </div>
-                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-                        Create a new account
-                    </h2>
+                    <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Create your account</h2>
                     <p class="mt-2 text-sm text-gray-600">
-                        Already have an account? <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
+                        Already have an account?
+                        <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
                     </p>
                 </div>
 
                 <div class="mt-8">
-                    <div class="mt-6">
-                        <form id="registrationForm" action="../app/auth/register.php" method="POST" class="space-y-6">
-                            <div>
-                                <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                <div class="mt-1">
-                                    <input id="full-name" name="full-name" type="text" autocomplete="name" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <form id="registrationForm" action="../app/auth/register.php" method="POST" class="space-y-4">
+
+                        <div>
+                            <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                            <div class="mt-1">
+                                <input id="full-name" name="full-name" type="text" autocomplete="name" required
+                                    placeholder="John Doe"
+                                    class="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                            <div class="mt-1">
+                                <input id="email" name="email" type="email" autocomplete="email" required
+                                    placeholder="you@example.com"
+                                    class="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors">
+                            </div>
+                            <div id="email-validation-status" class="mt-1.5 px-2 py-1.5 rounded-md transition-all duration-200">
+                                <div class="flex items-center text-xs gap-2">
+                                    <div id="email-icon" class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i data-feather="minus" class="h-3 w-3"></i>
+                                    </div>
+                                    <span id="email-validation-text" class="font-medium text-gray-500">Enter email to validate format</span>
                                 </div>
                             </div>
+                        </div>
 
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-                                <div class="mt-1">
-                                    <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                                <!-- Email Validation Status -->
-                                <div id="email-validation-status" class="mt-2 p-2 rounded-md transition-all duration-200">
-                                    <div class="flex items-center text-xs">
-                                        <div id="email-icon" class="w-4 h-4 rounded-full mr-2 flex items-center justify-center">
-                                            <i data-feather="minus" class="h-3 w-3"></i>
-                                        </div>
-                                        <span id="email-validation-text" class="font-medium">Enter email to validate format</span>
-                                    </div>
-                                </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <div class="mt-1">
+                                <input id="phone" name="phone" type="tel" autocomplete="tel" required
+                                    placeholder="+1 (555) 000-0000"
+                                    class="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors">
                             </div>
+                        </div>
 
-                            <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <div class="mt-1">
-                                    <input id="phone" name="phone" type="tel" autocomplete="tel" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                            </div>
-
-                            <div class="space-y-1">
-                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                                <div class="mt-1">
-                                    <input id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-
-                                <!-- Password Strength Indicator -->
-                                <div class="mt-2">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span class="text-xs font-medium text-gray-700">Password Strength</span>
-                                        <span id="strength-text" class="text-xs font-medium text-gray-500">Very Weak</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div id="strength-bar" class="h-2 rounded-full transition-all duration-300" style="width: 0%; background-color: #ef4444;"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Password Requirements -->
-                                <div id="password-requirements" class="mt-3 p-3 bg-gray-50 rounded-md">
-                                    <div class="text-xs font-medium text-gray-700 mb-2 flex items-center">
-                                        <i data-feather="shield" class="h-3 w-3 mr-2"></i>
-                                        Password Requirements
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div id="length-check" class="flex items-center text-xs transition-all duration-200">
-                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
-                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
-                                            </div>
-                                            <span class="text-gray-600">At least 8 characters</span>
-                                        </div>
-                                        <div id="uppercase-check" class="flex items-center text-xs transition-all duration-200">
-                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
-                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
-                                            </div>
-                                            <span class="text-gray-600">One uppercase letter (A-Z)</span>
-                                        </div>
-                                        <div id="number-check" class="flex items-center text-xs transition-all duration-200">
-                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
-                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
-                                            </div>
-                                            <span class="text-gray-600">One number (0-9)</span>
-                                        </div>
-                                        <div id="special-check" class="flex items-center text-xs transition-all duration-200">
-                                            <div class="w-4 h-4 rounded-full mr-2 flex items-center justify-center transition-all duration-200" style="background-color: #e5e7eb; color: #6b7280;">
-                                                <i data-feather="x" class="h-2.5 w-2.5"></i>
-                                            </div>
-                                            <span class="text-gray-600">One special character (!@#$%^&*)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-1">
-                                <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                                <div class="mt-1">
-                                    <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                </div>
-                                <!-- Password Match Status -->
-                                <div id="password-match-status" class="mt-2 p-2 rounded-md transition-all duration-200">
-                                    <div class="flex items-center text-xs">
-                                        <div id="match-icon" class="w-4 h-4 rounded-full mr-2 flex items-center justify-center">
-                                            <i data-feather="minus" class="h-3 w-3"></i>
-                                        </div>
-                                        <span id="password-match-text" class="font-medium">Enter password to check match</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center">
-                                <input id="terms" name="terms" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" required>
-                                <label for="terms" class="ml-2 block text-sm text-gray-900">
-                                    I agree to the <a href="terms.html" class="text-blue-600 hover:text-blue-500">Terms of Service</a> and <a href="privacy.html" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
-                                </label>
-                            </div>
-
-                            <div>
-                                <button type="submit" id="registerBtn" class="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                                    <span class="spinner hidden" id="registerSpinner"></span>
-                                    <span id="registerText">Register</span>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <div class="mt-1 relative">
+                                <input id="password" name="password" type="password" autocomplete="new-password" required
+                                    placeholder="••••••••"
+                                    class="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors">
+                                <button type="button" onclick="togglePasswordVisibility('password', 'togglePasswordIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                                    <i id="togglePasswordIcon" data-feather="eye" class="h-4 w-4"></i>
                                 </button>
                             </div>
-                        </form>
+
+                            <!-- Password Strength Indicator -->
+                            <div class="mt-2">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-medium text-gray-600">Password Strength</span>
+                                    <span id="strength-text" class="text-xs font-medium text-gray-400">Very Weak</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div id="strength-bar" class="h-1.5 rounded-full transition-all duration-300" style="width: 0%; background-color: #ef4444;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Password Requirements -->
+                            <div id="password-requirements" class="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                <div class="text-xs font-medium text-gray-600 mb-2 flex items-center gap-1">
+                                    <i data-feather="shield" class="h-3 w-3"></i>
+                                    Requirements
+                                </div>
+                                <div class="space-y-1.5">
+                                    <div id="length-check" class="flex items-center text-xs gap-2 text-gray-500">
+                                        <div class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: #e5e7eb; color: #6b7280;">
+                                            <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                        </div>
+                                        At least 8 characters
+                                    </div>
+                                    <div id="uppercase-check" class="flex items-center text-xs gap-2 text-gray-500">
+                                        <div class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: #e5e7eb; color: #6b7280;">
+                                            <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                        </div>
+                                        One uppercase letter (A-Z)
+                                    </div>
+                                    <div id="number-check" class="flex items-center text-xs gap-2 text-gray-500">
+                                        <div class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: #e5e7eb; color: #6b7280;">
+                                            <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                        </div>
+                                        One number (0-9)
+                                    </div>
+                                    <div id="special-check" class="flex items-center text-xs gap-2 text-gray-500">
+                                        <div class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0" style="background-color: #e5e7eb; color: #6b7280;">
+                                            <i data-feather="x" class="h-2.5 w-2.5"></i>
+                                        </div>
+                                        One special character (!@#$%^&*)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                            <div class="mt-1">
+                                <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required
+                                    placeholder="••••••••"
+                                    class="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors">
+                            </div>
+                            <div id="password-match-status" class="mt-1.5 px-2 py-1.5 rounded-md transition-all duration-200">
+                                <div class="flex items-center text-xs gap-2">
+                                    <div id="match-icon" class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i data-feather="minus" class="h-3 w-3"></i>
+                                    </div>
+                                    <span id="password-match-text" class="font-medium text-gray-500">Enter password to check match</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start">
+                            <input id="terms" name="terms" type="checkbox" required
+                                class="h-4 w-4 mt-0.5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded flex-shrink-0">
+                            <label for="terms" class="ml-2 block text-sm text-gray-600">
+                                I agree to the
+                                <a href="terms.html" class="text-blue-600 hover:text-blue-500 font-medium">Terms of Service</a>
+                                and
+                                <a href="privacy.html" class="text-blue-600 hover:text-blue-500 font-medium">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div>
+                            <button type="submit" id="registerBtn"
+                                class="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                                <span class="spinner hidden" id="registerSpinner"></span>
+                                <span id="registerText">Create Account</span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right Column - Branding -->
+        <div class="hidden lg:block relative w-0 flex-1 register-bg">
+            <div class="absolute inset-0 flex items-center justify-center p-12">
+                <div class="text-white max-w-md text-center">
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-white bg-opacity-20 rounded-full p-5">
+                            <i data-feather="user-plus" class="h-16 w-16 text-white"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-3">Join MediCare</h3>
+                    <p class="text-blue-100 mb-8">Thousands of patients trust MediCare to manage their healthcare online.</p>
+                    <div class="space-y-4 text-left">
+                        <div class="flex items-center gap-3">
+                            <i data-feather="calendar" class="h-5 w-5 text-blue-200 flex-shrink-0"></i>
+                            <span class="text-sm text-blue-100">Book and manage appointments 24/7</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-feather="file-text" class="h-5 w-5 text-blue-200 flex-shrink-0"></i>
+                            <span class="text-sm text-blue-100">Access your medical records anytime</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-feather="message-square" class="h-5 w-5 text-blue-200 flex-shrink-0"></i>
+                            <span class="text-sm text-blue-100">Secure messaging with your care team</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-feather="bell" class="h-5 w-5 text-blue-200 flex-shrink-0"></i>
+                            <span class="text-sm text-blue-100">Get health reminders and notifications</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column - Image -->
-        <div class="hidden lg:block relative w-0 flex-1 register-bg">
-            <div class="absolute inset-0 flex items-center justify-center p-12">
-                <div class="bg-white bg-opacity-90 p-8 rounded-lg max-w-md">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Why Register?</h3>
-                    <p class="text-gray-600 mb-6">Join thousands of patients managing their healthcare online with our secure patient portal.</p>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i data-feather="calendar" class="h-5 w-5 text-blue-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-gray-700">Book and manage appointments 24/7</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i data-feather="file-text" class="h-5 w-5 text-blue-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-gray-700">Access your medical records anytime</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i data-feather="message-square" class="h-5 w-5 text-blue-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-gray-700">Secure messaging with your care team</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i data-feather="bell" class="h-5 w-5 text-blue-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-gray-700">Get important health reminders</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         feather.replace();
 
-        // Password validation elements
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-feather', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-feather', 'eye');
+            }
+            feather.replace();
+        }
+
         const passwordField = document.getElementById('password');
         const confirmPasswordField = document.getElementById('confirm-password');
         const strengthBar = document.getElementById('strength-bar');
@@ -231,55 +249,25 @@
         const passwordMatchStatus = document.getElementById('password-match-status');
         const matchIcon = document.getElementById('match-icon');
         const passwordMatchText = document.getElementById('password-match-text');
-        const registerForm = document.querySelector('form');
-
-        // Email validation elements
         const emailField = document.getElementById('email');
         const emailValidationStatus = document.getElementById('email-validation-status');
         const emailIcon = document.getElementById('email-icon');
         const emailValidationText = document.getElementById('email-validation-text');
 
-        // Email validation functions
         function validateEmailFormat(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        // Password requirements validation functions
-        function validatePasswordLength(password) {
-            return password.length >= 8;
-        }
-
-        function validatePasswordUppercase(password) {
-            return /[A-Z]/.test(password);
-        }
-
-        function validatePasswordNumber(password) {
-            return /\d/.test(password);
-        }
-
-        function validatePasswordSpecial(password) {
-            return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-        }
-
-        function validatePasswordMatch(password, confirmPassword) {
-            return password === confirmPassword && confirmPassword !== '';
-        }
-
-        // Calculate password strength
         function calculatePasswordStrength(password) {
             let score = 0;
-
             if (password.length >= 8) score += 25;
             if (password.length >= 12) score += 15;
             if (/[A-Z]/.test(password)) score += 20;
             if (/\d/.test(password)) score += 20;
             if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 20;
-
             return Math.min(score, 100);
         }
 
-        // Get strength level info
         function getStrengthLevel(score) {
             if (score < 30) return { text: 'Very Weak', color: '#ef4444' };
             if (score < 50) return { text: 'Weak', color: '#f97316' };
@@ -288,139 +276,114 @@
             return { text: 'Strong', color: '#16a34a' };
         }
 
-        // Update email validation status
-        function updateEmailValidation() {
-            const email = emailField.value;
-
-            if (email === '') {
-                emailValidationStatus.classList.remove('bg-green-50', 'bg-red-50');
-                emailValidationStatus.classList.add('bg-gray-50');
-                emailIcon.style.backgroundColor = '#e5e7eb';
-                emailIcon.style.color = '#6b7280';
-                emailIcon.querySelector('i').setAttribute('data-feather', 'minus');
-                emailValidationText.textContent = 'Enter email to validate format';
-                emailValidationText.classList.remove('text-green-700', 'text-red-600');
-                emailValidationText.classList.add('text-gray-600');
-            } else if (validateEmailFormat(email)) {
-                emailValidationStatus.classList.remove('bg-gray-50', 'bg-red-50');
-                emailValidationStatus.classList.add('bg-green-50');
-                emailIcon.style.backgroundColor = '#dcfce7';
-                emailIcon.style.color = '#16a34a';
-                emailIcon.querySelector('i').setAttribute('data-feather', 'check');
-                emailValidationText.textContent = 'Valid email format âœ“';
-                emailValidationText.classList.remove('text-gray-600', 'text-red-600');
-                emailValidationText.classList.add('text-green-700');
-            } else {
-                emailValidationStatus.classList.remove('bg-gray-50', 'bg-green-50');
-                emailValidationStatus.classList.add('bg-red-50');
-                emailIcon.style.backgroundColor = '#fecaca';
-                emailIcon.style.color = '#dc2626';
-                emailIcon.querySelector('i').setAttribute('data-feather', 'x');
-                emailValidationText.textContent = 'Invalid email format';
-                emailValidationText.classList.remove('text-gray-600', 'text-green-700');
-                emailValidationText.classList.add('text-red-600');
-            }
-
-            feather.replace();
-        }
-
-        // Update password requirements visual indicators
-        function updatePasswordRequirements() {
-            const password = passwordField.value;
-
-            // Update strength indicator
-            const strength = calculatePasswordStrength(password);
-            const strengthLevel = getStrengthLevel(strength);
-
-            strengthBar.style.width = strength + '%';
-            strengthBar.style.backgroundColor = strengthLevel.color;
-            strengthText.textContent = strengthLevel.text;
-            strengthText.style.color = strengthLevel.color;
-
-            // Length check
-            updateRequirementIndicator(lengthCheck, validatePasswordLength(password), 'check');
-
-            // Uppercase check
-            updateRequirementIndicator(uppercaseCheck, validatePasswordUppercase(password), 'check');
-
-            // Number check
-            updateRequirementIndicator(numberCheck, validatePasswordNumber(password), 'check');
-
-            // Special character check
-            updateRequirementIndicator(specialCheck, validatePasswordSpecial(password), 'check');
-
-            // Update password match status
-            updatePasswordMatchStatus();
-
-            // Re-render feather icons
-            feather.replace();
-        }
-
-        // Update all validations (password + email)
-        function updateAllValidations() {
-            updatePasswordRequirements();
-            updateEmailValidation();
-        }
-
-        // Update requirement indicator styling
-        function updateRequirementIndicator(element, isValid, validIcon) {
+        function updateRequirementIndicator(element, isValid) {
             const iconDiv = element.querySelector('div');
             const icon = element.querySelector('i');
-
             if (isValid) {
                 iconDiv.style.backgroundColor = '#dcfce7';
                 iconDiv.style.color = '#16a34a';
-                icon.setAttribute('data-feather', validIcon);
-                element.classList.remove('text-gray-600');
+                icon.setAttribute('data-feather', 'check');
+                element.classList.remove('text-gray-500');
                 element.classList.add('text-green-700');
             } else {
                 iconDiv.style.backgroundColor = '#e5e7eb';
                 iconDiv.style.color = '#6b7280';
                 icon.setAttribute('data-feather', 'x');
                 element.classList.remove('text-green-700');
-                element.classList.add('text-gray-600');
+                element.classList.add('text-gray-500');
             }
         }
 
-        // Update password match status
+        function updateEmailValidation() {
+            const email = emailField.value;
+            if (email === '') {
+                emailValidationStatus.className = 'mt-1.5 px-2 py-1.5 rounded-md transition-all duration-200';
+                emailIcon.style.backgroundColor = '#e5e7eb';
+                emailIcon.style.color = '#6b7280';
+                emailIcon.querySelector('i').setAttribute('data-feather', 'minus');
+                emailValidationText.textContent = 'Enter email to validate format';
+                emailValidationText.className = 'font-medium text-gray-500';
+            } else if (validateEmailFormat(email)) {
+                emailValidationStatus.className = 'mt-1.5 px-2 py-1.5 rounded-md bg-green-50 transition-all duration-200';
+                emailIcon.style.backgroundColor = '#dcfce7';
+                emailIcon.style.color = '#16a34a';
+                emailIcon.querySelector('i').setAttribute('data-feather', 'check');
+                emailValidationText.textContent = 'Valid email format';
+                emailValidationText.className = 'font-medium text-green-700';
+            } else {
+                emailValidationStatus.className = 'mt-1.5 px-2 py-1.5 rounded-md bg-red-50 transition-all duration-200';
+                emailIcon.style.backgroundColor = '#fecaca';
+                emailIcon.style.color = '#dc2626';
+                emailIcon.querySelector('i').setAttribute('data-feather', 'x');
+                emailValidationText.textContent = 'Invalid email format';
+                emailValidationText.className = 'font-medium text-red-600';
+            }
+            feather.replace();
+        }
+
         function updatePasswordMatchStatus() {
             const password = passwordField.value;
             const confirmPassword = confirmPasswordField.value;
-
             if (confirmPassword === '') {
-                passwordMatchStatus.classList.remove('bg-green-50', 'bg-red-50');
-                passwordMatchStatus.classList.add('bg-gray-50');
+                passwordMatchStatus.className = 'mt-1.5 px-2 py-1.5 rounded-md transition-all duration-200';
                 matchIcon.style.backgroundColor = '#e5e7eb';
                 matchIcon.style.color = '#6b7280';
                 matchIcon.querySelector('i').setAttribute('data-feather', 'minus');
                 passwordMatchText.textContent = 'Enter password to check match';
-                passwordMatchText.classList.remove('text-green-700', 'text-red-600');
-                passwordMatchText.classList.add('text-gray-600');
-            } else if (validatePasswordMatch(password, confirmPassword)) {
-                passwordMatchStatus.classList.remove('bg-gray-50', 'bg-red-50');
-                passwordMatchStatus.classList.add('bg-green-50');
+                passwordMatchText.className = 'font-medium text-gray-500';
+            } else if (password === confirmPassword) {
+                passwordMatchStatus.className = 'mt-1.5 px-2 py-1.5 rounded-md bg-green-50 transition-all duration-200';
                 matchIcon.style.backgroundColor = '#dcfce7';
                 matchIcon.style.color = '#16a34a';
                 matchIcon.querySelector('i').setAttribute('data-feather', 'check');
-                passwordMatchText.textContent = 'Passwords match perfectly!';
-                passwordMatchText.classList.remove('text-gray-600', 'text-red-600');
-                passwordMatchText.classList.add('text-green-700');
+                passwordMatchText.textContent = 'Passwords match';
+                passwordMatchText.className = 'font-medium text-green-700';
             } else {
-                passwordMatchStatus.classList.remove('bg-gray-50', 'bg-green-50');
-                passwordMatchStatus.classList.add('bg-red-50');
+                passwordMatchStatus.className = 'mt-1.5 px-2 py-1.5 rounded-md bg-red-50 transition-all duration-200';
                 matchIcon.style.backgroundColor = '#fecaca';
                 matchIcon.style.color = '#dc2626';
                 matchIcon.querySelector('i').setAttribute('data-feather', 'x');
                 passwordMatchText.textContent = 'Passwords do not match';
-                passwordMatchText.classList.remove('text-gray-600', 'text-green-700');
-                passwordMatchText.classList.add('text-red-600');
+                passwordMatchText.className = 'font-medium text-red-600';
             }
-
             feather.replace();
         }
 
-        // Validate form before submission
-        function validateForm(event) {
+        function updatePasswordRequirements() {
+            const password = passwordField.value;
+            const strength = calculatePasswordStrength(password);
+            const level = getStrengthLevel(strength);
+            strengthBar.style.width = strength + '%';
+            strengthBar.style.backgroundColor = level.color;
+            strengthText.textContent = level.text;
+            strengthText.style.color = level.color;
+            updateRequirementIndicator(lengthCheck, password.length >= 8);
+            updateRequirementIndicator(uppercaseCheck, /[A-Z]/.test(password));
+            updateRequirementIndicator(numberCheck, /\d/.test(password));
+            updateRequirementIndicator(specialCheck, /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password));
+            updatePasswordMatchStatus();
+            feather.replace();
+        }
+
+        function showMessage(message, type) {
+            const existing = document.querySelector('.form-message');
+            if (existing) existing.remove();
+            const div = document.createElement('div');
+            const isError = type === 'error';
+            div.className = `form-message p-3 ${isError ? 'bg-red-50 border border-red-200' : 'bg-green-50 border border-green-200'} rounded-lg flex items-start gap-2`;
+            div.innerHTML = `<svg class="h-4 w-4 ${isError ? 'text-red-400' : 'text-green-500'} flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="${isError ? 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z' : '10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'}" clip-rule="evenodd"/></svg><p class="text-sm ${isError ? 'text-red-700' : 'text-green-700'}">${message}</p>`;
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.parentNode.insertBefore(div, submitButton);
+            if (isError) setTimeout(() => { if (div.parentNode) div.remove(); }, 5000);
+        }
+
+        passwordField.addEventListener('input', updatePasswordRequirements);
+        confirmPasswordField.addEventListener('input', updatePasswordMatchStatus);
+        emailField.addEventListener('input', updateEmailValidation);
+
+        document.getElementById('registrationForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
             const password = passwordField.value;
             const confirmPassword = confirmPasswordField.value;
             const email = emailField.value;
@@ -428,253 +391,51 @@
             const phone = document.getElementById('phone').value.trim();
             const terms = document.getElementById('terms').checked;
 
-            // Check all fields are filled
-            if (!fullName) {
-                showErrorMessage('Please enter your full name');
-                document.getElementById('full-name').focus();
-                event.preventDefault();
-                return false;
-            }
+            if (!fullName) { showMessage('Please enter your full name', 'error'); return; }
+            if (!validateEmailFormat(email)) { showMessage('Please enter a valid email address', 'error'); return; }
+            if (!phone) { showMessage('Please enter your phone number', 'error'); return; }
+            if (password.length < 8) { showMessage('Password must be at least 8 characters', 'error'); return; }
+            if (!/[A-Z]/.test(password)) { showMessage('Password must contain at least one uppercase letter', 'error'); return; }
+            if (!/\d/.test(password)) { showMessage('Password must contain at least one number', 'error'); return; }
+            if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) { showMessage('Password must contain at least one special character', 'error'); return; }
+            if (password !== confirmPassword) { showMessage('Passwords do not match', 'error'); return; }
+            if (!terms) { showMessage('You must agree to the Terms of Service', 'error'); return; }
 
-            // Check email format
-            if (!validateEmailFormat(email)) {
-                showErrorMessage('Please enter a valid email address');
-                emailField.focus();
-                event.preventDefault();
-                return false;
-            }
+            const submitButton = document.getElementById('registerBtn');
+            const registerSpinner = document.getElementById('registerSpinner');
+            const registerText = document.getElementById('registerText');
+            submitButton.disabled = true;
+            registerSpinner.classList.remove('hidden');
+            registerText.textContent = 'Creating account...';
 
-            // Check phone number
-            if (!phone) {
-                showErrorMessage('Please enter your phone number');
-                document.getElementById('phone').focus();
-                event.preventDefault();
-                return false;
-            }
-
-            // Check password requirements
-            if (!validatePasswordLength(password)) {
-                showErrorMessage('Password must be at least 8 characters long');
-                passwordField.focus();
-                event.preventDefault();
-                return false;
-            }
-
-            if (!validatePasswordUppercase(password)) {
-                showErrorMessage('Password must contain at least one uppercase letter');
-                passwordField.focus();
-                event.preventDefault();
-                return false;
-            }
-
-            if (!validatePasswordNumber(password)) {
-                showErrorMessage('Password must contain at least one number');
-                passwordField.focus();
-                event.preventDefault();
-                return false;
-            }
-
-            if (!validatePasswordSpecial(password)) {
-                showErrorMessage('Password must contain at least one special character');
-                passwordField.focus();
-                event.preventDefault();
-                return false;
-            }
-
-            // Check password match
-            if (!validatePasswordMatch(password, confirmPassword)) {
-                showErrorMessage('Passwords do not match');
-                confirmPasswordField.focus();
-                event.preventDefault();
-                return false;
-            }
-
-            // Check terms and conditions
-            if (!terms) {
-                showErrorMessage('You must agree to the terms and conditions');
-                event.preventDefault();
-                return false;
-            }
-
-            // All validations passed
-            return true;
-        }
-
-        // Show error message with animation
-        function showErrorMessage(message) {
-            // Remove existing error message
-            const existingError = document.querySelector('.error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-
-            // Create error message element
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'error-message mt-4 p-3 bg-red-50 border border-red-200 rounded-md animate-pulse';
-            errorDiv.innerHTML = `
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i data-feather="alert-circle" class="h-4 w-4 text-red-400"></i>
-                    </div>
-                    <div class="ml-2">
-                        <p class="text-sm text-red-700">${message}</p>
-                    </div>
-                </div>
-            `;
-
-            // Insert before the form submit button
-            const submitButton = document.querySelector('button[type="submit"]');
-            submitButton.parentNode.insertBefore(errorDiv, submitButton);
-
-            // Remove after 5 seconds
-            setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.style.opacity = '0';
-                    errorDiv.style.transform = 'translateY(-10px)';
-                    setTimeout(() => {
-                        if (errorDiv.parentNode) {
-                            errorDiv.parentNode.removeChild(errorDiv);
-                        }
-                    }, 300);
-                }
-            }, 5000);
-
-            feather.replace();
-        }
-        
-        // Show success message with animation
-        function showSuccessMessage(message, redirectUrl = null) {
-            // Remove existing messages
-            const existingMessage = document.querySelector('.success-message');
-            if (existingMessage) {
-                existingMessage.remove();
-            }
-
-            // Create success message element
-            const successDiv = document.createElement('div');
-            successDiv.className = 'success-message mt-4 p-3 bg-green-50 border border-green-200 rounded-md';
-            successDiv.innerHTML = `
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i data-feather="check-circle" class="h-4 w-4 text-green-400"></i>
-                    </div>
-                    <div class="ml-2">
-                        <p class="text-sm text-green-700">${message}</p>
-                    </div>
-                </div>
-            `;
-
-            // Insert before the form submit button
-            const submitButton = document.querySelector('button[type="submit"]');
-            submitButton.parentNode.insertBefore(successDiv, submitButton);
-            
-            // Scroll to show the success message
-            successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // Redirect if URL is provided
-            if (redirectUrl) {
-                setTimeout(() => {
-                    window.location.href = redirectUrl;
-                }, 1500);
-            }
-            
-            feather.replace();
-        }
-        
-        // Event listeners
-        passwordField.addEventListener('input', updateAllValidations);
-        confirmPasswordField.addEventListener('input', updatePasswordMatchStatus);
-        emailField.addEventListener('input', updateEmailValidation);
-        
-        // Add form submission event listener
-        registerForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            // Validate form first
-            if (!validateForm(event)) {
-                return;
-            }
-            
-            // Get form data
-            const form = event.target;
-            const formData = new FormData(form);
-            const submitButton = form.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.innerHTML;
-            
             try {
-                // Disable submit button and show loading state
-                submitButton.disabled = true;
-                submitButton.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Processing...
-                `;
-                
-                // Submit form data
-                const response = await fetch(form.action, {
+                const response = await fetch(this.action, {
                     method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    body: new FormData(this),
+                    headers: { 'Accept': 'application/json' }
                 });
-                
                 const result = await response.json();
-                
                 if (result.success) {
-                    // Show success message and redirect
-                    showSuccessMessage(result.message, result.redirect);
+                    showMessage(result.message, 'success');
+                    if (result.redirect) setTimeout(() => { window.location.href = result.redirect; }, 1500);
                 } else if (result.error === 'duplicate_entry') {
-                    // Show error message for duplicate entry
-                    showErrorMessage('Email address already exists. Please try again.');
+                    showMessage('An account with this email already exists.', 'error');
                 } else {
-                    // Show error message
-                    showErrorMessage(result.message || 'Registration failed. Please try again.');
+                    showMessage(result.message || 'Registration failed. Please try again.', 'error');
                 }
-            } catch (error) {
-                console.error('Registration error:', error);
-                showErrorMessage('An error occurred. Please try again later.');
+            } catch (err) {
+                showMessage('An error occurred. Please try again later.', 'error');
             } finally {
-                // Re-enable submit button and restore original text
                 submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonText;
+                registerSpinner.classList.add('hidden');
+                registerText.textContent = 'Create Account';
             }
         });
-        
-        // Initialize password strength and validation
-        updateAllValidations();
-        updatePasswordMatchStatus();
+
+        // Initialize
         updateEmailValidation();
-        
-        // Add animations to CSS
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
-            }
-            .animate-shake {
-                animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-            }
-            button:disabled {
-                opacity: 0.7;
-                cursor: not-allowed;
-            }
-            .success-message {
-                transition: opacity 0.3s ease-in-out;
-            }
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-            .animate-spin {
-                animation: spin 1s linear infinite;
-            }
-        `;
-        document.head.appendChild(style);
+        updatePasswordMatchStatus();
     </script>
 </body>
+
 </html>

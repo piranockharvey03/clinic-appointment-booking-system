@@ -558,6 +558,12 @@
                 <div class="px-5 py-2">
                     <a href="terms.html" class="text-base text-gray-500 hover:text-gray-900">Terms</a>
                 </div>
+                <div class="px-5 py-2 border-l border-gray-300 ml-2">
+                    <a href="admin-login.html" class="text-base text-blue-600 hover:text-blue-800 font-medium">Admin Login</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="doctor-login.html" class="text-base text-blue-600 hover:text-blue-800 font-medium">Doctor Login</a>
+                </div>
             </nav>
             <div class="mt-8 flex justify-center space-x-6">
                 <a href="#" class="text-gray-400 hover:text-gray-500">
@@ -761,12 +767,12 @@
                                 ratingStars.forEach(s => s.classList.remove('text-yellow-400'));
                             }, 5000);
                         } else {
-                            alert('Error: ' + data.message);
+                            customAlert('Error: ' + data.message, 'Submission Error', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while submitting your feedback. Please try again.');
+                        customAlert('An error occurred while submitting your feedback. Please try again.', 'Error', 'error');
                     })
                     .finally(() => {
                         // Reset button state
@@ -776,7 +782,7 @@
                     });
                 } else {
                     // Show error message
-                    alert('Please fill in all required fields correctly.');
+                    customAlert('Please fill in all required fields correctly.', 'Validation Error', 'warning');
                 }
             });
             
@@ -819,5 +825,6 @@
             feather.replace();
         });
     </script>
+    <script src="assets/js/custom-modal.js"></script>
 </body>
 </html>

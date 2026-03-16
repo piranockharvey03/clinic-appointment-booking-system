@@ -2015,7 +2015,7 @@ $_SESSION = [
 3. Database setup:
    - Access phpMyAdmin (http://localhost/phpmyadmin)
    - Create database: medicare
-   - Import: config/database-schema.sql
+  - Import: config/medicare-complete-database.sql
    - Optionally import: config/database-migration.sql
    - Add foreign keys: config/add-foreign-keys.sql
 4. Configure database connection:
@@ -2283,7 +2283,7 @@ hospital/
 ├── config/                       # Configuration files
 │   ├── add-foreign-keys.sql
 │   ├── database-migration.sql
-│   ├── database-schema.sql
+│   ├── medicare-complete-database.sql
 │   └── db-config.php
 │
 ├── public/                       # Public-facing pages
@@ -2591,13 +2591,13 @@ TC-004: Admin Approval
 
 ## Document Approval
 
-| Role                   | Name           | Signature      | Date         |
-| ---------------------- | -------------- | -------------- | ------------ |
-| Lead Architect         | ******\_****** | ******\_****** | ****\_\_**** |
-| Senior Developer       | ******\_****** | ******\_****** | ****\_\_**** |
-| Database Administrator | ******\_****** | ******\_****** | ****\_\_**** |
-| Security Specialist    | ******\_****** | ******\_****** | ****\_\_**** |
-| Project Manager        | ******\_****** | ******\_****** | ****\_\_**** |
+| Role                   | Name               | Signature          | Date             |
+| ---------------------- | ------------------ | ------------------ | ---------------- |
+| Lead Architect         | **\*\***\_**\*\*** | **\*\***\_**\*\*** | \***\*\_\_\*\*** |
+| Senior Developer       | **\*\***\_**\*\*** | **\*\***\_**\*\*** | \***\*\_\_\*\*** |
+| Database Administrator | **\*\***\_**\*\*** | **\*\***\_**\*\*** | \***\*\_\_\*\*** |
+| Security Specialist    | **\*\***\_**\*\*** | **\*\***\_**\*\*** | \***\*\_\_\*\*** |
+| Project Manager        | **\*\***\_**\*\*** | **\*\***\_**\*\*** | \***\*\_\_\*\*** |
 
 ---
 

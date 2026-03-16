@@ -1,6 +1,6 @@
 <?php
 // Booking handler that stores appointments in database
-session_start();
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
 // Check if user is logged in as patient
@@ -62,16 +62,31 @@ if (empty($phone)) {
     exit;
 }
 
-// Map doctorId to known metadata (kept in sync with patient-book.html)
-$doctorDirectory = [
-    'cardio-1' => ['name' => 'Dr. Sarah Johnson',  'specialty' => 'Cardiology',        'photo' => 'http://static.photos/people/200x200/2'],
-    'gm-1'     => ['name' => 'Dr. Michael Chen',   'specialty' => 'General Medicine',  'photo' => 'http://static.photos/people/200x200/3'],
-    'oph-1'    => ['name' => 'Dr. Elena Novak',    'specialty' => 'Ophthalmology',     'photo' => 'http://static.photos/people/200x200/5'],
-    'ortho-1'  => ['name' => 'Dr. Rajesh Kumar',   'specialty' => 'Orthopedics',       'photo' => 'http://static.photos/people/200x200/6'],
-    'ped-1'    => ['name' => 'Dr. Emily Carter',   'specialty' => 'Pediatrics',        'photo' => 'http://static.photos/people/200x200/7'],
-    'derm-1'   => ['name' => 'Dr. Aisha Patel',    'specialty' => 'Dermatology',       'photo' => 'http://static.photos/people/200x200/4'],
-];
-$doctor = isset($doctorDirectory[$doctorId]) ? $doctorDirectory[$doctorId] : ['name' => 'Unknown', 'specialty' => $department, 'photo' => ''];
+// Look up doctor from database using the numeric doctor ID
+$doctor = null;
+try {
+    $conn = getDBConnection();
+    $docStmt = $conn->prepare("SELECT id, full_name, specialty, photo FROM doctors WHERE id = ? AND status = 'active'");
+    $docStmt->bind_param("i", $doctorId);
+    $docStmt->execute();
+    $docResult = $docStmt->get_result();
+    if ($docRow = $docResult->fetch_assoc()) {
+        $doctor = [
+            'name'      => $docRow['full_name'],
+            'specialty' => $docRow['specialty'],
+            'photo'     => $docRow['photo'] ?? ''
+        ];
+    }
+    $docStmt->close();
+    closeDBConnection($conn);
+} catch (Exception $e) {
+    error_log("Doctor lookup error: " . $e->getMessage());
+}
+
+if (!$doctor) {
+    header('Location: ../../public/patient-book.html?error=' . urlencode('Selected doctor is not available. Please choose another doctor.'));
+    exit;
+}
 
 // Generate unique appointment ID
 $appointmentId = uniqid('appt_', true);

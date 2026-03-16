@@ -1,19 +1,9 @@
 <?php
-session_start();
-
-// Database connection
-$host = "localhost";
-$dbname = "medicare";
-$username = "root";
-$password = "";
+require_once '../../config/session-config.php';
+require_once '../../config/db-config.php';
 
 try {
-    $conn = new mysqli($host, $username, $password, $dbname);
-
-    // Check DB connection
-    if ($conn->connect_error) {
-        throw new Exception("Unable to connect to the database. Please try again later.");
-    }
+    $conn = getDBConnection();
 
     // Handle form submission
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -47,7 +37,7 @@ try {
             $stmt->fetch();
 
             // Verify password
-            if (password_verify($password, $hashedPassword)) {
+            if ($hashedPassword && password_verify($password, $hashedPassword)) {
                 // Save session data
                 $_SESSION['user_id'] = $id;
                 $_SESSION['user_name'] = $fullName;
@@ -56,7 +46,7 @@ try {
                 $_SESSION['login_time'] = time();
 
                 // Redirect to admin dashboard
-                header("Location: admin-dashboard.php");
+                header("Location: new-admin-dashboard.php");
                 exit;
             } else {
                 header("Location: ../../public/admin-login.html?error=" . urlencode("Incorrect password. Please try again"));
@@ -70,7 +60,7 @@ try {
         $stmt->close();
     }
 
-    $conn->close();
+    closeDBConnection($conn);
 } catch (Exception $e) {
     error_log("Admin login error: " . $e->getMessage());
     header("Location: ../../public/admin-login.html?error=" . urlencode("An error occurred. Please try again later"));

@@ -1,0 +1,22 @@
+# Ignore database backups
+backups/*.sql
+
+# Ignore environment configuration
+.env
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+tmp/
+temp/
