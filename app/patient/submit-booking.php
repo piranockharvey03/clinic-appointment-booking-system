@@ -62,32 +62,6 @@ if (empty($phone)) {
     exit;
 }
 
-// Look up doctor from database using the numeric doctor ID
-$doctor = null;
-try {
-    $conn = getDBConnection();
-    $docStmt = $conn->prepare("SELECT id, full_name, specialty, photo FROM doctors WHERE id = ? AND status = 'active'");
-    $docStmt->bind_param("i", $doctorId);
-    $docStmt->execute();
-    $docResult = $docStmt->get_result();
-    if ($docRow = $docResult->fetch_assoc()) {
-        $doctor = [
-            'name'      => $docRow['full_name'],
-            'specialty' => $docRow['specialty'],
-            'photo'     => $docRow['photo'] ?? ''
-        ];
-    }
-    $docStmt->close();
-    closeDBConnection($conn);
-} catch (Exception $e) {
-    error_log("Doctor lookup error: " . $e->getMessage());
-}
-
-if (!$doctor) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Selected doctor is not available. Please choose another doctor.'));
-    exit;
-}
-
 // Generate unique appointment ID
 $appointmentId = uniqid('appt_', true);
 
@@ -95,21 +69,43 @@ $appointmentId = uniqid('appt_', true);
 $patientId = $_SESSION['user_id'];
 $patientName = $_SESSION['user_name'];
 
-try {
-    // Get database connection
-    $conn = getDBConnection();
+$conn = null;
 
-    // Prepare SQL statement to insert appointment
-    $stmt = $conn->prepare("
+try {
+    $conn = getDBConnection();
+    beginDBTransaction($conn);
+
+    $doctorLookupId = (int) $doctorId;
+    $docStmt = prepareDBStatement($conn, "SELECT id, full_name, specialty, photo FROM doctors WHERE id = ? AND status = 'active' FOR UPDATE");
+    $docStmt->bind_param("i", $doctorLookupId);
+    executeDBStatement($docStmt);
+    $docResult = $docStmt->get_result();
+    $docRow = $docResult ? $docResult->fetch_assoc() : null;
+    $docResult?->free();
+    $docStmt->close();
+
+    if (!$docRow) {
+        throw new RuntimeException('Selected doctor is not available. Please choose another doctor.');
+    }
+
+    $doctor = [
+        'name' => $docRow['full_name'],
+        'specialty' => $docRow['specialty'],
+        'photo' => $docRow['photo'] ?? ''
+    ];
+    $slotKey = buildAppointmentSlotKey($doctorId, $date, $time);
+
+    $stmt = prepareDBStatement($conn, "
         INSERT INTO appointments 
         (appointment_id, patient_id, patient_name, phone, department, doctor_id, 
-         doctor_name, doctor_specialty, doctor_photo, appointment_date, appointment_time, 
+         doctor_name, doctor_specialty, doctor_photo, appointment_date, appointment_time,
+         booking_slot_key,
          reason, notes, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     ");
 
     $stmt->bind_param(
-        "sisssssssssss",
+        "sissssssssssss",
         $appointmentId,
         $patientId,
         $patientName,
@@ -121,38 +117,44 @@ try {
         $doctor['photo'],
         $date,
         $time,
+        $slotKey,
         $reason,
         $notes
     );
+    executeDBStatement($stmt);
+    $stmt->close();
 
-    // Execute the statement
-    if ($stmt->execute()) {
-        // Create a notification for the admin
-        $notificationMessage = "New appointment booked with " . $doctor['name'] . " on " . $date . " at " . $time;
-        $notificationStmt = $conn->prepare("
-            INSERT INTO notifications 
-            (type, message, appointment_id) 
-            VALUES ('new_appointment', ?, ?)
-        ");
-        $notificationStmt->bind_param("ss", $notificationMessage, $appointmentId);
-        $notificationStmt->execute();
-        $notificationStmt->close();
+    $notificationMessage = "New appointment booked with " . $doctor['name'] . " on " . $date . " at " . $time;
+    $notificationStmt = prepareDBStatement($conn, "
+        INSERT INTO notifications 
+        (type, message, appointment_id) 
+        VALUES ('new_appointment', ?, ?)
+    ");
+    $notificationStmt->bind_param("ss", $notificationMessage, $appointmentId);
+    executeDBStatement($notificationStmt);
+    $notificationStmt->close();
 
-        $stmt->close();
-        closeDBConnection($conn);
-        // Redirect to the appointments page with success message
-        header('Location: patient-appointments.php?success=' . urlencode('Appointment booked successfully'));
-        exit;
-    } else {
-        throw new Exception("Failed to create appointment. Please try again.");
-    }
+    commitDBTransaction($conn);
+    closeDBConnection($conn);
+
+    header('Location: patient-appointments.php?success=' . urlencode('Appointment booked successfully'));
+    exit;
 } catch (Exception $e) {
-    error_log("Appointment booking error: " . $e->getMessage());
-    // Redirect back to booking page with specific error
-    $errorMsg = "Unable to book appointment. Please try again or contact support.";
-    if (strpos($e->getMessage(), 'Duplicate') !== false) {
-        $errorMsg = "This appointment time is already taken. Please select a different time.";
+    if ($conn) {
+        rollbackDBTransaction($conn);
+        closeDBConnection($conn);
     }
+
+    error_log("Appointment booking error: " . $e->getMessage());
+
+    $errorMsg = "Unable to book appointment. Please try again or contact support.";
+
+    if (isDuplicateKeyException($e)) {
+        $errorMsg = "This appointment time is already taken. Please select a different time.";
+    } elseif ($e->getMessage() === 'Selected doctor is not available. Please choose another doctor.') {
+        $errorMsg = $e->getMessage();
+    }
+
     header('Location: ../../public/patient-book.html?error=' . urlencode($errorMsg));
     exit;
 }

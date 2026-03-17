@@ -10,24 +10,33 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
 
 // Handle doctor actions: approve, cancel, reschedule
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['appt_id'])) {
+    $conn = null;
+
     try {
         $conn = getDBConnection();
+        beginDBTransaction($conn);
+
         $apptId = $_POST['appt_id'];
         $doctorId = (int)$_SESSION['user_id'];
+        $action = $_POST['action'];
 
         // Get appointment details for notification (ownership enforced)
-        $apptStmt = $conn->prepare("SELECT patient_id, patient_name, appointment_date, appointment_time, doctor_name FROM appointments WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
+        $apptStmt = prepareDBStatement($conn, "SELECT patient_id, patient_name, appointment_date, appointment_time, doctor_name FROM appointments WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ? FOR UPDATE");
         $apptStmt->bind_param("si", $apptId, $doctorId);
-        $apptStmt->execute();
+        executeDBStatement($apptStmt);
         $apptResult = $apptStmt->get_result();
         $appointment = $apptResult ? $apptResult->fetch_assoc() : null;
         $apptResult?->free();
         $apptStmt->close();
 
-        if ($_POST['action'] === 'approve') {
-            $stmt = $conn->prepare("UPDATE appointments SET status = 'approved' WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
+        if (!$appointment) {
+            throw new RuntimeException('Appointment not found or access denied.');
+        }
+
+        if ($action === 'approve') {
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'approved', booking_slot_key = COALESCE(booking_slot_key, CONCAT(doctor_id, '|', DATE_FORMAT(appointment_date, '%Y-%m-%d'), '|', TIME_FORMAT(appointment_time, '%H:%i:%s'))) WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
             $stmt->bind_param("si", $apptId, $doctorId);
-            $stmt->execute();
+            executeDBStatement($stmt);
             $stmt->close();
 
             $logDesc = $appointment
@@ -36,25 +45,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             logActivity($conn, $_SESSION['user_id'], $_SESSION['user_name'], 'doctor', 'approve_appointment', $logDesc);
 
             // Create patient notification for approval
-            if ($appointment) {
+            if (!empty($appointment['patient_id'])) {
                 $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been approved.";
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'approved', ?)");
+                $notificationStmt = prepareDBStatement($conn, "INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'approved', ?)");
                 $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
-                $notificationStmt->execute();
+                executeDBStatement($notificationStmt);
                 $notificationStmt->close();
             }
 
             // Create doctor notification for approval
             $doctorMessage = "Appointment approved: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'];
-            $doctorNotificationStmt = $conn->prepare("INSERT INTO doctor_notifications (type, message, appointment_id) VALUES ('approved', ?, ?)");
-            $doctorNotificationStmt->bind_param("ss", $doctorMessage, $apptId);
-            $doctorNotificationStmt->execute();
+            $doctorNotificationStmt = prepareDBStatement($conn, "INSERT INTO doctor_notifications (doctor_id, type, message, appointment_id) VALUES (?, 'approved', ?, ?)");
+            $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
+            executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
-        } elseif ($_POST['action'] === 'cancel') {
+        } elseif ($action === 'cancel') {
             $cancelReason = trim($_POST['cancel_reason'] ?? '');
-            $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled', cancel_reason = ? WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'canceled', cancel_reason = ?, booking_slot_key = NULL WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
             $stmt->bind_param("ssi", $cancelReason, $apptId, $doctorId);
-            $stmt->execute();
+            executeDBStatement($stmt);
             $stmt->close();
 
             $reasonNote = $cancelReason ? " Reason: {$cancelReason}" : '';
@@ -64,51 +73,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             logActivity($conn, $_SESSION['user_id'], $_SESSION['user_name'], 'doctor', 'cancel_appointment', $logDesc);
 
             // Create patient notification for cancellation
-            if ($appointment) {
+            if (!empty($appointment['patient_id'])) {
                 $reasonNote = $cancelReason ? " Reason: {$cancelReason}." : '';
                 $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been canceled." . $reasonNote;
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'canceled', ?)");
+                $notificationStmt = prepareDBStatement($conn, "INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'canceled', ?)");
                 $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
-                $notificationStmt->execute();
+                executeDBStatement($notificationStmt);
                 $notificationStmt->close();
             }
 
             // Create doctor notification for cancellation
             $doctorMessage = "Appointment canceled: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'];
-            $doctorNotificationStmt = $conn->prepare("INSERT INTO doctor_notifications (type, message, appointment_id) VALUES ('canceled', ?, ?)");
-            $doctorNotificationStmt->bind_param("ss", $doctorMessage, $apptId);
-            $doctorNotificationStmt->execute();
+            $doctorNotificationStmt = prepareDBStatement($conn, "INSERT INTO doctor_notifications (doctor_id, type, message, appointment_id) VALUES (?, 'canceled', ?, ?)");
+            $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
+            executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
-        } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
-            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'rescheduled' WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
-            $stmt->bind_param("sssi", $_POST['new_date'], $_POST['new_time'], $apptId, $doctorId);
-            $stmt->execute();
+        } elseif ($action === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
+            $newDate = $_POST['new_date'];
+            $newTime = $_POST['new_time'];
+            $newSlotKey = buildAppointmentSlotKey($doctorId, $newDate, $newTime);
+
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET appointment_date = ?, appointment_time = ?, booking_slot_key = ?, status = 'rescheduled' WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
+            $stmt->bind_param("ssssi", $newDate, $newTime, $newSlotKey, $apptId, $doctorId);
+            executeDBStatement($stmt);
             $stmt->close();
 
             $logDesc = $appointment
-                ? "Rescheduled appointment {$apptId} for patient " . $appointment['patient_name'] . " to " . $_POST['new_date'] . " at " . $_POST['new_time']
-                : "Rescheduled appointment {$apptId} to " . $_POST['new_date'] . " at " . $_POST['new_time'];
+                ? "Rescheduled appointment {$apptId} for patient " . $appointment['patient_name'] . " to " . $newDate . " at " . $newTime
+                : "Rescheduled appointment {$apptId} to " . $newDate . " at " . $newTime;
             logActivity($conn, $_SESSION['user_id'], $_SESSION['user_name'], 'doctor', 'reschedule_appointment', $logDesc);
 
             // Create patient notification for rescheduling
-            if ($appointment) {
-                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " has been rescheduled to " . $_POST['new_date'] . " at " . $_POST['new_time'] . ".";
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'rescheduled', ?)");
+            if (!empty($appointment['patient_id'])) {
+                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " has been rescheduled to " . $newDate . " at " . $newTime . ".";
+                $notificationStmt = prepareDBStatement($conn, "INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'rescheduled', ?)");
                 $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
-                $notificationStmt->execute();
+                executeDBStatement($notificationStmt);
                 $notificationStmt->close();
             }
 
             // Create doctor notification for rescheduling
-            $doctorMessage = "Appointment rescheduled: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " to " . $_POST['new_date'] . " at " . $_POST['new_time'];
-            $doctorNotificationStmt = $conn->prepare("INSERT INTO doctor_notifications (type, message, appointment_id) VALUES ('rescheduled', ?, ?)");
-            $doctorNotificationStmt->bind_param("ss", $doctorMessage, $apptId);
-            $doctorNotificationStmt->execute();
+            $doctorMessage = "Appointment rescheduled: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " to " . $newDate . " at " . $newTime;
+            $doctorNotificationStmt = prepareDBStatement($conn, "INSERT INTO doctor_notifications (doctor_id, type, message, appointment_id) VALUES (?, 'rescheduled', ?, ?)");
+            $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
+            executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
-        } elseif ($_POST['action'] === 'complete') {
-            $stmt = $conn->prepare("UPDATE appointments SET status = 'completed' WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
+        } elseif ($action === 'complete') {
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'completed', booking_slot_key = NULL WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
             $stmt->bind_param("si", $apptId, $doctorId);
-            $stmt->execute();
+            executeDBStatement($stmt);
             $stmt->close();
 
             $logDesc = $appointment
@@ -117,24 +130,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             logActivity($conn, $_SESSION['user_id'], $_SESSION['user_name'], 'doctor', 'complete_appointment', $logDesc);
 
             // Create patient notification for completion
-            if ($appointment) {
+            if (!empty($appointment['patient_id'])) {
                 $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'] . " has been marked as completed.";
-                $notificationStmt = $conn->prepare("INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'completed', ?)");
+                $notificationStmt = prepareDBStatement($conn, "INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'completed', ?)");
                 $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
-                $notificationStmt->execute();
+                executeDBStatement($notificationStmt);
                 $notificationStmt->close();
             }
 
             // Create doctor notification for completion
             $doctorMessage = "Appointment completed: " . $appointment['patient_name'] . " with Dr. " . $appointment['doctor_name'] . " on " . $appointment['appointment_date'] . " at " . $appointment['appointment_time'];
-            $doctorNotificationStmt = $conn->prepare("INSERT INTO doctor_notifications (type, message, appointment_id) VALUES ('completed', ?, ?)");
-            $doctorNotificationStmt->bind_param("ss", $doctorMessage, $apptId);
-            $doctorNotificationStmt->execute();
+            $doctorNotificationStmt = prepareDBStatement($conn, "INSERT INTO doctor_notifications (doctor_id, type, message, appointment_id) VALUES (?, 'completed', ?, ?)");
+            $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
+            executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
         }
 
+        commitDBTransaction($conn);
         closeDBConnection($conn);
     } catch (Exception $e) {
+        if ($conn) {
+            rollbackDBTransaction($conn);
+            closeDBConnection($conn);
+        }
+
         error_log("Doctor appointment action error: " . $e->getMessage());
     }
 
@@ -349,7 +368,7 @@ if ($view_id) {
                             <a href="?tab=rescheduled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'rescheduled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Rescheduled</a>
                             <a href="?tab=canceled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'canceled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Canceled</a>
                             <a href="?tab=completed" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Completed</a>
-                            <button id="toggleFilters" class="ml-auto px-3 py-1.5 text-sm rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                            <button id="toggleFilters" class="ml-0 sm:ml-auto w-full sm:w-auto justify-center px-3 py-1.5 text-sm rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 flex items-center gap-1">
                                 <i data-feather="sliders" class="h-4 w-4"></i>
                                 Filters
                             </button>
@@ -415,7 +434,7 @@ if ($view_id) {
                                 <div id="noAppointments" class="p-6 text-sm text-gray-600">No appointments in this category.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
-                                    <div class="appointment-card p-4 flex items-center justify-between"
+                                    <div class="appointment-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                                         data-patient-name="<?= htmlspecialchars(strtolower($appt['patientName'])) ?>"
                                         data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>"
                                         data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
@@ -438,7 +457,7 @@ if ($view_id) {
                                                 <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: <?= htmlspecialchars($appt['department']) ?></div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="w-full sm:w-auto flex flex-wrap items-center gap-2 justify-start sm:justify-end">
                                             <?php
                                             $status = strtolower($appt['status'] ?? 'pending');
                                             ?>

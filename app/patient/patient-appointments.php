@@ -10,26 +10,38 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
 
 // Handle status change actions and reschedule
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['appt_id'])) {
+    $conn = null;
+
     try {
         $conn = getDBConnection();
+        beginDBTransaction($conn);
+
         $apptId = $_POST['appt_id'];
         $patientId = (int)$_SESSION['user_id'];
 
         if ($_POST['action'] === 'cancel') {
             $cancelReason = trim($_POST['cancel_reason'] ?? '');
-            $stmt = $conn->prepare("UPDATE appointments SET status = 'canceled', cancel_reason = ? WHERE appointment_id = ? AND patient_id = ?");
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'canceled', cancel_reason = ?, booking_slot_key = NULL WHERE appointment_id = ? AND patient_id = ?");
             $stmt->bind_param("ssi", $cancelReason, $apptId, $patientId);
-            $stmt->execute();
+            executeDBStatement($stmt);
             $stmt->close();
         } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
-            $stmt = $conn->prepare("UPDATE appointments SET appointment_date = ?, appointment_time = ?, status = 'rescheduled' WHERE appointment_id = ? AND patient_id = ?");
-            $stmt->bind_param("sssi", $_POST['new_date'], $_POST['new_time'], $apptId, $patientId);
-            $stmt->execute();
+            $newDate = $_POST['new_date'];
+            $newTime = $_POST['new_time'];
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET appointment_date = ?, appointment_time = ?, booking_slot_key = CONCAT(doctor_id, '|', ?, '|', ?), status = 'rescheduled' WHERE appointment_id = ? AND patient_id = ?");
+            $stmt->bind_param("sssssi", $newDate, $newTime, $newDate, $newTime, $apptId, $patientId);
+            executeDBStatement($stmt);
             $stmt->close();
         }
 
+        commitDBTransaction($conn);
         closeDBConnection($conn);
     } catch (Exception $e) {
+        if ($conn) {
+            rollbackDBTransaction($conn);
+            closeDBConnection($conn);
+        }
+
         error_log("Patient appointment action error: " . $e->getMessage());
     }
 
@@ -217,9 +229,9 @@ if ($reschedule_id) {
                                 <a href="?tab=canceled" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'canceled' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Canceled</a>
                                 <a href="?tab=completed" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'completed' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Completed</a>
                             </div>
-                            <div class="relative">
+                            <div class="relative w-full sm:w-auto">
                                 <i data-feather="search" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400"></i>
-                                <input id="patientApptSearch" class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Search doctor or department" />
+                                <input id="patientApptSearch" class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm w-full sm:w-auto" placeholder="Search doctor or department" />
                             </div>
                         </div>
                         <div class="divide-y divide-gray-200">
@@ -227,7 +239,7 @@ if ($reschedule_id) {
                                 <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../../public/patient-book.html">Book your appointment here</a>.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
-                                    <div class="appointment-card p-4 flex items-center justify-between"
+                                    <div class="appointment-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                                         data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>"
                                         data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
                                         data-doctor-specialty="<?= htmlspecialchars(strtolower($appt['doctorSpecialty'])) ?>">
@@ -245,7 +257,7 @@ if ($reschedule_id) {
                                                 <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: <?= htmlspecialchars($appt['department']) ?></div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-2">
+                                        <div class="w-full sm:w-auto flex flex-wrap items-center gap-2 justify-start sm:justify-end">
                                             <?php
                                             $status = strtolower($appt['status'] ?? 'pending');
                                             ?>

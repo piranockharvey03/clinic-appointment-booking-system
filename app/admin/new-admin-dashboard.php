@@ -75,14 +75,20 @@ try {
 </head>
 
 <body class="bg-gray-50">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="hidden md:flex md:flex-shrink-0">
+        <aside class="sidebar bg-blue-800 text-white" id="sidebar">
             <div class="flex flex-col w-64">
                 <div class="flex flex-col flex-grow bg-blue-800 pt-5 pb-4 overflow-y-auto">
-                    <div class="flex items-center flex-shrink-0 px-4">
-                        <i data-feather="activity" class="text-white mr-2"></i>
-                        <span class="text-xl font-semibold text-white">MediCare Admin</span>
+                    <div class="flex items-center justify-between flex-shrink-0 px-4">
+                        <div class="flex items-center">
+                            <i data-feather="activity" class="text-white mr-2"></i>
+                            <span class="text-xl font-semibold text-white">MediCare Admin</span>
+                        </div>
+                        <button class="text-blue-200 hover:text-white md:hidden" id="menuBtn" type="button">
+                            <i data-feather="menu" class="h-6 w-6"></i>
+                        </button>
                     </div>
                     <nav class="mt-5 flex-1 px-2 space-y-1">
                         <a href="new-admin-dashboard.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
@@ -123,9 +129,9 @@ try {
         </aside>
 
         <!-- Main content -->
-        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+        <div class="main-content flex flex-col w-0 flex-1 overflow-hidden">
             <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
-                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
+                <button type="button" id="mobileMenuBtn" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
                     <i data-feather="menu" class="h-6 w-6"></i>
                 </button>
                 <div class="flex-1 px-4 flex justify-between">
@@ -228,52 +234,54 @@ try {
                                 <a href="manage-doctors.php" class="text-sm text-blue-600 hover:text-blue-500">View all →</a>
                             </div>
                             <div class="border-t border-gray-200">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        <?php if (empty($recentDoctors)): ?>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
                                             <tr>
-                                                <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No doctors found</td>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                                             </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($recentDoctors as $doctor): ?>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <?php if (empty($recentDoctors)): ?>
                                                 <tr>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                        <?= htmlspecialchars($doctor['full_name']) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= htmlspecialchars($doctor['email']) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= htmlspecialchars($doctor['specialty']) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= htmlspecialchars($doctor['department']) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap">
-                                                        <?php if ($doctor['status'] === 'active'): ?>
-                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                                                        <?php else: ?>
-                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= date('M d, Y', strtotime($doctor['created_at'])) ?>
-                                                    </td>
+                                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No doctors found</td>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                            <?php else: ?>
+                                                <?php foreach ($recentDoctors as $doctor): ?>
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                            <?= htmlspecialchars($doctor['full_name']) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= htmlspecialchars($doctor['email']) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= htmlspecialchars($doctor['specialty']) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= htmlspecialchars($doctor['department']) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            <?php if ($doctor['status'] === 'active'): ?>
+                                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                                            <?php else: ?>
+                                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= date('M d, Y', strtotime($doctor['created_at'])) ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 

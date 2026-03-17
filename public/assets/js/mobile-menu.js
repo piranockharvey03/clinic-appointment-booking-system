@@ -5,10 +5,31 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const menuBtn = document.getElementById('menuBtn');
 
-    function toggleSidebar() {
+    function isMobileView() {
+        return window.matchMedia('(max-width: 768px)').matches;
+    }
+
+    function openSidebar() {
+        if (sidebar && overlay && isMobileView()) {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+        }
+    }
+
+    function closeSidebar() {
         if (sidebar && overlay) {
-            sidebar.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        }
+    }
+
+    function toggleSidebar() {
+        if (sidebar && overlay && isMobileView()) {
+            if (sidebar.classList.contains('mobile-open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
         }
     }
 
@@ -21,7 +42,35 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (overlay) {
-        overlay.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', closeSidebar);
+    }
+
+    if (sidebar) {
+        const sidebarLinks = sidebar.querySelectorAll('a');
+        sidebarLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (isMobileView()) {
+                    closeSidebar();
+                }
+            });
+        });
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeSidebar();
+        }
+    });
+
+    window.addEventListener('resize', function() {
+        if (!isMobileView()) {
+            closeSidebar();
+        }
+    });
+
+    // Ensure overlay is reset on initial desktop load.
+    if (!isMobileView()) {
+        closeSidebar();
     }
 
     // Re-render feather icons after DOM changes

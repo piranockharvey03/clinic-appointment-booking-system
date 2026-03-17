@@ -90,7 +90,7 @@ $fullName = $_SESSION['user_name'];
                     <div class="bg-white shadow rounded-lg p-6 mb-6">
                         <h2 class="text-xl font-bold mb-6 text-gray-900">Appearance</h2>
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Dark Mode</h3>
                                     <p class="text-sm text-gray-500">Toggle dark mode for better viewing at night</p>
@@ -107,7 +107,7 @@ $fullName = $_SESSION['user_name'];
                     <div class="bg-white shadow rounded-lg p-6 mb-6">
                         <h2 class="text-xl font-bold mb-6 text-gray-900">Notifications</h2>
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Email Notifications</h3>
                                     <p class="text-sm text-gray-500">Receive system alerts via email</p>
@@ -124,7 +124,7 @@ $fullName = $_SESSION['user_name'];
                     <div class="bg-white shadow rounded-lg p-6 mb-6">
                         <h2 class="text-xl font-bold mb-6 text-gray-900">System</h2>
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Auto-Approve Appointments</h3>
                                     <p class="text-sm text-gray-500">Automatically approve new appointments</p>
@@ -134,7 +134,7 @@ $fullName = $_SESSION['user_name'];
                                     <div class="toggle-switch" id="autoApproveToggle"></div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between py-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3">
                                 <div>
                                     <h3 class="text-base font-medium text-gray-900">Maintenance Mode</h3>
                                     <p class="text-sm text-gray-500">Put the system in maintenance mode</p>
@@ -165,7 +165,7 @@ $fullName = $_SESSION['user_name'];
 
     <!-- Password Change Modal -->
     <div id="doctorPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900">Change Doctor Password</h3>

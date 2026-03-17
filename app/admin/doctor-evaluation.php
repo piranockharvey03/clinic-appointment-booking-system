@@ -162,25 +162,25 @@ function completionRate(int $completed, int $total): string
                 <div class="flex-1 overflow-y-auto">
                     <nav class="p-4">
                         <div class="space-y-1">
-                            <a href="admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="new-admin-dashboard.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="home" class="mr-3 h-5 w-5"></i>
                                 Dashboard
-                            </a>
-                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
-                                Appointments
                             </a>
                             <a href="manage-doctors.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="users" class="mr-3 h-5 w-5"></i>
                                 Manage Doctors
                             </a>
-                            <a href="doctor-evaluation.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="reports.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="bar-chart-2" class="mr-3 h-5 w-5"></i>
+                                Reports
+                            </a>
+                            <a href="doctor-evaluation.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                                <i data-feather="activity" class="mr-3 h-5 w-5"></i>
                                 Doctor Evaluation
                             </a>
-                            <a href="reports.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
-                                <i data-feather="file-text" class="mr-3 h-5 w-5"></i>
-                                Reports
+                            <a href="admin-appointments.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
+                                Appointments
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
@@ -318,7 +318,7 @@ function completionRate(int $completed, int $total): string
                     $grandApproved  = array_sum(array_column($summaryRows, 'approved'));
                     $grandPending   = array_sum(array_column($summaryRows, 'pending'));
                     ?>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div class="bg-white rounded-lg shadow p-4 text-center">
                             <p class="text-2xl font-bold text-gray-900"><?= $grandTotal ?></p>
                             <p class="text-sm text-gray-500">Total Appointments</p>

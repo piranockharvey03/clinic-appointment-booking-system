@@ -318,14 +318,20 @@ try {
 </head>
 
 <body class="bg-gray-50">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="hidden md:flex md:flex-shrink-0">
+        <aside class="sidebar bg-blue-800 text-white" id="sidebar">
             <div class="flex flex-col w-64">
                 <div class="flex flex-col flex-grow bg-blue-800 pt-5 pb-4 overflow-y-auto">
-                    <div class="flex items-center flex-shrink-0 px-4">
-                        <i data-feather="activity" class="text-white mr-2"></i>
-                        <span class="text-xl font-semibold text-white">MediCare Admin</span>
+                    <div class="flex items-center justify-between flex-shrink-0 px-4">
+                        <div class="flex items-center">
+                            <i data-feather="activity" class="text-white mr-2"></i>
+                            <span class="text-xl font-semibold text-white">MediCare Admin</span>
+                        </div>
+                        <button class="text-blue-200 hover:text-white md:hidden" id="menuBtn" type="button">
+                            <i data-feather="menu" class="h-6 w-6"></i>
+                        </button>
                     </div>
                     <nav class="mt-5 flex-1 px-2 space-y-1">
                         <a href="new-admin-dashboard.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
@@ -366,9 +372,9 @@ try {
         </aside>
 
         <!-- Main content -->
-        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+        <div class="main-content flex flex-col w-0 flex-1 overflow-hidden">
             <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
-                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
+                <button type="button" id="mobileMenuBtn" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
                     <i data-feather="menu" class="h-6 w-6"></i>
                 </button>
                 <div class="flex-1 px-4 flex justify-between">
@@ -482,7 +488,7 @@ try {
 
                         <!-- Filter Tabs -->
                         <div class="mb-6 border-b border-gray-200">
-                            <nav class="-mb-px flex space-x-8">
+                            <nav class="-mb-px flex flex-wrap gap-3 sm:gap-8">
                                 <?php
                                 $tabParams = '';
                                 if ($filterDepartment !== 'all') $tabParams .= '&department=' . urlencode($filterDepartment);
@@ -502,82 +508,84 @@ try {
 
                         <!-- Doctors Table -->
                         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <?php if (empty($doctors)): ?>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
                                         <tr>
-                                            <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No doctors found</td>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($doctors as $doctor): ?>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <?php if (empty($doctors)): ?>
                                             <tr>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    <?= htmlspecialchars($doctor['full_name']) ?>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <?= htmlspecialchars($doctor['email']) ?>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <?= htmlspecialchars($doctor['phone']) ?>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <?= htmlspecialchars($doctor['specialty']) ?>
-                                                </td>
-                                                <td class="px-6 py-4 text-sm text-gray-500">
-                                                    <div class="max-w-xs">
-                                                        <?php
-                                                        if (!empty($doctor['all_departments'])) {
-                                                            $depts = explode(', ', $doctor['all_departments']);
-                                                            $shortDepts = array_map(function ($d) {
-                                                                return str_replace(' Department', '', $d);
-                                                            }, $depts);
-                                                            echo htmlspecialchars(implode(', ', $shortDepts));
-                                                        } else {
-                                                            echo htmlspecialchars($doctor['department']);
-                                                        }
-                                                        ?>
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    <?= htmlspecialchars($doctor['experience_years']) ?> years
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <?php if ($doctor['status'] === 'active'): ?>
-                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                                                    <?php else: ?>
-                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button onclick='showEditDoctorModal(<?= json_encode($doctor) ?>)' class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                                        Edit
-                                                    </button>
-                                                    <form method="POST" class="inline-block">
-                                                        <input type="hidden" name="action" value="update_status">
-                                                        <input type="hidden" name="doctor_id" value="<?= $doctor['id'] ?>">
-                                                        <input type="hidden" name="new_status" value="<?= $doctor['status'] === 'active' ? 'inactive' : 'active' ?>">
-                                                        <button type="submit" class="text-blue-600 hover:text-blue-900">
-                                                            <?= $doctor['status'] === 'active' ? 'Deactivate' : 'Activate' ?>
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No doctors found</td>
                                             </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
+                                        <?php else: ?>
+                                            <?php foreach ($doctors as $doctor): ?>
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        <?= htmlspecialchars($doctor['full_name']) ?>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <?= htmlspecialchars($doctor['email']) ?>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <?= htmlspecialchars($doctor['phone']) ?>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <?= htmlspecialchars($doctor['specialty']) ?>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-sm text-gray-500">
+                                                        <div class="max-w-xs">
+                                                            <?php
+                                                            if (!empty($doctor['all_departments'])) {
+                                                                $depts = explode(', ', $doctor['all_departments']);
+                                                                $shortDepts = array_map(function ($d) {
+                                                                    return str_replace(' Department', '', $d);
+                                                                }, $depts);
+                                                                echo htmlspecialchars(implode(', ', $shortDepts));
+                                                            } else {
+                                                                echo htmlspecialchars($doctor['department']);
+                                                            }
+                                                            ?>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <?= htmlspecialchars($doctor['experience_years']) ?> years
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <?php if ($doctor['status'] === 'active'): ?>
+                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                                        <?php else: ?>
+                                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactive</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <button onclick='showEditDoctorModal(<?= json_encode($doctor) ?>)' class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                                            Edit
+                                                        </button>
+                                                        <form method="POST" class="inline-block">
+                                                            <input type="hidden" name="action" value="update_status">
+                                                            <input type="hidden" name="doctor_id" value="<?= $doctor['id'] ?>">
+                                                            <input type="hidden" name="new_status" value="<?= $doctor['status'] === 'active' ? 'inactive' : 'active' ?>">
+                                                            <button type="submit" class="text-blue-600 hover:text-blue-900">
+                                                                <?= $doctor['status'] === 'active' ? 'Deactivate' : 'Activate' ?>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -599,7 +607,7 @@ try {
                 <form method="POST">
                     <input type="hidden" name="action" value="add">
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
                             <input type="text" name="full_name" required
@@ -651,7 +659,7 @@ try {
                             <label class="block text-sm font-medium text-gray-700 mb-2">Additional Specialties (Optional)</label>
                             <p class="text-xs text-gray-500 mb-2">Select other specialties this doctor has experience with</p>
                             <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                                <div class="grid grid-cols-3 gap-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                     <label class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded">
                                         <input type="checkbox" name="additional_specialties[]" value="Anesthesiology" class="rounded">
                                         <span class="text-sm">Anesthesiology</span>
@@ -779,7 +787,7 @@ try {
                         <div class="mb-4 col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Departments * (Select one or more)</label>
                             <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                                <div class="grid grid-cols-2 gap-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <label class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded">
                                         <input type="checkbox" name="departments[]" value="Cardiology Department" class="rounded">
                                         <span class="text-sm">Cardiology</span>
@@ -923,7 +931,7 @@ try {
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="doctor_id" id="edit_doctor_id">
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
                             <input type="text" name="full_name" id="edit_full_name" required
@@ -975,7 +983,7 @@ try {
                             <label class="block text-sm font-medium text-gray-700 mb-2">Additional Specialties (Optional)</label>
                             <p class="text-xs text-gray-500 mb-2">Select other specialties this doctor has experience with</p>
                             <div class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                                <div class="grid grid-cols-3 gap-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                     <label class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded">
                                         <input type="checkbox" name="additional_specialties[]" value="Anesthesiology" class="rounded edit-spec-checkbox">
                                         <span class="text-sm">Anesthesiology</span>
@@ -1103,7 +1111,7 @@ try {
                         <div class="mb-4 col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Departments * (Select one or more)</label>
                             <div id="edit_departments_container" class="max-h-48 overflow-y-auto border border-gray-300 rounded-md p-3">
-                                <div class="grid grid-cols-2 gap-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     <label class="flex items-center space-x-2 p-1 hover:bg-gray-50 rounded">
                                         <input type="checkbox" name="departments[]" value="Cardiology Department" class="rounded edit-dept-checkbox">
                                         <span class="text-sm">Cardiology</span>

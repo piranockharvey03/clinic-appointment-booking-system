@@ -78,14 +78,20 @@ try {
 </head>
 
 <body class="bg-gray-50">
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-        <aside class="hidden md:flex md:flex-shrink-0">
+        <aside class="sidebar bg-blue-800 text-white" id="sidebar">
             <div class="flex flex-col w-64">
                 <div class="flex flex-col flex-grow bg-blue-800 pt-5 pb-4 overflow-y-auto">
-                    <div class="flex items-center flex-shrink-0 px-4">
-                        <i data-feather="activity" class="text-white mr-2"></i>
-                        <span class="text-xl font-semibold text-white">MediCare Admin</span>
+                    <div class="flex items-center justify-between flex-shrink-0 px-4">
+                        <div class="flex items-center">
+                            <i data-feather="activity" class="text-white mr-2"></i>
+                            <span class="text-xl font-semibold text-white">MediCare Admin</span>
+                        </div>
+                        <button class="text-blue-200 hover:text-white md:hidden" id="menuBtn" type="button">
+                            <i data-feather="menu" class="h-6 w-6"></i>
+                        </button>
                     </div>
                     <nav class="mt-5 flex-1 px-2 space-y-1">
                         <a href="new-admin-dashboard.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
@@ -126,9 +132,9 @@ try {
         </aside>
 
         <!-- Main content -->
-        <div class="flex flex-col w-0 flex-1 overflow-hidden">
+        <div class="main-content flex flex-col w-0 flex-1 overflow-hidden">
             <div class="relative z-10 flex-shrink-0 flex h-16 bg-white shadow">
-                <button type="button" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
+                <button type="button" id="mobileMenuBtn" class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
                     <i data-feather="menu" class="h-6 w-6"></i>
                 </button>
                 <div class="flex-1 px-4 flex justify-between">
@@ -175,32 +181,34 @@ try {
                         <div class="mb-8">
                             <h2 class="text-lg font-medium text-gray-900 mb-4">Appointments by Status</h2>
                             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        <?php if (empty($reportData['appointments_by_status'])): ?>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
                                             <tr>
-                                                <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
                                             </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($reportData['appointments_by_status'] as $row): ?>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <?php if (empty($reportData['appointments_by_status'])): ?>
                                                 <tr>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
-                                                        <?= htmlspecialchars($row['status']) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= htmlspecialchars($row['count']) ?>
-                                                    </td>
+                                                    <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                            <?php else: ?>
+                                                <?php foreach ($reportData['appointments_by_status'] as $row): ?>
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">
+                                                            <?= htmlspecialchars($row['status']) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= htmlspecialchars($row['count']) ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -208,32 +216,34 @@ try {
                         <div class="mb-8">
                             <h2 class="text-lg font-medium text-gray-900 mb-4">Top 10 Doctors by Appointments</h2>
                             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor Name</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Appointments</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        <?php if (empty($reportData['appointments_by_doctor'])): ?>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
                                             <tr>
-                                                <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor Name</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Appointments</th>
                                             </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($reportData['appointments_by_doctor'] as $row): ?>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <?php if (empty($reportData['appointments_by_doctor'])): ?>
                                                 <tr>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                        <?= htmlspecialchars($row['doctor_name']) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= htmlspecialchars($row['count']) ?>
-                                                    </td>
+                                                    <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                            <?php else: ?>
+                                                <?php foreach ($reportData['appointments_by_doctor'] as $row): ?>
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                            <?= htmlspecialchars($row['doctor_name']) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= htmlspecialchars($row['count']) ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
@@ -241,32 +251,34 @@ try {
                         <div class="mb-8">
                             <h2 class="text-lg font-medium text-gray-900 mb-4">Monthly Appointment Trend (Last 6 Months)</h2>
                             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointments</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        <?php if (empty($reportData['appointments_by_month'])): ?>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
                                             <tr>
-                                                <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appointments</th>
                                             </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($reportData['appointments_by_month'] as $row): ?>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            <?php if (empty($reportData['appointments_by_month'])): ?>
                                                 <tr>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                        <?= date('F Y', strtotime($row['month'] . '-01')) ?>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        <?= htmlspecialchars($row['count']) ?>
-                                                    </td>
+                                                    <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No data available</td>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+                                            <?php else: ?>
+                                                <?php foreach ($reportData['appointments_by_month'] as $row): ?>
+                                                    <tr>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                            <?= date('F Y', strtotime($row['month'] . '-01')) ?>
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            <?= htmlspecialchars($row['count']) ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 

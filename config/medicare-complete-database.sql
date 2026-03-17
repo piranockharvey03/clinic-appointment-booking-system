@@ -233,6 +233,7 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   `doctor_photo`     VARCHAR(255) DEFAULT NULL,
   `appointment_date` DATE         NOT NULL,
   `appointment_time` TIME         NOT NULL,
+  `booking_slot_key` VARCHAR(191) DEFAULT NULL,
   `reason`           TEXT         DEFAULT NULL,
   `notes`            TEXT         DEFAULT NULL,
   `status`           ENUM('pending','approved','rescheduled','canceled','completed') NOT NULL DEFAULT 'pending',
@@ -245,6 +246,8 @@ CREATE TABLE IF NOT EXISTS `appointments` (
   KEY `idx_status`           (`status`),
   KEY `idx_appointment_date` (`appointment_date`),
   KEY `idx_doctor_id`        (`doctor_id`),
+  KEY `idx_doctor_slot`      (`doctor_id`, `appointment_date`, `appointment_time`, `status`),
+  UNIQUE KEY `uq_appointments_booking_slot_key` (`booking_slot_key`),
   CONSTRAINT `fk_appointments_patient` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -315,6 +318,71 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
 -- Default admin account (password: admin123)
 INSERT IGNORE INTO `admin` (`full_name`, `email`, `password`)
 VALUES ('Admin', 'admin@hospital.com', '$2y$12$NZMY5ff1cOYntTre7ReZie.FBpj6QGhlsgx6ds0rg9MfaQo/YlWai');
+
+-- =====================================================
+-- APPOINTMENT SLOT INTEGRITY (existing DB-safe)
+-- This keeps active slots unique for pending/approved/rescheduled.
+-- =====================================================
+
+SELECT `doctor_id`, `appointment_date`, `appointment_time`, COUNT(*) AS `active_appointments`
+FROM `appointments`
+WHERE `status` IN ('pending', 'approved', 'rescheduled')
+GROUP BY `doctor_id`, `appointment_date`, `appointment_time`
+HAVING COUNT(*) > 1;
+
+SET @schema_name = DATABASE();
+
+SET @add_booking_slot_column = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `appointments` ADD COLUMN `booking_slot_key` VARCHAR(191) DEFAULT NULL AFTER `appointment_time`',
+    'SELECT ''booking_slot_key already exists'''
+  )
+  FROM `INFORMATION_SCHEMA`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = @schema_name
+    AND `TABLE_NAME` = 'appointments'
+    AND `COLUMN_NAME` = 'booking_slot_key'
+);
+PREPARE stmt FROM @add_booking_slot_column;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+UPDATE `appointments`
+SET `booking_slot_key` = CASE
+  WHEN `status` IN ('pending', 'approved', 'rescheduled')
+    THEN CONCAT(`doctor_id`, '|', DATE_FORMAT(`appointment_date`, '%Y-%m-%d'), '|', TIME_FORMAT(`appointment_time`, '%H:%i:%s'))
+  ELSE NULL
+END;
+
+SET @add_doctor_slot_index = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `appointments` ADD KEY `idx_doctor_slot` (`doctor_id`, `appointment_date`, `appointment_time`, `status`)',
+    'SELECT ''idx_doctor_slot already exists'''
+  )
+  FROM `INFORMATION_SCHEMA`.`STATISTICS`
+  WHERE `TABLE_SCHEMA` = @schema_name
+    AND `TABLE_NAME` = 'appointments'
+    AND `INDEX_NAME` = 'idx_doctor_slot'
+);
+PREPARE stmt FROM @add_doctor_slot_index;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @add_booking_slot_unique = (
+  SELECT IF(
+    COUNT(*) = 0,
+    'ALTER TABLE `appointments` ADD UNIQUE KEY `uq_appointments_booking_slot_key` (`booking_slot_key`)',
+    'SELECT ''uq_appointments_booking_slot_key already exists'''
+  )
+  FROM `INFORMATION_SCHEMA`.`STATISTICS`
+  WHERE `TABLE_SCHEMA` = @schema_name
+    AND `TABLE_NAME` = 'appointments'
+    AND `INDEX_NAME` = 'uq_appointments_booking_slot_key'
+);
+PREPARE stmt FROM @add_booking_slot_unique;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- =====================================================
 -- SETUP COMPLETE

@@ -145,13 +145,13 @@ usort($todayAppointments, function ($a, $b) {
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                     <h1 class="text-lg font-semibold text-gray-900">Doctor Dashboard</h1>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center gap-3">
                         <div class="relative">
                             <button id="notificationBtn" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
                                 <i data-feather="bell" class="h-6 w-6"></i>
                                 <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
                             </button>
-                            <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-50">
+                            <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-80 bg-white rounded-md shadow-lg overflow-hidden z-50">
                                 <div class="py-1">
                                     <div class="px-4 py-2 bg-blue-600 text-white font-medium flex justify-between items-center">
                                         <span>Notifications</span>
@@ -168,16 +168,16 @@ usort($todayAppointments, function ($a, $b) {
                                 </div>
                             </div>
                         </div>
-                        <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <span class="hidden sm:inline text-sm font-medium text-gray-700"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
                         <i data-feather="user" class="h-6 w-6 text-blue-600"></i>
                     </div>
                 </div>
             </header>
             <main class="p-4 sm:px-6 lg:px-8">
                 <!-- Statistics Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
                                 <p class="text-sm font-medium text-gray-600 uppercase">Total Appointments</p>
                                 <p class="text-3xl font-bold text-gray-900 mt-2"><?= $stats['total'] ?></p>
@@ -265,7 +265,7 @@ usort($todayAppointments, function ($a, $b) {
                                 $isUpcoming = !$isPast;
                                 ?>
                                 <div class="p-5 hover:bg-gray-50 transition-colors <?= $isPast ? 'opacity-60' : '' ?>">
-                                    <div class="flex items-center justify-between">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                         <div class="flex-1">
                                             <div class="flex items-center gap-3">
                                                 <div class="h-12 w-12 rounded-full <?= $isUpcoming ? 'bg-blue-100' : 'bg-gray-100' ?> flex items-center justify-center flex-shrink-0">
@@ -297,7 +297,7 @@ usort($todayAppointments, function ($a, $b) {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center gap-3">
+                                        <div class="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-3">
                                             <div class="text-right">
                                                 <div class="flex items-center gap-1 text-lg font-bold <?= $isUpcoming ? 'text-blue-600' : 'text-gray-500' ?>">
                                                     <i data-feather="clock" class="h-5 w-5"></i>

@@ -145,15 +145,15 @@
                         <div id="mainFormContent" style="display: none;">
                         
                         <!-- Step 1: Select Department -->
-                        <div class="mb-8">
+                        <div class="mb-7">
                             <h3 class="text-md font-medium text-gray-900 mb-4">1. Select Department</h3>
-                            <div id="departmentList" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <div id="departmentList" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 <!-- Departments loaded dynamically -->
                             </div>
                         </div>
                         
                         <!-- Step 2: Select Doctor (auto-populated by department) -->
-                        <div class="mb-8">
+                        <div class="mb-7">
                             <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
                                 <div>
                                     <h3 class="text-md font-medium text-gray-900 mb-1">2. Select Doctor</h3>
@@ -190,7 +190,7 @@
                                 <p class="text-sm text-gray-600 mt-1">Try selecting a different department or clearing your search</p>
                             </div>
                             
-                            <div id="doctorList" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" style="display: none;">
+                            <div id="doctorList" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3" style="display: none;">
                                 <!-- Doctors loaded dynamically -->
                             </div>
                         </div>
@@ -348,10 +348,10 @@
                 
                 label.innerHTML = `
                     <input type="radio" name="department" value="${deptName}" required class="hidden peer" onchange="selectDepartment('${deptName}')" />
-                    <div class="p-5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
-                        <div class="font-semibold text-gray-900 mb-1 group-hover:text-blue-700 peer-checked:text-white">${shortName}</div>
-                        <div class="text-sm text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">${description}</div>
-                        <div class="mt-2 text-xs text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-200">${dept.doctor_count} doctor${dept.doctor_count !== 1 ? 's' : ''} available</div>
+                    <div class="p-3.5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
+                        <div class="font-semibold text-sm text-gray-900 mb-1 group-hover:text-blue-700 peer-checked:text-white">${shortName}</div>
+                        <div class="text-xs text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">${description}</div>
+                        <div class="mt-1.5 text-xs text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-200">${dept.doctor_count} doctor${dept.doctor_count !== 1 ? 's' : ''} available</div>
                     </div>
                 `;
                 
@@ -435,14 +435,14 @@
                 
                 label.innerHTML = `
                     <input type="radio" name="doctorId" value="${doctor.id}" required class="hidden peer" />
-                    <div class="p-5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
-                        <div class="font-semibold text-gray-900 mb-1 group-hover:text-blue-700 peer-checked:text-white">${doctor.full_name}</div>
-                        <div class="text-sm text-gray-600 mb-2 group-hover:text-blue-600 peer-checked:text-blue-100">${doctor.specialty}</div>
+                    <div class="p-3.5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
+                        <div class="font-semibold text-sm text-gray-900 mb-1 group-hover:text-blue-700 peer-checked:text-white">${doctor.full_name}</div>
+                        <div class="text-xs text-gray-600 mb-1.5 group-hover:text-blue-600 peer-checked:text-blue-100">${doctor.specialty}</div>
                         ${additionalSpecialtiesHTML}
-                        <div class="flex flex-wrap gap-1 mb-2">
+                        <div class="flex flex-wrap gap-1 mb-1.5">
                             <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700 group-hover:bg-blue-200 group-hover:text-blue-800 peer-checked:bg-blue-400 peer-checked:text-white transition-all duration-200">${departmentsDisplay}</div>
                         </div>
-                        <div class="flex items-center justify-between mt-2">
+                        <div class="flex items-center justify-between mt-1.5">
                             <div class="text-xs text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-200">
                                 <i data-feather="award" class="inline h-3 w-3"></i> ${doctor.experience_years} years exp.
                             </div>

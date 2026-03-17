@@ -186,7 +186,7 @@ $statusColors = [
                 <!-- Doctor Filter -->
                 <div class="bg-white rounded-lg shadow p-4 mb-6">
                     <form method="GET" class="flex flex-wrap items-end gap-4">
-                        <div class="flex-1 min-w-48">
+                        <div class="w-full sm:flex-1 sm:min-w-[12rem]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Doctor</label>
                             <select name="doctor_id" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">â€” All Doctors â€”</option>
@@ -198,7 +198,7 @@ $statusColors = [
                             </select>
                         </div>
                         <input type="hidden" name="tab" value="<?= htmlspecialchars($selectedTab) ?>">
-                        <div class="flex gap-2">
+                        <div class="w-full sm:w-auto flex gap-2">
                             <button type="submit" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">
                                 Apply
                             </button>
@@ -215,7 +215,7 @@ $statusColors = [
                 </div>
 
                 <!-- Stats Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
                     <?php
                     $statCards = [
                         ['label' => 'Total',       'key' => 'total',       'color' => 'bg-blue-50 text-blue-700',    'icon' => 'layers'],
@@ -350,27 +350,9 @@ $statusColors = [
         </div>
     </div>
 
+    <script src="../assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
-
-        // Sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const menuBtn = document.getElementById('menuBtn');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const overlay = document.querySelector('.sidebar-overlay');
-
-        function openSidebar() {
-            sidebar.classList.add('open');
-            if (overlay) overlay.classList.add('active');
-        }
-
-        function closeSidebar() {
-            sidebar.classList.remove('open');
-            if (overlay) overlay.classList.remove('active');
-        }
-        if (menuBtn) menuBtn.addEventListener('click', openSidebar);
-        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
-        if (overlay) overlay.addEventListener('click', closeSidebar);
 
         // Table search
         const searchInput = document.getElementById('tableSearch');

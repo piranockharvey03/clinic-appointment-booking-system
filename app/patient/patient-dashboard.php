@@ -162,13 +162,13 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                     <h1 class="text-lg font-semibold text-gray-900">Dashboard</h1>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center gap-3">
                         <div class="relative">
                             <button id="patientNotificationBtn" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
                                 <i data-feather="bell" class="h-6 w-6"></i>
                                 <span id="patientNotificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
                             </button>
-                            <div id="patientNotificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-50">
+                            <div id="patientNotificationDropdown" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-80 bg-white rounded-md shadow-lg overflow-hidden z-50">
                                 <div class="py-1">
                                     <div class="px-4 py-2 bg-blue-600 text-white font-medium flex justify-between items-center">
                                         <span>Notifications</span>
@@ -187,7 +187,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                         </div>
                         <div class="relative">
                             <button class="flex items-center space-x-2">
-                                <span class="text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
+                                <span class="hidden sm:inline text-sm font-medium text-gray-700"><?php echo htmlspecialchars($fullName); ?></span>
                                 <i data-feather="chevron-down" class="h-4 w-4"></i>
                             </button>
                         </div>
@@ -199,7 +199,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
             <main class="p-4 sm:px-6 lg:px-8">
                 <!-- Welcome banner -->
                 <div class="bg-blue-600 rounded-lg shadow-sm p-6 mb-6">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             <h2 class="text-2xl font-bold text-white">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                             <p class="mt-1 text-blue-100">Here's what's happening with your health today.</p>
@@ -299,7 +299,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                 $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800 border-gray-200';
                                 ?>
                                 <div class="appointment-card transition duration-300 ease-in-out p-5 hover:bg-gray-50">
-                                    <div class="flex items-center justify-between">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                         <div class="flex items-center">
                                             <?php if (!empty($appt['doctorPhoto'])): ?>
                                                 <img class="h-12 w-12 rounded-full" src="<?= htmlspecialchars($appt['doctorPhoto']) ?>" alt="Doctor">
@@ -319,7 +319,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex items-center space-x-2">
+                                        <div class="w-full sm:w-auto flex flex-wrap items-center gap-2 justify-start sm:justify-end">
                                             <span class="px-3 py-1.5 text-xs font-semibold rounded-full border <?= $badgeClass ?>">
                                                 <?= ucfirst($status) ?>
                                             </span>
