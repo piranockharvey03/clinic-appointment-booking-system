@@ -25,6 +25,7 @@ Provides core database/session configuration and schema definitions that all PHP
 ## Data and Entities
 
 - Core system entities: users, doctors, admin, appointments, notifications, patient_notifications, activity_logs, and related lookup/junction tables.
+- Appointments include encounter verification fields: checked_in_at, checkin_token, checked_in_by.
 
 ## Security Notes
 

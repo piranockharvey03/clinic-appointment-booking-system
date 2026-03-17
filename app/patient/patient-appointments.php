@@ -76,6 +76,8 @@ try {
                 'reason' => $row['reason'],
                 'notes' => $row['notes'],
                 'status' => $row['status'],
+                'checkedInAt' => $row['checked_in_at'] ?? null,
+                'checkinToken' => $row['checkin_token'] ?? null,
                 'createdAt' => $row['created_at']
             ];
         }
@@ -262,6 +264,21 @@ if ($reschedule_id) {
                                             $status = strtolower($appt['status'] ?? 'pending');
                                             ?>
                                             <?php if (!in_array($status, ['canceled', 'past'], true)): ?>
+                                                <?php if ($status === 'approved' && empty($appt['checkedInAt']) && $appt['date'] === date('Y-m-d')): ?>
+                                                    <form method="post" action="checkin.php" style="display:inline;">
+                                                        <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
+                                                        <button type="submit" class="px-3 py-1.5 text-sm rounded-md text-white bg-teal-600 hover:bg-teal-700 flex items-center gap-1">
+                                                            <i data-feather="map-pin" class="h-4 w-4"></i>
+                                                            Check In
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
+                                                <?php if ($status === 'approved' && !empty($appt['checkedInAt'])): ?>
+                                                    <span class="px-2 py-1 text-xs rounded-full bg-teal-100 text-teal-700 flex items-center gap-1 font-medium">
+                                                        <i data-feather="user-check" class="h-3 w-3"></i>
+                                                        Checked In &middot; Code&nbsp;<strong><?= htmlspecialchars($appt['checkinToken'] ?? '----') ?></strong>
+                                                    </span>
+                                                <?php endif; ?>
                                                 <form method="get" style="display:inline;">
                                                     <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                                                     <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">

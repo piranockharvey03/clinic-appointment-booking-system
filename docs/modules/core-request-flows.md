@@ -38,6 +38,15 @@ This document summarizes how core user journeys move across modules.
 3. Client marks items read via mark-read endpoints.
 4. Notification badge and state sync in UI.
 
+## 6) Appointment Encounter Verification Flow
+
+1. A doctor approves a patient appointment.
+2. On appointment day, patient checks in from patient appointments page.
+3. app/patient/checkin.php validates ownership, approved state, and same-day date.
+4. Backend stores checked_in_at/checkin_token/checked_in_by and logs activity.
+5. Doctor notification is emitted with the verification token.
+6. Doctor can mark appointment completed only after checked_in_at exists.
+
 ## Cross-Cutting Controls
 
 - Session and role checks at role module entry points.

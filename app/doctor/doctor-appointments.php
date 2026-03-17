@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
         $action = $_POST['action'];
 
         // Get appointment details for notification (ownership enforced)
-        $apptStmt = prepareDBStatement($conn, "SELECT patient_id, patient_name, appointment_date, appointment_time, doctor_name FROM appointments WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ? FOR UPDATE");
+        $apptStmt = prepareDBStatement($conn, "SELECT patient_id, patient_name, appointment_date, appointment_time, doctor_name, checked_in_at FROM appointments WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ? FOR UPDATE");
         $apptStmt->bind_param("si", $apptId, $doctorId);
         executeDBStatement($apptStmt);
         $apptResult = $apptStmt->get_result();
@@ -119,6 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
         } elseif ($action === 'complete') {
+            // Enforce attendance: patient must have checked in before the doctor can complete
+            if (empty($appointment['checked_in_at'])) {
+                throw new RuntimeException('Cannot mark complete: patient has not checked in yet.');
+            }
             $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'completed', booking_slot_key = NULL WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
             $stmt->bind_param("si", $apptId, $doctorId);
             executeDBStatement($stmt);
@@ -189,6 +193,8 @@ try {
                 'notes' => $row['notes'],
                 'status' => $row['status'],
                 'cancelReason' => $row['cancel_reason'] ?? '',
+                'checkedInAt' => $row['checked_in_at'] ?? null,
+                'checkinToken' => $row['checkin_token'] ?? null,
                 'createdAt' => $row['created_at']
             ];
         }
@@ -478,13 +484,24 @@ if ($view_id) {
                                                 <button type="button" onclick="openDoctorCancelModal('<?= htmlspecialchars($appt['id']) ?>')" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200">Cancel</button>
                                             <?php elseif ($status === 'approved'): ?>
                                                 <a href="?tab=<?= htmlspecialchars($tab) ?>&view=<?= htmlspecialchars($appt['id']) ?>" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-gray-700">View Details</a>
-                                                <form method="post" style="display:inline;">
-                                                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button name="action" value="complete" class="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-1">
-                                                        <i data-feather="check-circle" class="h-4 w-4"></i>
-                                                        Complete
-                                                    </button>
-                                                </form>
+                                                <?php if (!empty($appt['checkedInAt'])): ?>
+                                                    <span class="px-2 py-1 text-xs rounded-full bg-teal-100 text-teal-700 flex items-center gap-1 font-medium">
+                                                        <i data-feather="user-check" class="h-3 w-3"></i>
+                                                        Patient Arrived &middot; Code&nbsp;<strong><?= htmlspecialchars($appt['checkinToken'] ?? '----') ?></strong>
+                                                    </span>
+                                                    <form method="post" style="display:inline;">
+                                                        <input type="hidden" name="appt_id" value="<?= htmlspecialchars($appt['id']) ?>">
+                                                        <button name="action" value="complete" class="px-3 py-1.5 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-1">
+                                                            <i data-feather="check-circle" class="h-4 w-4"></i>
+                                                            Complete
+                                                        </button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 flex items-center gap-1">
+                                                        <i data-feather="clock" class="h-3 w-3"></i>
+                                                        Awaiting Check-In
+                                                    </span>
+                                                <?php endif; ?>
                                                 <form method="get" style="display:inline;">
                                                     <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
                                                     <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">

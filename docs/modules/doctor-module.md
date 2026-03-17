@@ -6,13 +6,13 @@
 
 ## Purpose
 
-Enables doctor-side appointment triage and management, including approval, cancellation, rescheduling, and profile/settings operations.
+Enables doctor-side appointment triage and management, including approval, cancellation, rescheduling, check-in verification, and completion gating.
 
 ## Key Components
 
 - doctor-login.php and doctor-logout.php: doctor access control.
 - doctor-dashboard.php: doctor summary and active workload view.
-- doctor-appointments.php: appointment actions and state transitions.
+- doctor-appointments.php: appointment actions, check-in visibility, and state transitions.
 - doctor-settings.php: profile and password settings.
 
 ## Inbound Dependencies
@@ -31,12 +31,14 @@ Enables doctor-side appointment triage and management, including approval, cance
 - Doctor identity and status (active/inactive)
 - Doctor-owned appointments only
 - Notification payloads sent to patients and doctors
+- Encounter verification context (checked-in timestamp and token display)
 
 ## Security Notes
 
 - Doctor login checks account status before granting access.
 - Appointment mutations are scoped by doctor_id ownership checks.
 - Activity logging captures key actions.
+- Appointment completion is blocked until checked_in_at is present.
 
 ## Observed Risks
 

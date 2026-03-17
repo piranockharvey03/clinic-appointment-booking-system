@@ -5,6 +5,47 @@ All notable changes to the MediCare Clinic Hospital Management System will be do
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2026-03-17
+
+### Added
+
+- **Patient check-in endpoint** ([app/patient/checkin.php](app/patient/checkin.php)):
+  - Added role-protected POST handler for appointment attendance check-in
+  - Enforces ownership (`patient_id`), approved status, and same-day date requirement
+  - Generates secure 4-digit verification token and stores check-in metadata
+  - Logs activity and sends doctor notification for arrival verification
+
+### Changed
+
+- **Patient appointments UI** ([app/patient/patient-appointments.php](app/patient/patient-appointments.php)):
+  - Added same-day "Check In" action for approved appointments
+  - Added check-in badge showing verification code after successful check-in
+
+- **Doctor appointments completion guard** ([app/doctor/doctor-appointments.php](app/doctor/doctor-appointments.php)):
+  - Added server-side guard: `complete` action now requires `checked_in_at`
+  - Updated approved-card UI to show "Awaiting Check-In" vs "Patient Arrived"
+  - Completion button is shown only after patient check-in is present
+
+### Database
+
+- **Applied migration on live database**:
+  - Added `appointments.checked_in_at` (`DATETIME`, nullable)
+  - Added `appointments.checkin_token` (`VARCHAR(8)`, nullable)
+  - Added `appointments.checked_in_by` (`VARCHAR(50)`, nullable)
+  - Backfilled legacy completed rows without check-in metadata using `checked_in_by = 'legacy_backfill'` and `checkin_token = 'LEGACY'`
+
+- **Schema alignment**:
+  - Updated authoritative schema file [config/medicare-complete-database.sql](config/medicare-complete-database.sql) with the new appointment check-in columns
+  - Consolidated to a single SQL source in config: [config/medicare-complete-database.sql](config/medicare-complete-database.sql)
+
+### Documentation
+
+- Updated module and flow documentation to include the encounter verification lifecycle:
+  - [docs/modules/patient-module.md](docs/modules/patient-module.md)
+  - [docs/modules/doctor-module.md](docs/modules/doctor-module.md)
+  - [docs/modules/core-request-flows.md](docs/modules/core-request-flows.md)
+  - [docs/modules/config-module.md](docs/modules/config-module.md)
+
 ## [2.0.2] - 2026-03-16
 
 ### Fixed

@@ -15,6 +15,7 @@ Provides patient-facing appointment booking lifecycle operations, profile manage
 - patient-profile.php: patient profile updates.
 - patient-settings.php: patient account settings.
 - submit-booking.php: booking endpoint with server-side validation.
+- checkin.php: patient check-in endpoint for approved same-day appointments.
 
 ## Inbound Dependencies
 
@@ -25,12 +26,13 @@ Provides patient-facing appointment booking lifecycle operations, profile manage
 
 - config/session-config.php
 - config/db-config.php
-- Tables: users, doctors, appointments, doctor_departments, doctor_specialties, patient_notifications
+- Tables: users, doctors, appointments, doctor_departments, doctor_specialties, patient_notifications, doctor_notifications, activity_logs
 
 ## Data and Entities
 
 - Patient profile and role-scoped identity
 - Appointment intent: doctor, department, date, time, reason, notes
+- Encounter proof fields on appointments: checked_in_at, checkin_token, checked_in_by
 - Patient notification history
 
 ## Security Notes
@@ -38,6 +40,8 @@ Provides patient-facing appointment booking lifecycle operations, profile manage
 - Session role checks protect patient-only pages.
 - Appointment updates are scoped to patient ownership checks.
 - Booking validation blocks invalid dates and non-active doctors.
+- Check-in requires approved status, same-day date, and patient ownership.
+- Check-in writes an audit trail and doctor notification with a verification token.
 
 ## Observed Risks
 
