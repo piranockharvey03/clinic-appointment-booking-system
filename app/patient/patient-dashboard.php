@@ -348,194 +348,30 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
     </div>
 
     <script src="../assets/js/mobile-menu.js"></script>
+    <script src="../assets/js/notification-dropdown.js"></script>
     <script>
         feather.replace();
 
         // Patient notification system
         $(document).ready(function() {
-            const notificationBtn = $('#patientNotificationBtn');
-            const notificationDropdown = $('#patientNotificationDropdown');
-            const notificationBadge = $('#patientNotificationBadge');
-            const markAllReadBtn = $('#markAllPatientNotificationsReadBtn');
-            let notificationCheckInterval;
-
-            // Toggle dropdown
-            notificationBtn.on('click', function(e) {
-                e.stopPropagation();
-                notificationDropdown.toggleClass('hidden');
-
-                // Check for notifications when dropdown is opened
-                if (!notificationDropdown.hasClass('hidden')) {
-                    checkPatientNotifications();
+            NotificationDropdown.init({
+                buttonSelector: '#patientNotificationBtn',
+                dropdownSelector: '#patientNotificationDropdown',
+                badgeSelector: '#patientNotificationBadge',
+                listSelector: '#patientNotificationList',
+                markAllSelector: '#markAllPatientNotificationsReadBtn',
+                markReadButtonClass: 'mark-patient-read-btn',
+                fetchUrl: '../includes/get-patient-notifications.php',
+                markReadUrl: '../includes/mark-patient-notifications-read.php',
+                pollIntervalMs: 30000,
+                emptyText: 'No new notifications',
+                iconMap: {
+                    approved: '<i data-feather="check-circle" class="h-4 w-4 text-green-500"></i>',
+                    canceled: '<i data-feather="x-circle" class="h-4 w-4 text-red-500"></i>',
+                    rescheduled: '<i data-feather="refresh-cw" class="h-4 w-4 text-blue-500"></i>',
+                    completed: '<i data-feather="check-square" class="h-4 w-4 text-indigo-500"></i>'
                 }
             });
-
-            // Close dropdown when clicking outside
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('#patientNotificationBtn, #patientNotificationDropdown').length) {
-                    notificationDropdown.addClass('hidden');
-                }
-            });
-
-            // Function to check for patient notifications
-            function checkPatientNotifications() {
-                // Get all appointment IDs for this patient (in a real system, you'd filter by patient_id)
-                // For now, we'll get notifications for all appointments (demo purposes)
-                $.ajax({
-                    url: 'get-patient-notifications.php',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            updatePatientNotificationUI(response.notifications);
-                        }
-                    },
-                    error: function() {
-                        console.error('Failed to fetch patient notifications');
-                    }
-                });
-            }
-
-            // Update patient notification UI
-            function updatePatientNotificationUI(notifications) {
-                const notificationList = $('#patientNotificationList');
-
-                if (notifications.length === 0) {
-                    notificationList.html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
-                    notificationBadge.addClass('hidden');
-                    markAllReadBtn.hide();
-                    return;
-                }
-
-                // Update badge
-                notificationBadge.text(notifications.length).removeClass('hidden');
-                markAllReadBtn.show();
-
-                // Update notification list
-                let html = '';
-                notifications.forEach(notification => {
-                    const statusIcon = getStatusIcon(notification.type);
-                    const statusColor = getStatusColor(notification.type);
-
-                    html += `
-                        <div class="border-b border-gray-200" data-notification-id="${notification.id}">
-                            <div class="px-4 py-3 hover:bg-gray-50">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex items-start flex-1">
-                                        <div class="flex-shrink-0 mt-0.5">
-                                            ${statusIcon}
-                                        </div>
-                                        <div class="ml-3 flex-1">
-                                            <p class="text-sm font-medium text-gray-900">${notification.message}</p>
-                                            <p class="text-xs text-gray-500 mt-1">${notification.time}</p>
-                                        </div>
-                                    </div>
-                                    <button class="mark-patient-read-btn ml-2 p-1 text-gray-400 hover:text-green-600 focus:outline-none"
-                                            data-notification-id="${notification.id}"
-                                            title="Mark as read">
-                                        <i data-feather="check" class="h-4 w-4"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                notificationList.html(html);
-                feather.replace();
-
-                // Add event listeners for mark as read buttons
-                $('.mark-patient-read-btn').on('click', function() {
-                    const notificationId = $(this).data('notification-id');
-                    markPatientNotificationAsRead(notificationId);
-                });
-            }
-
-            // Mark patient notification as read
-            function markPatientNotificationAsRead(notificationId) {
-                $.ajax({
-                    url: 'mark-patient-notifications-read.php',
-                    type: 'POST',
-                    data: {
-                        notification_ids: [notificationId]
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            // Remove the notification from the UI
-                            $(`[data-notification-id="${notificationId}"]`).fadeOut(300, function() {
-                                $(this).remove();
-                                // Update badge count and mark all button visibility
-                                const remainingNotifications = $('.mark-patient-read-btn').length;
-                                if (remainingNotifications === 0) {
-                                    $('#patientNotificationList').html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
-                                    $('#patientNotificationBadge').addClass('hidden');
-                                    $('#markAllPatientNotificationsReadBtn').hide();
-                                } else {
-                                    $('#patientNotificationBadge').text(remainingNotifications);
-                                }
-                            });
-                        }
-                    },
-                    error: function() {
-                        console.error('Failed to mark patient notification as read');
-                    }
-                });
-            }
-
-            // Mark all patient notifications as read
-            function markAllPatientNotificationsAsRead() {
-                const notificationIds = $('.mark-patient-read-btn').map(function() {
-                    return $(this).data('notification-id');
-                }).get();
-
-                if (notificationIds.length === 0) return;
-
-                $.ajax({
-                    url: 'mark-patient-notifications-read.php',
-                    type: 'POST',
-                    data: {
-                        notification_ids: notificationIds
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            $('#patientNotificationList').html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
-                            $('#patientNotificationBadge').addClass('hidden');
-                            $('#markAllPatientNotificationsReadBtn').hide();
-                        }
-                    },
-                    error: function() {
-                        console.error('Failed to mark all patient notifications as read');
-                    }
-                });
-            }
-
-            // Helper functions for status icons and colors
-            function getStatusIcon(type) {
-                const icons = {
-                    'approved': '<i data-feather="check-circle" class="h-4 w-4 text-green-500"></i>',
-                    'canceled': '<i data-feather="x-circle" class="h-4 w-4 text-red-500"></i>',
-                    'rescheduled': '<i data-feather="refresh-cw" class="h-4 w-4 text-blue-500"></i>'
-                };
-                return icons[type] || '<i data-feather="info" class="h-4 w-4 text-gray-500"></i>';
-            }
-
-            function getStatusColor(type) {
-                const colors = {
-                    'approved': 'text-green-600',
-                    'canceled': 'text-red-600',
-                    'rescheduled': 'text-blue-600'
-                };
-                return colors[type] || 'text-gray-600';
-            }
-
-            // Add event listener for mark all as read button
-            $('#markAllPatientNotificationsReadBtn').on('click', markAllPatientNotificationsAsRead);
-
-            // Check for notifications every 30 seconds
-            checkPatientNotifications();
-            notificationCheckInterval = setInterval(checkPatientNotifications, 30000);
         });
 
         // Show login success popup

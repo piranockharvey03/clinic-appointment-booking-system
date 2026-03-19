@@ -1,12 +1,11 @@
 <?php
-// Get patient notifications by appointment IDs
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
 header('Content-Type: application/json');
 
-// Check if patient is logged in
-require_once '../../config/session-config.php';
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
+// Only allow doctor access
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
     http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
@@ -14,17 +13,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
 
 try {
     $conn = getDBConnection();
-    $patientId = (int) $_SESSION['user_id'];
+    $doctorId = (int) $_SESSION['user_id'];
 
-    // Fetch unread notifications owned by the authenticated patient.
     $stmt = $conn->prepare("
-        SELECT pn.id, pn.notification_type, pn.message, pn.created_at
-        FROM patient_notifications pn
-        WHERE pn.patient_id = ? AND pn.is_read = FALSE
-        ORDER BY pn.created_at DESC
+        SELECT id, type, message, appointment_id, created_at
+        FROM doctor_notifications
+        WHERE doctor_id = ? AND is_read = FALSE
+        ORDER BY created_at DESC
         LIMIT 10
     ");
-    $stmt->bind_param("i", $patientId);
+    $stmt->bind_param('i', $doctorId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -33,8 +31,9 @@ try {
         while ($row = $result->fetch_assoc()) {
             $notifications[] = [
                 'id' => $row['id'],
-                'type' => $row['notification_type'],
+                'type' => $row['type'],
                 'message' => $row['message'],
+                'appointment_id' => $row['appointment_id'],
                 'time' => date('M j, Y g:i A', strtotime($row['created_at']))
             ];
         }
@@ -47,5 +46,5 @@ try {
     echo json_encode(['success' => true, 'notifications' => $notifications]);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to fetch notifications']);
+    echo json_encode(['success' => false, 'error' => 'Failed to fetch doctor notifications']);
 }

@@ -389,198 +389,31 @@ usort($todayAppointments, function ($a, $b) {
         </div>
     </div>
     <script src="../assets/js/mobile-menu.js"></script>
+    <script src="../assets/js/notification-dropdown.js"></script>
     <script>
         feather.replace();
 
         // Notification system
         $(document).ready(function() {
-            const notificationBtn = $('#notificationBtn');
-            const notificationDropdown = $('#notificationDropdown');
-            const notificationBadge = $('#notificationBadge');
-            let notificationCheckInterval;
-
-            // Toggle dropdown
-            notificationBtn.on('click', function(e) {
-                e.stopPropagation();
-                notificationDropdown.toggleClass('hidden');
-
-                // Check for notifications when dropdown is opened
-                if (!notificationDropdown.hasClass('hidden')) {
-                    checkNotifications();
+            NotificationDropdown.init({
+                buttonSelector: '#notificationBtn',
+                dropdownSelector: '#notificationDropdown',
+                badgeSelector: '#notificationBadge',
+                listSelector: '#notificationList',
+                markAllSelector: '#markAllReadBtn',
+                markReadButtonClass: 'mark-read-btn',
+                fetchUrl: '../includes/get-doctor-notifications.php',
+                markReadUrl: '../includes/mark-doctor-notifications-read.php',
+                pollIntervalMs: 30000,
+                emptyText: 'No new notifications',
+                iconMap: {
+                    approved: '<i data-feather="check-circle" class="h-4 w-4 text-green-500"></i>',
+                    canceled: '<i data-feather="x-circle" class="h-4 w-4 text-red-500"></i>',
+                    rescheduled: '<i data-feather="refresh-cw" class="h-4 w-4 text-blue-500"></i>',
+                    completed: '<i data-feather="check-square" class="h-4 w-4 text-indigo-500"></i>',
+                    checked_in: '<i data-feather="user-check" class="h-4 w-4 text-emerald-500"></i>'
                 }
             });
-
-            // Close dropdown when clicking outside
-            $(document).on('click', function(e) {
-                if (!$(e.target).closest('#notificationBtn, #notificationDropdown').length) {
-                    notificationDropdown.addClass('hidden');
-                }
-            });
-
-            // Function to check for new notifications
-            function checkNotifications() {
-                $.ajax({
-                    url: 'get-notifications.php',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            updateNotificationUI(response.notifications);
-                        }
-                    },
-                    error: function() {
-                        console.error('Failed to fetch notifications');
-                    }
-                });
-            }
-
-            // Update notification UI
-            function updateNotificationUI(notifications) {
-                const notificationList = $('#notificationList');
-                const markAllReadBtn = $('#markAllReadBtn');
-
-                if (notifications.length === 0) {
-                    notificationList.html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
-                    notificationBadge.addClass('hidden');
-                    markAllReadBtn.hide();
-                    return;
-                }
-
-                // Update badge
-                notificationBadge.text(notifications.length).removeClass('hidden');
-                markAllReadBtn.show();
-
-                // Update notification list
-                let html = '';
-                notifications.forEach(notification => {
-                    const statusIcon = getStatusIcon(notification.type);
-
-                    html += `
-                        <div class="border-b border-gray-200" data-notification-id="${notification.id}">
-                            <div class="px-4 py-3 hover:bg-gray-50">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex items-start flex-1">
-                                        <div class="flex-shrink-0 mt-0.5">
-                                            ${statusIcon}
-                                        </div>
-                                        <div class="ml-3 flex-1">
-                                            <p class="text-sm font-medium text-gray-900">${notification.message}</p>
-                                            <p class="text-xs text-gray-500 mt-1">${notification.time}</p>
-                                        </div>
-                                    </div>
-                                    <button class="mark-read-btn ml-2 p-1 text-gray-400 hover:text-green-600 focus:outline-none"
-                                            data-notification-id="${notification.id}"
-                                            title="Mark as read">
-                                        <i data-feather="check" class="h-4 w-4"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                notificationList.html(html);
-                feather.replace();
-
-                // Add event listeners for mark as read buttons
-                $('.mark-read-btn').on('click', function() {
-                    const notificationId = $(this).data('notification-id');
-                    markNotificationAsRead(notificationId);
-                });
-            }
-
-            // Helper functions for status icons (matching patient notifications)
-            function getStatusIcon(type) {
-                const icons = {
-                    'new_appointment': '<i data-feather="calendar" class="h-4 w-4 text-blue-500"></i>',
-                    'approved': '<i data-feather="check-circle" class="h-4 w-4 text-green-500"></i>',
-                    'canceled': '<i data-feather="x-circle" class="h-4 w-4 text-red-500"></i>',
-                    'rescheduled': '<i data-feather="refresh-cw" class="h-4 w-4 text-blue-500"></i>'
-                };
-                return icons[type] || '<i data-feather="info" class="h-4 w-4 text-gray-500"></i>';
-            }
-
-            // Mark notification as read
-            function markNotificationAsRead(notificationId) {
-                $.ajax({
-                    url: 'mark-notifications-read.php',
-                    type: 'POST',
-                    data: {
-                        notification_ids: [notificationId]
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            // Remove the notification from the UI
-                            $(`[data-notification-id="${notificationId}"]`).fadeOut(300, function() {
-                                $(this).remove();
-                                // Update badge count and mark all button visibility
-                                const remainingNotifications = $('.mark-read-btn').length;
-                                if (remainingNotifications === 0) {
-                                    $('#notificationList').html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
-                                    $('#notificationBadge').addClass('hidden');
-                                    $('#markAllReadBtn').hide();
-                                } else {
-                                    $('#notificationBadge').text(remainingNotifications);
-                                }
-                            });
-                        }
-                    },
-                    error: function() {
-                        console.error('Failed to mark notification as read');
-                    }
-                });
-            }
-
-            // Mark all notifications as read
-            function markAllNotificationsAsRead() {
-                const notificationIds = $('.mark-read-btn').map(function() {
-                    return $(this).data('notification-id');
-                }).get();
-
-                if (notificationIds.length === 0) return;
-
-                $.ajax({
-                    url: 'mark-notifications-read.php',
-                    type: 'POST',
-                    data: {
-                        notification_ids: notificationIds
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            $('#notificationList').html('<div class="px-4 py-3 text-center text-gray-500">No new notifications</div>');
-                            $('#notificationBadge').addClass('hidden');
-                            $('#markAllReadBtn').hide();
-                        }
-                    },
-                    error: function() {
-                        console.error('Failed to mark all notifications as read');
-                    }
-                });
-            }
-
-            // Add event listener for mark all as read button
-            $('#markAllReadBtn').on('click', markAllNotificationsAsRead);
-
-            // Play notification sound and show badge animation for new notifications
-            function showNewNotification(notification) {
-                // Update badge with animation
-                notificationBadge.removeClass('hidden').text(notification.count).addClass('animate__animated animate__bounce');
-
-                // Remove animation class after it completes
-                setTimeout(() => {
-                    notificationBadge.removeClass('animate__bounce');
-                }, 1000);
-
-                // Show desktop notification if supported
-                if (Notification.permission === 'granted') {
-                    new Notification('New Appointment', {
-                        body: notification.message,
-                        icon: '../assets/img/favicon.ico'
-                    });
-                }
-            }
 
             // Request notification permission
             if (Notification.permission !== 'denied') {

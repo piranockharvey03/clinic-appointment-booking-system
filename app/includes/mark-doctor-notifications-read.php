@@ -4,10 +4,10 @@ require_once '../../config/db-config.php';
 
 header('Content-Type: application/json');
 
-// Only allow admin access
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Access denied']);
+// Only allow doctor access
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
 
@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Get notification IDs from request
 $notificationIds = isset($_POST['notification_ids']) ? $_POST['notification_ids'] : [];
 
 if (empty($notificationIds)) {
@@ -26,25 +25,32 @@ if (empty($notificationIds)) {
     exit;
 }
 
-// Validate that notification_ids is an array
 if (!is_array($notificationIds)) {
     $notificationIds = [$notificationIds];
 }
 
+$notificationIds = array_map('intval', $notificationIds);
+$notificationIds = array_filter($notificationIds, fn($id) => $id > 0);
+
+if (empty($notificationIds)) {
+    echo json_encode(['success' => false, 'error' => 'Invalid notification IDs']);
+    exit;
+}
+
 try {
     $conn = getDBConnection();
+    $doctorId = (int) $_SESSION['user_id'];
 
-    // Prepare the statement to mark notifications as read
     $placeholders = str_repeat('?,', count($notificationIds) - 1) . '?';
     $stmt = $conn->prepare("
-        UPDATE notifications
+        UPDATE doctor_notifications
         SET is_read = TRUE, read_at = NOW()
-        WHERE id IN ($placeholders) AND is_read = FALSE
+        WHERE id IN ($placeholders) AND doctor_id = ? AND is_read = FALSE
     ");
 
-    // Bind parameters
-    $types = str_repeat('i', count($notificationIds));
-    $stmt->bind_param($types, ...$notificationIds);
+    $types = str_repeat('i', count($notificationIds)) . 'i';
+    $params = array_merge($notificationIds, [$doctorId]);
+    $stmt->bind_param($types, ...$params);
 
     $success = $stmt->execute();
 
@@ -52,14 +58,18 @@ try {
         $affectedRows = $stmt->affected_rows;
         $stmt->close();
 
-        // Get the count of remaining unread notifications
-        $countResult = $conn->query("SELECT COUNT(*) as unread_count FROM notifications WHERE is_read = FALSE");
+        $countStmt = $conn->prepare("SELECT COUNT(*) AS unread_count FROM doctor_notifications WHERE doctor_id = ? AND is_read = FALSE");
+        $countStmt->bind_param('i', $doctorId);
+        $countStmt->execute();
+        $countResult = $countStmt->get_result();
+
         $unreadCount = 0;
         if ($countResult) {
             $countRow = $countResult->fetch_assoc();
-            $unreadCount = $countRow['unread_count'];
+            $unreadCount = (int) ($countRow['unread_count'] ?? 0);
             $countResult->free();
         }
+        $countStmt->close();
 
         closeDBConnection($conn);
 
@@ -69,9 +79,9 @@ try {
             'unread_count' => $unreadCount
         ]);
     } else {
-        throw new Exception("Failed to mark notifications as read: " . $stmt->error);
+        throw new Exception('Failed to mark doctor notifications as read: ' . $stmt->error);
     }
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to mark notifications as read']);
+    echo json_encode(['success' => false, 'error' => 'Failed to mark doctor notifications as read']);
 }

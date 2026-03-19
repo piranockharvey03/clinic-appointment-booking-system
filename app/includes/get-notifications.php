@@ -2,13 +2,14 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+header('Content-Type: application/json');
+
 // Only allow admin access
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     http_response_code(403);
-    exit('Access denied');
+    echo json_encode(['success' => false, 'error' => 'Access denied']);
+    exit;
 }
-
-header('Content-Type: application/json');
 
 try {
     $conn = getDBConnection();

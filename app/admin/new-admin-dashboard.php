@@ -139,6 +139,23 @@ try {
                         <h1 class="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
                     </div>
                     <div class="ml-4 flex items-center md:ml-6">
+                        <div class="relative mr-4">
+                            <button id="adminNotificationBtn" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none" type="button" aria-label="Notifications">
+                                <i data-feather="bell" class="h-6 w-6"></i>
+                                <span id="adminNotificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                            </button>
+                            <div id="adminNotificationDropdown" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-sm sm:w-80 bg-white rounded-md shadow-lg overflow-hidden z-50">
+                                <div class="py-2">
+                                    <div class="px-4 py-2 text-sm font-medium text-gray-700 border-b border-gray-200 flex justify-between items-center">
+                                        <span>Notifications</span>
+                                        <button id="adminMarkAllReadBtn" class="text-xs bg-blue-500 hover:bg-blue-700 px-2 py-1 rounded text-white" style="display: none;" type="button">Mark all read</button>
+                                    </div>
+                                    <div id="adminNotificationList" class="max-h-96 overflow-y-auto">
+                                        <div class="px-4 py-3 text-center text-gray-500">Loading notifications...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="ml-3 relative">
                             <div class="flex items-center">
                                 <span class="text-gray-700 text-sm font-medium mr-2"><?= htmlspecialchars($_SESSION['user_name']) ?></span>
@@ -333,8 +350,31 @@ try {
 
     <script src="../assets/js/mobile-menu.js"></script>
     <script src="../assets/js/dark-mode.js"></script>
+    <script src="../assets/js/notification-dropdown.js"></script>
     <script>
         feather.replace();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            NotificationDropdown.init({
+                buttonSelector: '#adminNotificationBtn',
+                dropdownSelector: '#adminNotificationDropdown',
+                badgeSelector: '#adminNotificationBadge',
+                listSelector: '#adminNotificationList',
+                markAllSelector: '#adminMarkAllReadBtn',
+                markReadButtonClass: 'admin-mark-read-btn',
+                fetchUrl: '../includes/get-notifications.php',
+                markReadUrl: '../includes/mark-notifications-read.php',
+                pollIntervalMs: 30000,
+                emptyText: 'No new notifications',
+                iconMap: {
+                    new_appointment: '<i data-feather="calendar" class="h-4 w-4 text-blue-500"></i>',
+                    approved: '<i data-feather="check-circle" class="h-4 w-4 text-green-500"></i>',
+                    canceled: '<i data-feather="x-circle" class="h-4 w-4 text-red-500"></i>',
+                    rescheduled: '<i data-feather="refresh-cw" class="h-4 w-4 text-blue-500"></i>',
+                    completed: '<i data-feather="check-square" class="h-4 w-4 text-indigo-500"></i>'
+                }
+            });
+        });
     </script>
 </body>
 
