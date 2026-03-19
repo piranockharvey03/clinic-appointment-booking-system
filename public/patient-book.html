@@ -91,6 +91,10 @@
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
+                            <a href="../app/patient/how-appointments-work.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
+                                How It Works
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="../app/patient/patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
@@ -121,6 +125,7 @@
                     </button>
                     <h1 class="text-lg font-semibold text-gray-900">Book New Appointment</h1>
                     <div class="flex items-center space-x-4">
+                        <a href="../app/patient/how-appointments-work.php" class="text-sm text-blue-600 hover:text-blue-800 font-medium hidden sm:inline">How booking works</a>
                         <button class="p-1 text-gray-400 hover:text-gray-500">
                             <i data-feather="bell" class="h-6 w-6"></i>
                         </button>
@@ -246,6 +251,7 @@
                                         </div>
                                     </label>
                                 </div>
+                                <div id="slotAvailabilityStatus" class="mt-3 text-sm hidden"></div>
                             </div>
                         </div>
                         <!-- Step 4: Reason & Notes -->
@@ -279,6 +285,7 @@
         let allDoctors = [];
         let allDepartments = [];
         let selectedDepartment = null;
+        let slotCheckRequestId = 0;
         
         // Department descriptions
         const departmentDescriptions = {
@@ -308,6 +315,7 @@
         window.addEventListener('DOMContentLoaded', function() {
             loadDepartments();
             setupDoctorSearch();
+            setupSlotAvailabilityChecks();
             handleErrorMessages();
         });
         
@@ -495,24 +503,149 @@
             setTimeout(() => feather.replace(), 50);
         }
         
-        // Handle form submission with loading state
-        document.querySelector('#bookingForm').addEventListener('submit', function(e) {
+        function setBookingButtonLoading(isLoading) {
             const btn = document.getElementById('confirmBookingBtn');
             const spinner = document.getElementById('bookingSpinner');
             const checkIcon = document.getElementById('bookingCheckIcon');
             const text = document.getElementById('bookingText');
-            
-            // Check if form is valid
-            if (!this.checkValidity()) {
-                return;
+
+            if (isLoading) {
+                btn.disabled = true;
+                spinner.classList.remove('hidden');
+                checkIcon.style.display = 'none';
+                text.textContent = 'Booking...';
+            } else {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                checkIcon.style.display = '';
+                text.textContent = 'Confirm Booking';
             }
-            
-            // Disable button and show spinner
-            btn.disabled = true;
-            spinner.classList.remove('hidden');
-            checkIcon.style.display = 'none';
-            text.textContent = 'Booking...';
-        });
+        }
+
+        function renderSlotAvailabilityStatus(type, message) {
+            const statusEl = document.getElementById('slotAvailabilityStatus');
+            statusEl.classList.remove('hidden', 'text-red-600', 'text-green-600', 'text-gray-500', 'text-amber-600');
+
+            if (type === 'available') {
+                statusEl.classList.add('text-green-600');
+            } else if (type === 'unavailable') {
+                statusEl.classList.add('text-red-600');
+            } else if (type === 'checking') {
+                statusEl.classList.add('text-gray-500');
+            } else {
+                statusEl.classList.add('text-amber-600');
+            }
+
+            statusEl.textContent = message;
+            statusEl.classList.remove('hidden');
+        }
+
+        function getSelectedBookingFields() {
+            const doctor = document.querySelector('input[name="doctorId"]:checked');
+            const date = document.querySelector('input[name="date"]');
+            const time = document.querySelector('input[name="time"]:checked');
+
+            return {
+                doctorId: doctor ? doctor.value : '',
+                date: date ? date.value : '',
+                time: time ? time.value : ''
+            };
+        }
+
+        async function checkSlotAvailability(options = {}) {
+            const silent = Boolean(options.silent);
+            const fields = getSelectedBookingFields();
+
+            if (!fields.doctorId || !fields.date || !fields.time) {
+                if (!silent) {
+                    renderSlotAvailabilityStatus('info', 'Please select doctor, date and time to check availability.');
+                } else {
+                    document.getElementById('slotAvailabilityStatus').classList.add('hidden');
+                }
+                return {
+                    success: false,
+                    available: false,
+                    skipped: true
+                };
+            }
+
+            const currentRequestId = ++slotCheckRequestId;
+            if (!silent) {
+                renderSlotAvailabilityStatus('checking', 'Checking slot availability...');
+            }
+
+            try {
+                const query = new URLSearchParams({
+                    doctor_id: fields.doctorId,
+                    date: fields.date,
+                    time: fields.time
+                });
+                const response = await fetch(`../app/includes/check-slot-availability.php?${query.toString()}`, {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+
+                if (currentRequestId !== slotCheckRequestId) {
+                    return {
+                        success: false,
+                        available: false,
+                        skipped: true
+                    };
+                }
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    renderSlotAvailabilityStatus('error', data.error || 'Unable to verify slot availability right now.');
+                    return {
+                        success: false,
+                        available: false
+                    };
+                }
+
+                renderSlotAvailabilityStatus(data.available ? 'available' : 'unavailable', data.message);
+
+                return {
+                    success: true,
+                    available: Boolean(data.available)
+                };
+            } catch (error) {
+                console.error('Slot availability check failed:', error);
+                renderSlotAvailabilityStatus('error', 'Unable to verify slot availability right now. Please try again.');
+                return {
+                    success: false,
+                    available: false
+                };
+            }
+        }
+
+        function setupSlotAvailabilityChecks() {
+            const form = document.getElementById('bookingForm');
+
+            form.addEventListener('change', function(event) {
+                const targetName = event.target && event.target.name ? event.target.name : '';
+                if (targetName === 'doctorId' || targetName === 'date' || targetName === 'time') {
+                    checkSlotAvailability({ silent: true });
+                }
+            });
+
+            form.addEventListener('submit', async function(event) {
+                if (!form.checkValidity()) {
+                    return;
+                }
+
+                event.preventDefault();
+                setBookingButtonLoading(true);
+
+                const slotResult = await checkSlotAvailability();
+                if (!slotResult.success || !slotResult.available) {
+                    setBookingButtonLoading(false);
+                    return;
+                }
+
+                form.submit();
+            });
+        }
         
         // Display error messages from URL
         function handleErrorMessages() {
@@ -558,68 +691,6 @@
             }
         }
         
-        // Handle form submission with loading state
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const btn = document.getElementById('confirmBookingBtn');
-            const spinner = document.getElementById('bookingSpinner');
-            const checkIcon = document.getElementById('bookingCheckIcon');
-            const text = document.getElementById('bookingText');
-            
-            // Check if form is valid
-            if (!this.checkValidity()) {
-                return;
-            }
-            
-            // Disable button and show spinner
-            btn.disabled = true;
-            spinner.classList.remove('hidden');
-            checkIcon.style.display = 'none';
-            text.textContent = 'Booking...';
-        });
-        
-        // Display error messages from URL
-        window.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const error = urlParams.get('error');
-            
-            if (error) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded animate-pulse';
-                errorDiv.innerHTML = `
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-red-800">${decodeURIComponent(error)}</p>
-                        </div>
-                        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-red-400 hover:text-red-600">
-                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    </div>
-                `;
-                
-                // Insert error at the top of the form container
-                const formContainer = document.querySelector('form');
-                formContainer.insertBefore(errorDiv, formContainer.firstChild);
-                
-                // Remove error from URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                // Auto-remove after 8 seconds
-                setTimeout(() => {
-                    if (errorDiv.parentNode) {
-                        errorDiv.style.transition = 'opacity 0.5s';
-                        errorDiv.style.opacity = '0';
-                        setTimeout(() => errorDiv.remove(), 500);
-                    }
-                }, 8000);
-            }
-        });
     </script>
 
     <!-- Doctor Details Modal -->

@@ -13,9 +13,11 @@ This document summarizes how core user journeys move across modules.
 
 1. Patient interacts with public booking page.
 2. Frontend requests department and doctor lists from app/includes endpoints.
-3. Booking is submitted to app/patient/submit-booking.php.
-4. Backend validates doctor availability constraints and stores appointment.
-5. Patient sees updated appointment data in patient module.
+3. Frontend checks slot availability using app/includes/check-slot-availability.php when doctor/date/time changes.
+4. Booking is submitted to app/patient/submit-booking.php.
+5. Backend validates doctor availability constraints, applies canonical slot key generation, and stores appointment.
+6. Database uniqueness checks prevent conflicting active bookings for the same doctor slot.
+7. Patient sees updated appointment data in patient module.
 
 ## 3) Feedback Flow
 
@@ -33,10 +35,11 @@ This document summarizes how core user journeys move across modules.
 
 ## 5) Notification Flow
 
-1. Role dashboard scripts request unread notifications from app/includes.
-2. Backend returns role-scoped notification records.
-3. Client marks items read via mark-read endpoints.
-4. Notification badge and state sync in UI.
+1. Role dashboards initialize shared notification client logic from app/assets/js/notification-dropdown.js.
+2. Dashboard scripts request unread notifications from role-scoped endpoints in app/includes.
+3. Backend returns role-scoped notification records for admin, doctor, or patient users.
+4. Client marks items read via corresponding mark-read endpoints.
+5. Notification badge and dropdown state remain synchronized through polling.
 
 ## 6) Appointment Encounter Verification Flow
 
@@ -46,6 +49,21 @@ This document summarizes how core user journeys move across modules.
 4. Backend stores checked_in_at/checkin_token/checked_in_by and logs activity.
 5. Doctor notification is emitted with the verification token.
 6. Doctor can mark appointment completed only after checked_in_at exists.
+
+## 7) Doctor Reschedule Flow
+
+1. Doctor initiates reschedule from doctor appointments page.
+2. Backend validates doctor ownership and requested date/time.
+3. Backend checks for slot conflicts in active appointments for that doctor.
+4. On success, appointment is updated to rescheduled with canonical slot key.
+5. Patient receives a reschedule notification containing old and new schedule values.
+
+## 8) No-Show Auto-Cancel Flow
+
+1. Before key patient and doctor flows, backend runs no-show processing with grace period.
+2. Approved appointments without check-in past grace window are auto-canceled.
+3. Auto-cancel action clears booking_slot_key so the slot becomes available again.
+4. Patient and doctor notifications are emitted for the no-show cancellation event.
 
 ## Cross-Cutting Controls
 

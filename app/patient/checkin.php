@@ -21,10 +21,13 @@ try {
     $conn = getDBConnection();
     beginDBTransaction($conn);
 
+    // Keep no-show cleanup up to date before evaluating this check-in request.
+    autoMarkNoShowAppointments($conn, 30);
+
     // Lock the row; verify ownership, status, and that it is today's appointment
     $stmt = prepareDBStatement(
         $conn,
-        "SELECT id, appointment_date, status, checked_in_at, patient_name, doctor_id, doctor_name
+        "SELECT id, appointment_date, status, cancel_reason, checked_in_at, patient_name, doctor_id, doctor_name
          FROM appointments
          WHERE appointment_id = ? AND patient_id = ?
          FOR UPDATE"
@@ -38,6 +41,9 @@ try {
         throw new RuntimeException('Appointment not found.');
     }
     if ($row['status'] !== 'approved') {
+        if ($row['status'] === 'canceled' && stripos((string)($row['cancel_reason'] ?? ''), 'no-show') !== false) {
+            throw new RuntimeException('Check-in window has closed and this appointment was marked as no-show.');
+        }
         throw new RuntimeException('Only approved appointments can be checked in.');
     }
     if ($row['checked_in_at'] !== null) {

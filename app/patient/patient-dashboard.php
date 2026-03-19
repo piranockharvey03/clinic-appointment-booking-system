@@ -24,6 +24,7 @@ $stats = [
 
 try {
     $conn = getDBConnection();
+    autoMarkNoShowAppointments($conn, 30);
 
     // Get patient appointments only (filter by logged-in patient)
     $stmt = $conn->prepare("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments WHERE patient_id = ? ORDER BY created_at DESC");
@@ -132,6 +133,10 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                             <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
+                            </a>
+                            <a href="how-appointments-work.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
+                                How It Works
                             </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">

@@ -109,6 +109,44 @@ function executeDBStatement($stmt)
 }
 
 /**
+ * Normalize appointment date for slot key usage.
+ * @param string $date
+ * @return string
+ */
+function normalizeAppointmentSlotDate($date)
+{
+    $raw = trim((string) $date);
+    $timestamp = strtotime($raw);
+
+    if ($timestamp === false) {
+        return $raw;
+    }
+
+    return date('Y-m-d', $timestamp);
+}
+
+/**
+ * Normalize appointment time for slot key usage.
+ * @param string $time
+ * @return string
+ */
+function normalizeAppointmentSlotTime($time)
+{
+    $raw = trim((string) $time);
+
+    if ($raw === '') {
+        return $raw;
+    }
+
+    $timestamp = strtotime($raw);
+    if ($timestamp === false) {
+        return $raw;
+    }
+
+    return date('H:i:s', $timestamp);
+}
+
+/**
  * Build a unique key representing an active appointment slot.
  * @param int|string $doctorId Doctor identifier
  * @param string $date Appointment date in YYYY-MM-DD format
@@ -117,7 +155,10 @@ function executeDBStatement($stmt)
  */
 function buildAppointmentSlotKey($doctorId, $date, $time)
 {
-    return (string) $doctorId . '|' . $date . '|' . $time;
+    $normalizedDate = normalizeAppointmentSlotDate($date);
+    $normalizedTime = normalizeAppointmentSlotTime($time);
+
+    return (string) $doctorId . '|' . $normalizedDate . '|' . $normalizedTime;
 }
 
 /**
@@ -132,6 +173,100 @@ function isDuplicateKeyException($error)
     return (int) $error->getCode() === 1062
         || stripos($message, 'Duplicate entry') !== false
         || stripos($message, 'duplicate') !== false;
+}
+
+/**
+ * Automatically cancel approved appointments that missed check-in beyond a grace period.
+ * Frees the slot and notifies patient + doctor once.
+ * @param mysqli $conn Open database connection
+ * @param int $graceMinutes Minutes allowed after appointment time before no-show cancellation
+ * @return int Number of appointments auto-canceled as no-show
+ */
+function autoMarkNoShowAppointments($conn, $graceMinutes = 30)
+{
+    $grace = max(0, (int) $graceMinutes);
+    $cutoff = date('Y-m-d H:i:s', time() - ($grace * 60));
+    $processed = 0;
+
+    $selectStmt = prepareDBStatement(
+        $conn,
+        "SELECT appointment_id, patient_id, patient_name, doctor_id, doctor_name, appointment_date, appointment_time
+         FROM appointments
+         WHERE status = 'approved'
+           AND checked_in_at IS NULL
+           AND TIMESTAMP(appointment_date, appointment_time) <= ?"
+    );
+    $selectStmt->bind_param('s', $cutoff);
+    executeDBStatement($selectStmt);
+    $result = $selectStmt->get_result();
+
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $apptId = $row['appointment_id'];
+
+            $updateStmt = prepareDBStatement(
+                $conn,
+                "UPDATE appointments
+                 SET status = 'canceled', cancel_reason = 'Patient no-show (auto)', booking_slot_key = NULL
+                 WHERE appointment_id = ?
+                   AND status = 'approved'
+                   AND checked_in_at IS NULL
+                   AND TIMESTAMP(appointment_date, appointment_time) <= ?"
+            );
+            $updateStmt->bind_param('ss', $apptId, $cutoff);
+            executeDBStatement($updateStmt);
+
+            $affected = $updateStmt->affected_rows;
+            $updateStmt->close();
+
+            if ($affected <= 0) {
+                continue;
+            }
+
+            $processed++;
+
+            if (!empty($row['patient_id'])) {
+                $patientMessage = "Your appointment with Dr. " . $row['doctor_name'] . " on "
+                    . $row['appointment_date'] . " at " . $row['appointment_time']
+                    . " was automatically canceled because check-in was not completed in time.";
+                $patientNotifStmt = prepareDBStatement(
+                    $conn,
+                    "INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message)
+                     VALUES (?, ?, ?, 'canceled', ?)"
+                );
+                $patientNotifStmt->bind_param('isss', $row['patient_id'], $apptId, $row['patient_name'], $patientMessage);
+                executeDBStatement($patientNotifStmt);
+                $patientNotifStmt->close();
+            }
+
+            $doctorId = (int) ($row['doctor_id'] ?? 0);
+            if ($doctorId > 0) {
+                $doctorMessage = "Auto no-show cancellation: " . $row['patient_name'] . " missed the check-in window for "
+                    . $row['appointment_date'] . " at " . $row['appointment_time'] . ".";
+                $doctorNotifStmt = prepareDBStatement(
+                    $conn,
+                    "INSERT INTO doctor_notifications (doctor_id, type, message, appointment_id)
+                     VALUES (?, 'canceled', ?, ?)"
+                );
+                $doctorNotifStmt->bind_param('iss', $doctorId, $doctorMessage, $apptId);
+                executeDBStatement($doctorNotifStmt);
+                $doctorNotifStmt->close();
+            }
+
+            logActivity(
+                $conn,
+                0,
+                'System',
+                'system',
+                'auto_no_show_cancel',
+                "Auto-canceled no-show appointment {$apptId}"
+            );
+        }
+        $result->free();
+    }
+
+    $selectStmt->close();
+    return $processed;
 }
 
 /**

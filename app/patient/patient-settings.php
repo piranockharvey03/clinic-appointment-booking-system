@@ -56,6 +56,10 @@ $fullName = $_SESSION['user_name'];
                                 <i data-feather="user" class="mr-3 h-5 w-5"></i>
                                 My Profile
                             </a>
+                            <a href="how-appointments-work.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
+                                How It Works
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="patient-settings.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">

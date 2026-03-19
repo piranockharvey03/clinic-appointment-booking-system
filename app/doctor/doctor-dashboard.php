@@ -20,6 +20,7 @@ $stats = [
 
 try {
     $conn = getDBConnection();
+    autoMarkNoShowAppointments($conn, 30);
 
     // Get only this doctor's appointments
     $doctorId = (string)$_SESSION['user_id'];

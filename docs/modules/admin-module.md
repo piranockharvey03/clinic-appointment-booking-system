@@ -10,7 +10,7 @@ Provides administrative operations for doctor management, appointment oversight,
 
 ## Key Components
 
-- new-admin-dashboard.php: summary metrics, notifications, quick actions.
+- new-admin-dashboard.php: summary metrics, notification bell/dropdown, quick actions.
 - admin-login.php and admin-logout.php: admin session entry/exit.
 - admin-appointments.php: appointment listing and filters.
 - manage-doctors.php: doctor CRUD and status management.
@@ -36,12 +36,14 @@ Provides administrative operations for doctor management, appointment oversight,
 - Doctor directory and activation status
 - Appointment data across all patients and doctors
 - Operational and activity reporting data
+- Admin notification feed state (read/unread lifecycle)
 
 ## Security Notes
 
 - Role checks are present and redirect unauthorized users.
 - Uses prepared statements in queried actions.
 - Password updates use hashing.
+- Notification endpoints return JSON for both success and authorization failure paths.
 
 ## Observed Risks
 

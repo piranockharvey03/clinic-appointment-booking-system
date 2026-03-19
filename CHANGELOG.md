@@ -5,6 +5,72 @@ All notable changes to the MediCare Clinic Hospital Management System will be do
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4] - 2026-03-19
+
+### Added
+
+- **Patient appointment guide page** ([app/patient/how-appointments-work.php](app/patient/how-appointments-work.php)):
+  - Added a patient-only page that explains booking, status meanings, doctor-only rescheduling, check-in/no-show handling, and patient notifications
+  - Added direct links to this guide from patient dashboard, appointments, profile, settings, and booking pages
+
+- **Doctor notification endpoints**:
+  - Added [app/includes/get-doctor-notifications.php](app/includes/get-doctor-notifications.php) for unread doctor notifications
+  - Added [app/includes/mark-doctor-notifications-read.php](app/includes/mark-doctor-notifications-read.php) with doctor ownership checks
+
+- **Live slot availability endpoint** ([app/includes/check-slot-availability.php](app/includes/check-slot-availability.php)):
+  - Added a patient role-protected API for checking doctor/date/time availability before booking submission
+  - Includes canonical slot-key checks with a legacy fallback query for older appointment rows
+
+- **Shared notification dropdown client** ([app/assets/js/notification-dropdown.js](app/assets/js/notification-dropdown.js)):
+  - Added reusable client logic for fetching, rendering, polling, and marking notifications as read
+
+### Changed
+
+- **Notification wiring across dashboards**:
+  - Rewired doctor dashboard to doctor-specific notification endpoints
+  - Enabled admin dashboard bell/dropdown using admin endpoints
+  - Standardized patient/doctor/admin notification behavior through the shared dropdown module
+
+- **Patient booking flow** ([public/patient-book.html](public/patient-book.html)):
+  - Added real-time slot availability checks when doctor/date/time changes
+  - Added submit-time guard to block booking if the slot becomes unavailable
+
+- **Appointment slot integrity helpers** ([config/db-config.php](config/db-config.php)):
+  - Added date/time normalization helpers for consistent slot-key generation
+  - Updated `buildAppointmentSlotKey()` to generate canonical keys
+
+- **Reschedule policy and conflict handling**:
+  - Enforced doctor-only rescheduling (patient reschedule flow removed)
+  - Added explicit conflict checks and duplicate-key handling during doctor reschedule actions
+  - Improved reschedule notifications to include old and new schedule values
+
+- **No-show automation**:
+  - Added `autoMarkNoShowAppointments()` helper to auto-cancel approved appointments that miss check-in after grace period
+  - Integrated no-show processing into patient/doctor dashboard and appointments flows, and check-in flow
+  - Auto no-show cancellation releases slot keys and emits patient/doctor notifications
+
+### Fixed
+
+- **Patient notifications fetch reliability** ([app/includes/get-patient-notifications.php](app/includes/get-patient-notifications.php)):
+  - Switched to direct patient_id filtering on `patient_notifications`
+
+- **Notification API error consistency**:
+  - Updated admin notification endpoints to return JSON on authorization failures
+
+- **Patient appointments warning** ([app/patient/patient-appointments.php](app/patient/patient-appointments.php)):
+  - Fixed undefined `$status` usage in appointment-card rendering
+
+### Documentation
+
+- Updated:
+  - [docs/modules/patient-module.md](docs/modules/patient-module.md)
+  - [docs/modules/doctor-module.md](docs/modules/doctor-module.md)
+  - [docs/modules/admin-module.md](docs/modules/admin-module.md)
+  - [docs/modules/includes-module.md](docs/modules/includes-module.md)
+  - [docs/modules/config-module.md](docs/modules/config-module.md)
+  - [docs/modules/assets-module.md](docs/modules/assets-module.md)
+  - [docs/modules/core-request-flows.md](docs/modules/core-request-flows.md)
+
 ## [2.0.3] - 2026-03-17
 
 ### Added

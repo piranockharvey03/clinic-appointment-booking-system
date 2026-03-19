@@ -11,27 +11,31 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
 // Handle status change actions and reschedule
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['appt_id'])) {
     $conn = null;
+    $redirectTab = $_GET['tab'] ?? 'pending';
+    $actionSuccess = '';
+    $actionError = '';
 
     try {
         $conn = getDBConnection();
         beginDBTransaction($conn);
 
+        autoMarkNoShowAppointments($conn, 30);
+
         $apptId = $_POST['appt_id'];
         $patientId = (int)$_SESSION['user_id'];
+        $action = trim((string)$_POST['action']);
 
-        if ($_POST['action'] === 'cancel') {
+        if ($action === 'cancel') {
             $cancelReason = trim($_POST['cancel_reason'] ?? '');
             $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'canceled', cancel_reason = ?, booking_slot_key = NULL WHERE appointment_id = ? AND patient_id = ?");
             $stmt->bind_param("ssi", $cancelReason, $apptId, $patientId);
             executeDBStatement($stmt);
             $stmt->close();
-        } elseif ($_POST['action'] === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
-            $newDate = $_POST['new_date'];
-            $newTime = $_POST['new_time'];
-            $stmt = prepareDBStatement($conn, "UPDATE appointments SET appointment_date = ?, appointment_time = ?, booking_slot_key = CONCAT(doctor_id, '|', ?, '|', ?), status = 'rescheduled' WHERE appointment_id = ? AND patient_id = ?");
-            $stmt->bind_param("sssssi", $newDate, $newTime, $newDate, $newTime, $apptId, $patientId);
-            executeDBStatement($stmt);
-            $stmt->close();
+            $actionSuccess = 'Appointment canceled successfully.';
+        } elseif ($action === 'reschedule') {
+            throw new RuntimeException('Only doctors can reschedule appointments.');
+        } else {
+            throw new RuntimeException('Unsupported appointment action.');
         }
 
         commitDBTransaction($conn);
@@ -43,10 +47,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
         }
 
         error_log("Patient appointment action error: " . $e->getMessage());
+        $actionError = $e->getMessage() ?: 'Failed to process appointment action.';
     }
 
     // Redirect to avoid form resubmission
-    header("Location: patient-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
+    $query = ['tab' => $redirectTab];
+    if ($actionSuccess !== '') {
+        $query['success'] = $actionSuccess;
+    }
+    if ($actionError !== '') {
+        $query['error'] = $actionError;
+    }
+
+    header("Location: patient-appointments.php?" . http_build_query($query));
     exit;
 }
 
@@ -54,6 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
 $appointments = [];
 try {
     $conn = getDBConnection();
+    autoMarkNoShowAppointments($conn, 30);
+
     // Get patient appointments only (filter by logged-in patient)
     $stmt = $conn->prepare("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments WHERE patient_id = ? ORDER BY created_at DESC");
     $stmt->bind_param("i", $_SESSION['user_id']);
@@ -103,17 +118,6 @@ function filter_appointments($appointments, $tab)
 }
 $filtered = array_reverse(filter_appointments($appointments, $tab));
 
-// For reschedule modal
-$reschedule_id = $_GET['reschedule'] ?? null;
-$reschedule_appt = null;
-if ($reschedule_id) {
-    foreach ($appointments as $a) {
-        if ($a['id'] == $reschedule_id) {
-            $reschedule_appt = $a;
-            break;
-        }
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -187,6 +191,10 @@ if ($reschedule_id) {
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
+                            <a href="how-appointments-work.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
+                                How It Works
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
@@ -223,6 +231,22 @@ if ($reschedule_id) {
             <main class="p-4 sm:px-6 lg:px-8">
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="p-4 sm:p-6">
+                        <?php if (!empty($_GET['success'])): ?>
+                            <div class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                                <?= htmlspecialchars($_GET['success']) ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($_GET['error'])): ?>
+                            <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                                <?= htmlspecialchars($_GET['error']) ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                            Appointment rescheduling is handled by your doctor. If your schedule needs to change, please contact the clinic or your doctor.
+                            <a href="how-appointments-work.php" class="ml-1 font-semibold text-blue-700 hover:text-blue-900 underline">View full appointment guide</a>.
+                        </div>
+
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                             <div class="flex flex-wrap items-center gap-2">
                                 <a href="?tab=pending" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Pending</a>
@@ -241,6 +265,7 @@ if ($reschedule_id) {
                                 <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../../public/patient-book.html">Book your appointment here</a>.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
+                                    <?php $status = strtolower($appt['status'] ?? 'pending'); ?>
                                     <div class="appointment-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                                         data-doctor-name="<?= htmlspecialchars(strtolower($appt['doctorName'])) ?>"
                                         data-department="<?= htmlspecialchars(strtolower($appt['department'])) ?>"
@@ -256,13 +281,13 @@ if ($reschedule_id) {
                                                 <div class="text-xs text-gray-500">
                                                     <?= htmlspecialchars($appt['doctorSpecialty']) ?> • <?= htmlspecialchars($appt['date']) ?>, <?= htmlspecialchars($appt['time']) ?>
                                                 </div>
+                                                <?php if ($status === 'rescheduled'): ?>
+                                                    <div class="text-xs text-blue-600 mt-1">This appointment was rescheduled by your doctor.</div>
+                                                <?php endif; ?>
                                                 <div class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Department: <?= htmlspecialchars($appt['department']) ?></div>
                                             </div>
                                         </div>
                                         <div class="w-full sm:w-auto flex flex-wrap items-center gap-2 justify-start sm:justify-end">
-                                            <?php
-                                            $status = strtolower($appt['status'] ?? 'pending');
-                                            ?>
                                             <?php if (!in_array($status, ['canceled', 'past'], true)): ?>
                                                 <?php if ($status === 'approved' && empty($appt['checkedInAt']) && $appt['date'] === date('Y-m-d')): ?>
                                                     <form method="post" action="checkin.php" style="display:inline;">
@@ -279,11 +304,6 @@ if ($reschedule_id) {
                                                         Checked In &middot; Code&nbsp;<strong><?= htmlspecialchars($appt['checkinToken'] ?? '----') ?></strong>
                                                     </span>
                                                 <?php endif; ?>
-                                                <form method="get" style="display:inline;">
-                                                    <input type="hidden" name="tab" value="<?= htmlspecialchars($tab) ?>">
-                                                    <input type="hidden" name="reschedule" value="<?= htmlspecialchars($appt['id']) ?>">
-                                                    <button type="submit" class="px-3 py-1.5 text-sm rounded-md border bg-white hover:bg-gray-100 text-blue-700">Reschedule</button>
-                                                </form>
                                                 <button type="button" onclick="openPatientCancelModal('<?= htmlspecialchars($appt['id']) ?>')" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200">Cancel</button>
                                                 <?php
                                                 $badgeClass = $status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
@@ -305,29 +325,6 @@ if ($reschedule_id) {
             </main>
         </div>
     </div>
-    <?php if ($reschedule_appt): ?>
-        <!-- Modal for rescheduling -->
-        <div class="fixed inset-0 flex items-center justify-center z-50 modal-bg">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm relative">
-                <form method="post">
-                    <input type="hidden" name="appt_id" value="<?= htmlspecialchars($reschedule_appt['id']) ?>">
-                    <input type="hidden" name="action" value="reschedule">
-                    <label class="block mb-2 font-semibold text-gray-700">Reschedule Appointment</label>
-                    <input type="date" name="new_date" class="border rounded px-3 py-2 w-full mb-4" value="<?= htmlspecialchars($reschedule_appt['date']) ?>" required min="<?= date('Y-m-d') ?>">
-                    <input type="time" name="new_time" class="border rounded px-3 py-2 w-full mb-4" value="<?= htmlspecialchars($reschedule_appt['time']) ?>" required>
-                    <div class="flex justify-end gap-2">
-                        <a href="patient-appointments.php?tab=<?= htmlspecialchars($tab) ?>" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-700">Cancel</a>
-                        <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <style>
-            body {
-                overflow: hidden;
-            }
-        </style>
-    <?php endif; ?>
     <!-- Patient Cancel Reason Modal -->
     <div id="patientCancelReasonModal" class="fixed inset-0 flex items-center justify-center z-50 modal-bg" style="display:none;">
         <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm relative">

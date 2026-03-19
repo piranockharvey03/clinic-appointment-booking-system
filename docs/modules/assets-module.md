@@ -12,7 +12,7 @@ Contains shared frontend CSS/JS resources that power layout behavior, dark mode,
 ## Key Components
 
 - CSS: dark-mode.css, responsive-sidebar.css
-- JS: custom-modal.js, dark-mode.js, feedback-form.js, init.js, mobile-menu.js, sidebar-toggle.js
+- JS: custom-modal.js, dark-mode.js, feedback-form.js, init.js, mobile-menu.js, sidebar-toggle.js, notification-dropdown.js
 
 ## Inbound Dependencies
 
@@ -27,6 +27,7 @@ Contains shared frontend CSS/JS resources that power layout behavior, dark mode,
 
 - UI state: dark mode preference, sidebar visibility, form validation state
 - Client-request payloads for feedback and notifications
+- Shared notification dropdown state: polling, unread counts, icon mapping, mark-all-read actions
 
 ## Security Notes
 
@@ -43,3 +44,4 @@ Contains shared frontend CSS/JS resources that power layout behavior, dark mode,
 1. Consolidate assets into one canonical source with build/sync process.
 2. Add versioned asset strategy to reduce cache/staleness issues.
 3. Add smoke tests for key JS flows (feedback, notifications, menus).
+4. Add a small UI regression suite for role-specific notification dropdown behavior.

@@ -15,6 +15,8 @@ Hosts shared backend endpoints and reusable API-like handlers consumed by fronte
 - get-doctors-by-department.php: returns doctor lists by filter.
 - get-notifications.php and mark-notifications-read.php: admin notification APIs.
 - get-patient-notifications.php and mark-patient-notifications-read.php: patient notification APIs.
+- get-doctor-notifications.php and mark-doctor-notifications-read.php: doctor notification APIs.
+- check-slot-availability.php: patient role-protected availability pre-check API.
 
 ## Inbound Dependencies
 
@@ -24,7 +26,7 @@ Hosts shared backend endpoints and reusable API-like handlers consumed by fronte
 ## Outbound Dependencies
 
 - config/db-config.php
-- Tables: feedback, departments, doctors, doctor_departments, doctor_specialties, notifications, patient_notifications
+- Tables: feedback, departments, doctors, doctor_departments, doctor_specialties, appointments, notifications, patient_notifications, doctor_notifications
 
 ## Data and Entities
 
@@ -37,6 +39,8 @@ Hosts shared backend endpoints and reusable API-like handlers consumed by fronte
 - Notification mark-read handlers include ownership checks.
 - Query execution uses prepared statements.
 - Basic input sanitization exists for feedback submissions.
+- Availability endpoint enforces patient session role and validates required input fields.
+- Admin notification endpoints return consistent JSON responses for unauthorized access.
 
 ## Observed Risks
 

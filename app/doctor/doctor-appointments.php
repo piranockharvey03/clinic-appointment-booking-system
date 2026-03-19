@@ -11,10 +11,15 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_S
 // Handle doctor actions: approve, cancel, reschedule
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['appt_id'])) {
     $conn = null;
+    $redirectTab = $_GET['tab'] ?? 'pending';
+    $actionSuccess = '';
+    $actionError = '';
 
     try {
         $conn = getDBConnection();
         beginDBTransaction($conn);
+
+        autoMarkNoShowAppointments($conn, 30);
 
         $apptId = $_POST['appt_id'];
         $doctorId = (int)$_SESSION['user_id'];
@@ -34,8 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
         }
 
         if ($action === 'approve') {
-            $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'approved', booking_slot_key = COALESCE(booking_slot_key, CONCAT(doctor_id, '|', DATE_FORMAT(appointment_date, '%Y-%m-%d'), '|', TIME_FORMAT(appointment_time, '%H:%i:%s'))) WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
-            $stmt->bind_param("si", $apptId, $doctorId);
+            $approvedSlotKey = buildAppointmentSlotKey($doctorId, $appointment['appointment_date'], $appointment['appointment_time']);
+            $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'approved', booking_slot_key = COALESCE(booking_slot_key, ?) WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
+            $stmt->bind_param("ssi", $approvedSlotKey, $apptId, $doctorId);
             executeDBStatement($stmt);
             $stmt->close();
 
@@ -59,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
             executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
+            $actionSuccess = 'Appointment approved successfully.';
         } elseif ($action === 'cancel') {
             $cancelReason = trim($_POST['cancel_reason'] ?? '');
             $stmt = prepareDBStatement($conn, "UPDATE appointments SET status = 'canceled', cancel_reason = ?, booking_slot_key = NULL WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
@@ -88,10 +95,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
             executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
+            $actionSuccess = 'Appointment canceled successfully.';
         } elseif ($action === 'reschedule' && !empty($_POST['new_date']) && !empty($_POST['new_time'])) {
             $newDate = $_POST['new_date'];
             $newTime = $_POST['new_time'];
+
+            if (strtotime($newDate) < strtotime(date('Y-m-d'))) {
+                throw new RuntimeException('Reschedule date cannot be in the past.');
+            }
+
             $newSlotKey = buildAppointmentSlotKey($doctorId, $newDate, $newTime);
+
+            $slotCheckStmt = prepareDBStatement($conn, "
+                SELECT appointment_id
+                FROM appointments
+                WHERE appointment_id <> ?
+                  AND CAST(doctor_id AS UNSIGNED) = ?
+                  AND status IN ('pending', 'approved', 'rescheduled')
+                  AND (
+                      booking_slot_key = ?
+                      OR (
+                          appointment_date = ?
+                          AND TIME_FORMAT(appointment_time, '%H:%i:%s') = ?
+                      )
+                  )
+                LIMIT 1
+            ");
+            $slotCheckStmt->bind_param("sisss", $apptId, $doctorId, $newSlotKey, $newDate, $newTime);
+            executeDBStatement($slotCheckStmt);
+            $slotConflictResult = $slotCheckStmt->get_result();
+            $slotConflict = $slotConflictResult && $slotConflictResult->num_rows > 0;
+            $slotConflictResult?->free();
+            $slotCheckStmt->close();
+
+            if ($slotConflict) {
+                throw new RuntimeException('Selected date/time is already booked for this doctor.');
+            }
 
             $stmt = prepareDBStatement($conn, "UPDATE appointments SET appointment_date = ?, appointment_time = ?, booking_slot_key = ?, status = 'rescheduled' WHERE appointment_id = ? AND CAST(doctor_id AS UNSIGNED) = ?");
             $stmt->bind_param("ssssi", $newDate, $newTime, $newSlotKey, $apptId, $doctorId);
@@ -105,7 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
 
             // Create patient notification for rescheduling
             if (!empty($appointment['patient_id'])) {
-                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " has been rescheduled to " . $newDate . " at " . $newTime . ".";
+                $message = "Your appointment with Dr. " . $appointment['doctor_name'] . " has been rescheduled from "
+                    . $appointment['appointment_date'] . " at " . $appointment['appointment_time']
+                    . " to " . $newDate . " at " . $newTime . ".";
                 $notificationStmt = prepareDBStatement($conn, "INSERT INTO patient_notifications (patient_id, appointment_id, patient_name, notification_type, message) VALUES (?, ?, ?, 'rescheduled', ?)");
                 $notificationStmt->bind_param("isss", $appointment['patient_id'], $apptId, $appointment['patient_name'], $message);
                 executeDBStatement($notificationStmt);
@@ -118,6 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
             executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
+            $actionSuccess = 'Appointment rescheduled successfully.';
         } elseif ($action === 'complete') {
             // Enforce attendance: patient must have checked in before the doctor can complete
             if (empty($appointment['checked_in_at'])) {
@@ -148,6 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
             $doctorNotificationStmt->bind_param("iss", $doctorId, $doctorMessage, $apptId);
             executeDBStatement($doctorNotificationStmt);
             $doctorNotificationStmt->close();
+            $actionSuccess = 'Appointment marked as completed.';
         }
 
         commitDBTransaction($conn);
@@ -159,10 +202,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
         }
 
         error_log("Doctor appointment action error: " . $e->getMessage());
+        if (isDuplicateKeyException($e)) {
+            $actionError = 'Selected date/time is already booked for this doctor.';
+        } else {
+            $actionError = $e->getMessage() ?: 'Failed to process appointment action.';
+        }
     }
 
     // Redirect to avoid form resubmission
-    header("Location: doctor-appointments.php?tab=" . ($_GET['tab'] ?? 'pending'));
+    $query = ['tab' => $redirectTab];
+    if ($actionSuccess !== '') {
+        $query['success'] = $actionSuccess;
+    }
+    if ($actionError !== '') {
+        $query['error'] = $actionError;
+    }
+
+    header("Location: doctor-appointments.php?" . http_build_query($query));
     exit;
 }
 
@@ -170,6 +226,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['app
 $appointments = [];
 try {
     $conn = getDBConnection();
+    autoMarkNoShowAppointments($conn, 30);
+
     $doctorId = (string)$_SESSION['user_id'];
     $stmt = $conn->prepare("SELECT *, appointment_id as id, appointment_date as date, appointment_time as time FROM appointments WHERE doctor_id = ? ORDER BY created_at DESC");
     $stmt->bind_param("s", $doctorId);
@@ -367,6 +425,17 @@ if ($view_id) {
             <main class="p-4 sm:px-6 lg:px-8">
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="p-4 sm:p-6">
+                        <?php if (!empty($_GET['success'])): ?>
+                            <div class="mb-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                                <?= htmlspecialchars($_GET['success']) ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (!empty($_GET['error'])): ?>
+                            <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                                <?= htmlspecialchars($_GET['error']) ?>
+                            </div>
+                        <?php endif; ?>
+
                         <!-- Tabs -->
                         <div class="flex flex-wrap items-center gap-2 mb-4">
                             <a href="?tab=pending" class="px-3 py-1.5 text-sm rounded-md <?= $tab === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' ?>">Pending</a>
