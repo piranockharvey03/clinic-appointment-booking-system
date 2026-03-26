@@ -138,6 +138,10 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                 <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
                                 How It Works
                             </a>
+                            <a href="patient-messages.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="message-circle" class="mr-3 h-5 w-5"></i>
+                                Messages
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
@@ -354,6 +358,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
 
     <script src="../assets/js/mobile-menu.js"></script>
     <script src="../assets/js/notification-dropdown.js"></script>
+    <script src="../assets/js/messaging.js"></script>
     <script>
         feather.replace();
 

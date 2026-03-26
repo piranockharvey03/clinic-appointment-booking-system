@@ -195,6 +195,10 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
                                 <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
                                 How It Works
                             </a>
+                            <a href="patient-messages.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="message-circle" class="mr-3 h-5 w-5"></i>
+                                Messages
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
@@ -304,6 +308,10 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
                                                         Checked In &middot; Code&nbsp;<strong><?= htmlspecialchars($appt['checkinToken'] ?? '----') ?></strong>
                                                     </span>
                                                 <?php endif; ?>
+                                                <button type="button" onclick="messageDoctor('<?= htmlspecialchars($appt['doctorId']) ?>', '<?= htmlspecialchars($appt['doctorName']) ?>')" class="px-3 py-1.5 text-sm rounded-md text-blue-600 border border-blue-200 hover:bg-blue-50 flex items-center gap-1">
+                                                    <i data-feather="message-circle" class="h-4 w-4"></i>
+                                                    Message
+                                                </button>
                                                 <button type="button" onclick="openPatientCancelModal('<?= htmlspecialchars($appt['id']) ?>')" class="px-3 py-1.5 text-sm rounded-md text-red-600 border border-red-200">Cancel</button>
                                                 <?php
                                                 $badgeClass = $status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
@@ -357,6 +365,7 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
     </form>
     <script src="../assets/js/mobile-menu.js"></script>
     <script src="../assets/js/custom-modal.js"></script>
+    <script src="../assets/js/messaging.js"></script>
     <script>
         feather.replace();
 
@@ -400,7 +409,37 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
                 searchInput.addEventListener('input', filterCards);
             }
         });
+        // Message doctor button
+        window.messageDoctor = async function(doctorId, doctorName) {
+            try {
+                const response = await fetch('../includes/create-conversation.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'doctor_id=' + encodeURIComponent(doctorId)
+                });
 
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({
+                        error: 'Unknown error'
+                    }));
+                    throw new Error(error.error || 'Request failed');
+                }
+
+                const data = await response.json();
+                if (data.success && data.conversation_id) {
+                    window.location.href = 'patient-messages.php?conversation_id=' + encodeURIComponent(data.conversation_id);
+                } else {
+                    throw new Error(data.error || 'Failed to create conversation');
+                }
+            } catch (error) {
+                console.error('Error initiating conversation:', error);
+                alert('Failed to start messaging: ' + error.message);
+            }
+        };
+
+        // 
         // Patient cancel reason modal
         window.openPatientCancelModal = function(apptId) {
             document.getElementById('patientCancelApptIdInput').value = apptId;

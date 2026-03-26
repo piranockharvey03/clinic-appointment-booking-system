@@ -387,9 +387,73 @@ PREPARE stmt FROM @add_booking_slot_unique;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- ─────────────────────────────────────────────────────
+-- 13. CONVERSATIONS (Doctor-Patient messaging)
+-- ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `conversations` (
+  `conversation_id` INT          NOT NULL AUTO_INCREMENT,
+  `patient_id`      INT(11)      NOT NULL,
+  `doctor_id`       INT(11)      NOT NULL,
+  `last_message_at` DATETIME     DEFAULT NULL,
+  `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`conversation_id`),
+  UNIQUE KEY `uniq_patient_doctor` (`patient_id`, `doctor_id`),
+  INDEX `idx_patient` (`patient_id`),
+  INDEX `idx_doctor` (`doctor_id`),
+  INDEX `idx_patient_last_message` (`patient_id`, `last_message_at`),
+  INDEX `idx_doctor_last_message` (`doctor_id`, `last_message_at`),
+  CONSTRAINT `fk_conversations_patient` FOREIGN KEY (`patient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_conversations_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Stores doctor-patient conversation threads';
+
+-- ─────────────────────────────────────────────────────
+-- 14. MESSAGES (Individual messages in conversations)
+-- ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `messages` (
+  `message_id`        INT          NOT NULL AUTO_INCREMENT,
+  `conversation_id`   INT          NOT NULL,
+  `sender_role`       ENUM('patient','doctor') NOT NULL,
+  `sender_id`         INT          NOT NULL,
+  `receiver_role`     ENUM('patient','doctor') NOT NULL,
+  `receiver_id`       INT          NOT NULL,
+  `message_text`      TEXT         NOT NULL,
+  `delivery_status`   ENUM('sending','sent','delivered','read') NOT NULL DEFAULT 'sending',
+  `is_read`           TINYINT(1)   NOT NULL DEFAULT 0,
+  `read_at`           DATETIME     DEFAULT NULL,
+  `delivered_at`      DATETIME     DEFAULT NULL,
+  `created_at`        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`message_id`),
+  INDEX `idx_conversation_created` (`conversation_id`, `created_at`),
+  INDEX `idx_receiver_unread` (`receiver_role`, `receiver_id`, `is_read`),
+  INDEX `idx_conversation_receiver_unread_created` (`conversation_id`, `receiver_id`, `is_read`, `created_at`),
+  INDEX `idx_delivery_status` (`conversation_id`, `delivery_status`),
+  CONSTRAINT `fk_messages_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Stores individual messages between doctors and patients with delivery status tracking';
+
+-- =====================================================
+-- 15. TYPING_STATUS (Real-time typing indicators)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `typing_status` (
+  `id`              INT          NOT NULL AUTO_INCREMENT,
+  `conversation_id` INT          NOT NULL,
+  `user_role`       ENUM('patient','doctor') NOT NULL,
+  `user_id`         INT          NOT NULL,
+  `is_typing`       TINYINT(1)   NOT NULL DEFAULT 0,
+  `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `expires_at`      DATETIME     DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_conversation_user` (`conversation_id`, `user_role`, `user_id`),
+  INDEX `idx_conversation` (`conversation_id`),
+  INDEX `idx_expires_at` (`expires_at`),
+  CONSTRAINT `fk_typing_status_conversation` FOREIGN KEY (`conversation_id`) REFERENCES `conversations` (`conversation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Tracks real-time typing indicators for conversations';
+
 -- =====================================================
 -- SETUP COMPLETE
--- =====================================================
+-- ===================================================
 -- Default credentials:
 --   Admin:   admin@hospital.com / admin123
 --
