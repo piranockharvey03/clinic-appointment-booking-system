@@ -6,7 +6,7 @@
 -- Run in phpMyAdmin or via: mysql -u root < medicare-complete-database.sql
 --
 -- Tables created (in dependency order):
---   1. users              — Patient accounts
+--   1. users              — Patient accounts with profile fields
 --   2. admin              — Admin accounts
 --   3. doctors            — Doctor profiles
 --   4. departments        — Department master list
@@ -18,6 +18,9 @@
 --  10. notifications      — Admin notifications
 --  11. patient_notifications — Patient notifications
 --  12. activity_logs      — Audit trail for user actions
+--  13. conversations      — Doctor-patient chat threads
+--  14. messages           — Individual messages with delivery status
+--  15. typing_status      — Real-time typing indicators
 -- =====================================================
 
 CREATE DATABASE IF NOT EXISTS `medicare`
