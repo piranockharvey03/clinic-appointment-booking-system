@@ -71,7 +71,7 @@ try {
 function admin_filter_appts(array $appts, string $tab): array
 {
     if ($tab === 'all') return $appts;
-    return array_values(array_filter($appts, fn($a) => strtolower($a['status'] ?? '') === $tab));
+    return array_values(array_filter($appts, fn($a) => strtolower($a['status'] ?? 'pending') === $tab));
 }
 $filtered = admin_filter_appts($appointments, $selectedTab);
 
@@ -189,10 +189,10 @@ $statusColors = [
                         <div class="w-full sm:flex-1 sm:min-w-[12rem]">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Doctor</label>
                             <select name="doctor_id" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">â€” All Doctors â€”</option>
+                                <option value=""> All Doctors</option>
                                 <?php foreach ($doctors as $d): ?>
                                     <option value="<?= (int)$d['id'] ?>" <?= $selectedDoctorId === (int)$d['id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($d['full_name']) ?> â€” <?= htmlspecialchars($d['specialty']) ?>
+                                        <?= htmlspecialchars($d['full_name']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

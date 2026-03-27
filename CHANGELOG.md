@@ -5,6 +5,104 @@ All notable changes to the MediCare Clinic Hospital Management System will be do
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2026-03-27
+
+### Added
+
+- **Real-time patient-doctor messaging system**:
+  - Added [app/patient/patient-messages.php](app/patient/patient-messages.php) - Patient messaging interface
+  - Added [app/doctor/doctor-messages.php](app/doctor/doctor-messages.php) - Doctor messaging interface
+  - Added 11 messaging API endpoints in `/app/includes/`:
+    - `create-conversation.php` - Initialize patient-doctor conversation
+    - `send-message.php` - Send new message
+    - `get-messages.php` - Fetch message thread history
+    - `get-conversations.php` - Fetch conversation list with latest message preview
+    - `message-stream.php` - Server-Sent Events (SSE) stream for real-time updates
+    - `set-typing-status.php` - Update typing indicator status
+    - `get-typing-status.php` - Fetch typing status for conversation
+    - `mark-messages-read.php` - Mark messages as read
+    - `update-message-status.php` - Update message delivery status
+
+- **Dark mode support for messaging pages**:
+  - Added [app/assets/css/dark-mode.css](app/assets/css/dark-mode.css) - Dark mode styling
+  - Added [app/assets/js/dark-mode.js](app/assets/js/dark-mode.js) - Dark mode toggle functionality
+  - Dark mode preference persists using browser localStorage
+  - Full dark styling for messages interface and all components
+
+- **Enhanced patient profile management**:
+  - Added `gender` column (ENUM: male, female, other) to users table
+  - Added `date_of_birth` column (DATE) to users table
+  - Extended [app/patient/patient-profile.php](app/patient/patient-profile.php):
+    - Added profile information display cards showing current values
+    - Added gender selection dropdown with proper persistence
+    - Added date of birth picker with proper display
+    - Added address field
+    - Added insurance provider field
+  - Data persists across sessions and displays immediately after update
+
+- **Messages navigation links**:
+  - Added "Messages" link to sidebar navigation on all patient pages:
+    - patient-dashboard.php
+    - patient-appointments.php
+    - patient-profile.php
+    - patient-settings.php
+    - how-appointments-work.php
+  - Added "Messages" link to sidebar navigation on all doctor pages:
+    - doctor-dashboard.php
+    - doctor-appointments.php
+    - doctor-settings.php
+  - Quick "Message Doctor" action button on patient appointments
+
+- **Mobile-responsive messaging interface**:
+  - Responsive sidebar collapsing on mobile (<768px)
+  - Conversation list hides on mobile, shows chat view
+  - Back button on mobile for navigation between conversations
+  - Adaptive padding and font sizes for mobile devices
+  - Touch-friendly button and input sizes
+
+### Changed
+
+- **Admin appointments filter**:
+  - Fixed null status handling in filter logic
+  - Updated doctor filter dropdown to display only doctor names (removed specialty)
+  - Improved filter consistency between stats calculation and filter function
+  - Doctor filter now properly persists when switching between status tabs
+
+- **Database schema updates**:
+  - Updated mysql-complete-database.sql with new user profile columns (gender, address, insurance, date_of_birth)
+  - Created conversations table for messaging system
+  - Created messages table for message storage
+  - Created typing_indicators table for real-time typing status
+
+### Fixed
+
+- **Patient profile null status handling**:
+  - Fixed undefined variable error for date_of_birth
+  - Profile now correctly displays all fields after update
+  - Success message properly shown after profile changes
+
+### Documentation
+
+- Updated [SRS_MediCare_Clinic_System.md](SRS_MediCare_Clinic_System.md):
+  - Added section 3.6: Patient-Doctor Communication System
+  - Added section 3.7: Patient Profile and Account Management
+  - Renumbered Public Website Features to section 3.8
+  - Added messaging UI requirements to section 4.1
+  - Added doctor interface components
+
+- Updated [SDD_MediCare_Clinic_System.md](SDD_MediCare_Clinic_System.md):
+  - Added section 3.5: Patient-Doctor Messaging Module
+  - Documented all 11 messaging API endpoints
+  - Documented dark mode implementation
+  - Documented mobile responsiveness architecture
+  - Updated table of contents with new component section
+
+- **Cleanup**:
+  - Deleted redundant documentation files:
+    - VERIFICATION_REPORT.md (duplicate of ANALYSIS_SUMMARY)
+    - FILE_CONNECTIVITY_VERIFICATION.md (duplicate of DEPENDENCY_ANALYSIS)
+    - ARCHITECTURE_ANALYSIS.md (superseded by DEPENDENCY_ANALYSIS)
+
 ## [2.0.4] - 2026-03-19
 
 ### Added

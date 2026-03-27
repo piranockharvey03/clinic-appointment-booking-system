@@ -44,11 +44,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_profile'])) {
             'phone' => 's',
             'gender' => 's',
             'address' => 's',
-            'insurance' => 's'
+            'insurance' => 's',
+            'date_of_birth' => 's'
         ];
 
         foreach ($fields as $field => $type) {
-            if (isset($_POST[$field])) {
+            if ($field === 'date_of_birth' && isset($_POST['dob'])) {
+                // Map 'dob' form field to 'date_of_birth' database field
+                $updates[] = "date_of_birth = ?";
+                $types .= $type;
+                $values[] = trim($_POST['dob']);
+            } elseif ($field !== 'date_of_birth' && isset($_POST[$field])) {
                 $updates[] = "$field = ?";
                 $types .= $type;
                 $values[] = trim($_POST[$field]);
@@ -94,6 +100,7 @@ $phone = '';
 $gender = '';
 $address = '';
 $insurance = '';
+$dob = '';
 
 // Fetch user profile from database
 try {
@@ -112,6 +119,7 @@ try {
     $selectFields[] = in_array('gender', $columns) ? 'gender' : "'' as gender";
     $selectFields[] = in_array('address', $columns) ? 'address' : "'' as address";
     $selectFields[] = in_array('insurance', $columns) ? 'insurance' : "'' as insurance";
+    $selectFields[] = in_array('date_of_birth', $columns) ? 'date_of_birth' : "'' as date_of_birth";
 
     $query = "SELECT " . implode(', ', $selectFields) . " FROM users WHERE id=?";
 
@@ -134,6 +142,7 @@ try {
         $gender = $userData['gender'] ?? '';
         $address = $userData['address'] ?? '';
         $insurance = $userData['insurance'] ?? '';
+        $dob = $userData['date_of_birth'] ?? '';
     }
     $stmt->close();
 } catch (Exception $e) {
@@ -228,6 +237,10 @@ try {
                                 <i data-feather="book-open" class="mr-3 h-5 w-5"></i>
                                 How It Works
                             </a>
+                            <a href="patient-messages.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                                <i data-feather="message-circle" class="mr-3 h-5 w-5"></i>
+                                Messages
+                            </a>
                         </div>
                         <div class="mt-8 pt-8 border-t border-blue-700">
                             <a href="patient-profile.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
@@ -275,11 +288,48 @@ try {
                     <?php elseif ($error): ?>
                         <div class="mb-4 p-3 rounded bg-red-100 text-red-800"><?php echo htmlspecialchars($error); ?></div>
                     <?php endif; ?>
-                    <form method="post" class="space-y-8">
-                        <div class="mb-8">
-                            <h2 class="text-2xl font-bold text-gray-900"><?php echo htmlspecialchars($fullName); ?></h2>
-                            <p class="text-gray-500"><?php echo htmlspecialchars($email); ?></p>
+
+                    <!-- Profile Information Display -->
+                    <div class="mb-8 pb-8 border-b border-gray-200">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2"><?php echo htmlspecialchars($fullName); ?></h2>
+                        <p class="text-gray-500 mb-4"><?php echo htmlspecialchars($email); ?></p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <?php if (!empty($gender)): ?>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <p class="text-xs font-semibold text-gray-600">Gender</p>
+                                    <p class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars(ucfirst($gender)); ?></p>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($dob)): ?>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <p class="text-xs font-semibold text-gray-600">Date of Birth</p>
+                                    <p class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars($dob); ?></p>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($phone)): ?>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <p class="text-xs font-semibold text-gray-600">Phone</p>
+                                    <p class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars($phone); ?></p>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($address)): ?>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <p class="text-xs font-semibold text-gray-600">Address</p>
+                                    <p class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars($address); ?></p>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($insurance)): ?>
+                                <div class="bg-blue-50 p-3 rounded">
+                                    <p class="text-xs font-semibold text-gray-600">Insurance</p>
+                                    <p class="text-lg font-medium text-gray-900"><?php echo htmlspecialchars($insurance); ?></p>
+                                </div>
+                            <?php endif; ?>
                         </div>
+                    </div>
+
+                    <!-- Edit Profile Form -->
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Edit Profile</h3>
+                    <form method="post" class="space-y-8">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label class="form-label mb-1">Phone</label>
@@ -293,9 +343,9 @@ try {
                                 <label class="form-label mb-1">Gender</label>
                                 <select name="gender" class="form-select">
                                     <option value="">Select</option>
-                                    <option value="Male" <?php if ($gender == 'Male') echo 'selected'; ?>>Male</option>
-                                    <option value="Female" <?php if ($gender == 'Female') echo 'selected'; ?>>Female</option>
-                                    <option value="Other" <?php if ($gender == 'Other') echo 'selected'; ?>>Other</option>
+                                    <option value="male" <?php if (strtolower($gender) == 'male') echo 'selected'; ?>>Male</option>
+                                    <option value="female" <?php if (strtolower($gender) == 'female') echo 'selected'; ?>>Female</option>
+                                    <option value="other" <?php if (strtolower($gender) == 'other') echo 'selected'; ?>>Other</option>
                                 </select>
                             </div>
                             <div>

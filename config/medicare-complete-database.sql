@@ -30,12 +30,16 @@ USE `medicare`;
 -- 1. USERS (Patients)
 -- ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `users` (
-  `id`         INT(11)      NOT NULL AUTO_INCREMENT,
-  `full_name`  VARCHAR(100) NOT NULL,
-  `email`      VARCHAR(100) NOT NULL,
-  `phone`      VARCHAR(20)  NOT NULL,
-  `password`   VARCHAR(255) NOT NULL,
-  `created_at` TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id`              INT(11)      NOT NULL AUTO_INCREMENT,
+  `full_name`       VARCHAR(100) NOT NULL,
+  `email`           VARCHAR(100) NOT NULL,
+  `phone`           VARCHAR(20)  NOT NULL,
+  `password`        VARCHAR(255) NOT NULL,
+  `gender`          ENUM('male','female','other') DEFAULT NULL,
+  `address`         TEXT DEFAULT NULL,
+  `insurance`       VARCHAR(100) DEFAULT NULL,
+  `date_of_birth`   DATE DEFAULT NULL,
+  `created_at`      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   INDEX `idx_email` (`email`)

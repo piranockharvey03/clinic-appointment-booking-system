@@ -13,6 +13,8 @@
 
 | Version | Date              | Author            | Description                       |
 | ------- | ----------------- | ----------------- | --------------------------------- |
+| 1.3     | March 27, 2026    | Development Team  | Real-time messaging system, dark mode UI, enhanced components |
+| 1.2     | March 19, 2026    | Development Team  | Profile data model expansion, appointment enhancements |
 | 1.1     | February 13, 2026 | Development Team  | Bug fixes and maintenance updates |
 | 1.0     | January 29, 2026  | Architecture Team | Initial Release                   |
 
@@ -23,6 +25,12 @@
 1. [Introduction](#1-introduction)
 2. [System Architecture](#2-system-architecture)
 3. [Component Design](#3-component-design)
+   - 3.1 Authentication Module
+   - 3.2 Appointment Management Module
+   - 3.3 Notification Module
+   - 3.4 User Management Module
+   - 3.5 Patient-Doctor Messaging Module
+   - 3.6 Database Connectivity Module
 4. [Data Design](#4-data-design)
 5. [Interface Design](#5-interface-design)
 6. [Security Design](#6-security-design)
@@ -744,7 +752,146 @@ Processing:
 Output: JSON {success: boolean, message: string}
 ```
 
-### 3.5 Database Connectivity Module
+### 3.5 Patient-Doctor Messaging Module
+
+#### 3.5.1 Component Overview
+
+**Purpose:** Enable real-time messaging between patients and doctors  
+**Location:** `/app/patient/`, `/app/doctor/`, `/app/includes/`  
+**Dependencies:** Database module, Session module, Server-Sent Events (SSE)
+
+#### 3.5.2 Component Structure
+
+```
+patient/
+├── patient-messages.php                    # Patient messaging interface
+
+doctor/
+├── doctor-messages.php                     # Doctor messaging interface
+
+includes/
+├── create-conversation.php                 # Initialize conversation
+├── send-message.php                        # Send new message
+├── get-messages.php                        # Fetch message thread
+├── get-conversations.php                   # Fetch conversation list
+├── message-stream.php                      # SSE stream for live updates
+├── set-typing-status.php                   # Update typing indicator
+├── get-typing-status.php                   # Fetch typing status
+├── mark-messages-read.php                  # Mark messages as read
+└── update-message-status.php               # Update delivery status
+```
+
+#### 3.5.3 Key Functions
+
+**create-conversation.php:**
+
+```php
+Function: initializeConversation()
+Input: POST data (user_id, doctor_id)
+Processing:
+  1. Verify session and user role
+  2. Check if conversation exists: SELECT * FROM conversations
+                                  WHERE (patient_id=? AND doctor_id=?)
+  3. If not exists, INSERT INTO conversations
+  4. Return conversation_id
+Output: JSON {success: boolean, conversation_id: string}
+Security:
+  - Validate user is patient or doctor
+  - Patient can only message their assigned doctor
+```
+
+**send-message.php:**
+
+```php
+Function: sendMessage()
+Input: POST data (conversation_id, message_text, sender_type)
+Processing:
+  1. Verify session
+  2. Validate message not empty
+  3. INSERT INTO messages (conversation_id, sender_id, message_text, created_at)
+  4. Set status = 'sent'
+  5. Broadcast to SSE stream
+Output: JSON {success: boolean, message_id: string, timestamp: string}
+Validation:
+  - Sender must be part of conversation
+  - Message length limits
+  - Input sanitization
+```
+
+**message-stream.php (SSE):**
+
+```php
+Function: streamMessages()
+Input: GET parameter conversation_id
+Processing:
+  1. Set headers for SSE: 'Content-Type: text/event-stream'
+  2. Verify session and permission to view conversation
+  3. Poll database for new messages every 2 seconds
+  4. Send JSON event with new messages
+  5. Keep connection open (infinite loop with sleep)
+Output: Server-Sent Events stream
+  Event Format: 
+  {
+    event: "new_message",
+    data: JSON stringified message object
+  }
+Security:
+  - Session validation for each poll
+  - Conversation access control
+  - Rate limiting to prevent abuse
+```
+
+**set-typing-status.php:**
+
+```php
+Function: updateTypingStatus()
+Input: POST data (conversation_id, is_typing: boolean)
+Processing:
+  1. Verify session
+  2. UPDATE typing_status SET is_typing = ?, updated_at = NOW()
+          WHERE conversation_id = ? AND user_id = ?
+  3. Broadcast to SSE
+Output: JSON {success: boolean, status: string}
+```
+
+#### 3.5.4 Dark Mode Implementation
+
+**Dark Mode CSS:**
+
+- File: `/app/assets/css/dark-mode.css`
+- Variables: CSS custom properties for colors
+- Toggle: JavaScript function to switch class
+
+**Dark Mode JavaScript:**
+
+- File: `/app/assets/js/dark-mode.js`
+- Functions:
+  - `initDarkMode()` - Initialize on page load
+  - `toggleDarkMode()` - Switch between light/dark
+  - `saveDarkModePreference()` - Store in localStorage / session
+
+**Usage:**
+
+```javascript
+// Toggle dark mode
+const darkModeToggle = new DarkModeManager();
+darkModeToggle.toggle();
+
+// Listen to changes
+darkModeToggle.onChange((isDark) => {
+  console.log('Dark mode is now', isDark ? 'ON' : 'OFF');
+});
+```
+
+#### 3.5.5 Mobile Responsiveness
+
+- Tailwind CSS responsive classes: `md:`, `sm:`, `lg:`
+- Responsive sidebar: Collapses on mobile (<768px)
+- Panel layout: Conversations list hides on mobile, shows chat
+- Back button: Mobile-only navigation element
+- Touch-friendly controls: Larger buttons and inputs on mobile
+
+### 3.6 Database Connectivity Module
 
 #### 3.5.1 Component Overview
 

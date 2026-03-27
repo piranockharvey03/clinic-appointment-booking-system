@@ -24,6 +24,7 @@ $userId = $_SESSION['user_id'];
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/dark-mode.js"></script>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
@@ -93,24 +94,24 @@ $userId = $_SESSION['user_id'];
             <!-- Messaging interface -->
             <main class="flex-1 flex overflow-hidden">
                 <!-- Conversations list -->
-                <div class="w-full md:w-80 lg:w-96 border-r border-gray-200 bg-white flex flex-col">
-                    <div class="p-4 border-b border-gray-200 bg-blue-600 text-white">
-                        <h2 class="font-semibold">Patient Conversations</h2>
+                <div id="conversationPanel" class="w-full md:w-80 lg:w-96 border-r border-gray-200 bg-white flex flex-col">
+                    <div class="p-3 md:p-4 border-b border-gray-200 bg-blue-600 text-white">
+                        <h2 class="font-semibold text-sm md:text-base">Patient Conversations</h2>
                     </div>
                     <div id="conversationList" class="flex-1 overflow-y-auto">
-                        <div class="px-4 py-8 text-center text-gray-500">
+                        <div class="px-4 py-8 text-center text-gray-500 text-sm">
                             Loading conversations...
                         </div>
                     </div>
                 </div>
 
                 <!-- Chat area -->
-                <div class="flex-1 flex flex-col bg-gray-50 hidden md:flex">
-                    <div id="chatArea" class="flex-1 flex items-center justify-center text-gray-500">
+                <div id="chatAreaPanel" class="flex-1 flex flex-col bg-gray-50 hidden md:flex">
+                    <div id="chatArea" class="flex-1 flex items-center justify-center text-gray-500 p-4">
                         <div class="text-center">
-                            <i data-feather="message-circle" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
-                            <p class="text-lg font-medium">Select a patient to start messaging</p>
-                            <p class="text-sm mt-2">Choose a patient from the list to view or send messages</p>
+                            <i data-feather="message-circle" class="h-12 md:h-16 w-12 md:w-16 mx-auto mb-4 text-gray-300"></i>
+                            <p class="text-base md:text-lg font-medium">Select a patient to start messaging</p>
+                            <p class="text-xs md:text-sm mt-2 text-gray-400">Choose a patient from the list to view or send messages</p>
                         </div>
                     </div>
                 </div>
@@ -118,33 +119,33 @@ $userId = $_SESSION['user_id'];
                 <!-- Active conversation view -->
                 <div id="conversationView" class="flex-1 flex flex-col bg-white hidden md:flex">
                     <!-- Conversation header with back button (mobile only) -->
-                    <div class="md:hidden border-b border-gray-200 px-4 py-3 bg-blue-600 text-white flex items-center gap-3">
-                        <button id="backToConversationsBtn" class="text-white hover:text-blue-100">
+                    <div class="md:hidden border-b border-gray-200 px-3 py-2 bg-blue-600 text-white flex items-center gap-2">
+                        <button id="backToConversationsBtn" class="text-white hover:text-blue-100 p-1" title="Back to conversations">
                             <i data-feather="arrow-left" class="h-5 w-5"></i>
                         </button>
-                        <span id="patientNameHeader" class="font-semibold">Patient Name</span>
+                        <span id="patientNameHeader" class="font-semibold text-sm truncate flex-1">Patient Name</span>
                     </div>
 
                     <!-- Messages list -->
-                    <div id="messagesList" class="flex-1 overflow-y-auto p-4 bg-gray-50">
-                        <div class="text-center py-8 text-gray-500">Loading messages...</div>
+                    <div id="messagesList" class="flex-1 overflow-y-auto px-3 md:px-4 py-4 bg-gray-50">
+                        <div class="text-center py-8 text-gray-500 text-sm">Loading messages...</div>
                     </div>
 
                     <!-- Typing indicator -->
-                    <div id="typingIndicator" class="px-4 py-2 bg-gray-50 border-t border-gray-200 min-h-7"></div>
+                    <div id="typingIndicator" class="px-3 md:px-4 py-2 bg-gray-50 border-t border-gray-200 min-h-7"></div>
 
                     <!-- Message input -->
-                    <div class="border-t border-gray-200 p-4 bg-white">
+                    <div class="border-t border-gray-200 px-3 md:px-4 py-2 md:py-3 bg-white">
                         <div class="flex gap-2">
                             <input
                                 type="text"
                                 id="messageInput"
-                                placeholder="Type your message..."
-                                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                placeholder="Type message..."
+                                class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             <button
                                 id="sendMessageBtn"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <i data-feather="send" class="h-5 w-5"></i>
+                                class="px-3 md:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0" title="Send message">
+                                <i data-feather="send" class="h-4 w-4 md:h-5 md:w-5"></i>
                             </button>
                         </div>
                     </div>
@@ -171,7 +172,8 @@ $userId = $_SESSION['user_id'];
             conversationList.addEventListener('click', function(e) {
                 const item = e.target.closest('[data-conversation-id]');
                 if (item && window.innerWidth < 768) {
-                    document.getElementById('chatArea').style.display = 'none';
+                    document.getElementById('conversationPanel').style.display = 'none';
+                    document.getElementById('chatAreaPanel').style.display = 'none';
                     document.getElementById('conversationView').style.display = 'flex';
                     // Scroll conversation into view
                     setTimeout(() => item.scrollIntoView({
@@ -181,11 +183,21 @@ $userId = $_SESSION['user_id'];
                 }
             });
 
-            // Handle back button on mobile (if clicked)
+            // Handle back button on mobile
+            document.getElementById('backToConversationsBtn')?.addEventListener('click', function() {
+                if (window.innerWidth < 768) {
+                    document.getElementById('conversationPanel').style.display = 'flex';
+                    document.getElementById('conversationView').style.display = 'none';
+                }
+            });
+
+            // Handle window resize
             window.addEventListener('resize', function() {
                 if (window.innerWidth >= 768) {
                     // Show both panels on desktop
-                    document.getElementById('chatArea').style.display = 'flex';
+                    document.getElementById('conversationPanel').style.display = '';
+                    document.getElementById('chatAreaPanel').style.display = 'flex';
+                    document.getElementById('conversationView').style.display = 'flex';
                 }
             });
         });

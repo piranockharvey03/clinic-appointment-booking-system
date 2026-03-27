@@ -13,6 +13,8 @@
 
 | Version | Date              | Author           | Description                       |
 | ------- | ----------------- | ---------------- | --------------------------------- |
+| 1.3     | March 27, 2026    | Development Team | Real-time messaging, dark mode, enhanced profile fields |
+| 1.2     | March 19, 2026    | Development Team | Patient profile enhancements (gender, DOB, address, insurance) |
 | 1.1     | February 13, 2026 | Development Team | Bug fixes and maintenance updates |
 | 1.0     | January 29, 2026  | Development Team | Initial Release                   |
 
@@ -576,8 +578,9 @@ Comprehensive administrative interface for system management.
   - Status (All, Pending, Approved, Rescheduled, Canceled, Completed)
   - Date range
   - Department
+  - Doctor selection filter
   - Search by patient name or appointment ID
-- **Output:** Filtered appointment list
+- **Output:** Filtered appointment list with proper status handling
 
 **FR-ADMIN-003:** Bulk Operations
 
@@ -596,14 +599,111 @@ Comprehensive administrative interface for system management.
   - Department management
   - Doctor information management
 
-### 3.6 Public Website Features
+### 3.6 Patient-Doctor Communication System
 
 #### 3.6.1 Description and Priority
+
+**Priority:** HIGH  
+Real-time messaging system enabling direct communication between patients and doctors.
+
+#### 3.6.2 Functional Requirements
+
+**FR-MSG-001:** Real-Time Messaging
+
+- **Description:** Enable direct messaging between patients and assigned doctors
+- **Features:**
+  - Send and receive messages in real-time
+  - Message history with timestamps
+  - Unread message indicators
+  - Typing status indicators
+  - Message read receipts
+- **Input:** Message text content
+- **Output:** Instant message delivery with live updates
+
+**FR-MSG-002:** Conversation Management
+
+- **Description:** Manage multiple conversations between patients and doctors
+- **Features:**
+  - Separate conversation thread per patient-doctor pair
+  - Conversation list with last message preview
+  - Search conversations
+  - Conversation timestamps
+  - Active status indicators
+- **Access Control:**
+  - Patients can only message assigned doctors
+  - Doctors can message their assigned patients
+  - Admin cannot access messaging (feature not available for admin role)
+
+**FR-MSG-003:** Dark Mode Support
+
+- **Description:** Optional dark mode UI for messaging pages
+- **Features:**
+  - Toggle dark mode for better viewing experience
+  - Persistent dark mode preference
+  - Full dark mode styling for messages interface
+  - Improved readability in low-light conditions
+
+**FR-MSG-004:** Mobile-Responsive Messaging
+
+- **Description:** Responsive messaging interface for all devices
+- **Features:**
+  - Optimized layout for mobile devices
+  - Touch-friendly controls
+  - Responsive conversation list sizing
+  - Hidden/collapsed panels on mobile for better space utilization
+  - Back button for mobile navigation
+  - Adaptive font sizes and button dimensions
+
+**FR-MSG-005:** Message Notifications
+
+- **Description:** Notify users of new messages
+- **Features:**
+  - In-app notification indicators
+  - Unread message badge on navigation
+  - Desktop notification support
+  - Email notification option
+
+### 3.7 Patient Profile and Account Management
+
+#### 3.7.1 Description and Priority
+
+**Priority:** MEDIUM  
+Enhanced patient profile management with additional personal information fields.
+
+#### 3.7.2 Functional Requirements
+
+**FR-PROFILE-001:** Extended Profile Information
+
+- **Description:** Patients can view and update comprehensive profile information
+- **Editable Fields:**
+  - Phone number
+  - Gender (Male, Female, Other)
+  - Date of Birth
+  - Home Address
+  - Insurance Provider/Plan
+- **Display:**
+  - Profile summary with all information displayed in formatted cards
+  - Separate edit form for modifications
+  - Success confirmation after updates
+  - Data persistence across sessions
+
+**FR-PROFILE-002:** Profile Information Display
+
+- **Description:** Display patient information prominently after updates
+- **Features:**
+  - Information cards showing current field values
+  - Color-coded background for better visibility
+  - Field labels and formatted values
+  - Auto-refresh to show updates immediately
+
+### 3.8 Public Website Features
+
+#### 3.8.1 Description and Priority
 
 **Priority:** MEDIUM  
 Public-facing pages for information and registration.
 
-#### 3.6.2 Functional Requirements
+#### 3.8.2 Functional Requirements
 
 **FR-PUBLIC-001:** Home Page
 
@@ -654,7 +754,8 @@ Public-facing pages for information and registration.
 - **UI-003:** Intuitive form layouts with clear labels
 - **UI-004:** Visual feedback for user actions (loading indicators, success/error messages)
 - **UI-005:** Accessibility compliance (WCAG 2.1 Level AA)
-- **UI-006:** Dark mode support (optional feature)
+- **UI-006:** Dark mode support for messaging pages
+- **UI-007:** Mobile-optimized interface with responsive sidebar collapsing
 
 #### 4.1.2 Patient Interface Components
 
@@ -696,7 +797,40 @@ Public-facing pages for information and registration.
 - Account statistics
 - Appointment history
 
-#### 4.1.3 Admin Interface Components
+**Patient Messaging Page:**
+
+- Conversation list with doctor names and last message preview
+- Chat area with message thread history
+- Message input box and send button
+- Typing indicators showing when doctor is typing
+- Dark mode toggle
+- Mobile-responsive panel layout with back button
+- Unread message indicators
+- Timestamps on all messages
+
+#### 4.1.3 Doctor Interface Components
+
+**Doctor Dashboard:**
+
+- Welcome message with doctor name
+- Navigation sidebar with icons
+- Statistics cards (total patients, upcoming appointments)
+- Recent appointments list with patient names
+- Quick action button to message patients
+- Appointment management options
+
+**Doctor Messaging Page:**
+
+- Conversation list with patient names and appointment status
+- Chat area with message thread history
+- Message input box and send button
+- Typing indicators showing when patient is typing
+- Dark mode toggle
+- Mobile-responsive panel layout with back button
+- Unread message indicators
+- Timestamps on all messages
+
+#### 4.1.4 Admin Interface Components
 
 **Admin Dashboard:**
 
@@ -705,6 +839,8 @@ Public-facing pages for information and registration.
 - Appointments table with filtering
 - Status badges with color coding
 - Action buttons (Approve, Reschedule, Cancel)
+- Doctor filter dropdown
+- Status tab filters (All, Pending, Approved, Completed, Canceled, Rescheduled)
 - Search functionality
 - Date range filters
 - Notification panel

@@ -25,6 +25,7 @@ $userId = $_SESSION['user_id'];
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/dark-mode.js"></script>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
@@ -186,7 +187,8 @@ $userId = $_SESSION['user_id'];
             conversationList.addEventListener('click', function(e) {
                 const item = e.target.closest('[data-conversation-id]');
                 if (item && window.innerWidth < 768) {
-                    document.getElementById('chatArea').style.display = 'none';
+                    document.getElementById('conversationPanel').style.display = 'none';
+                    document.getElementById('chatAreaPanel').style.display = 'none';
                     document.getElementById('conversationView').style.display = 'flex';
                     // Scroll conversation into view
                     setTimeout(() => item.scrollIntoView({
@@ -196,11 +198,21 @@ $userId = $_SESSION['user_id'];
                 }
             });
 
-            // Handle back button on mobile (if clicked)
+            // Handle back button on mobile
+            document.getElementById('backToConversationsBtn')?.addEventListener('click', function() {
+                if (window.innerWidth < 768) {
+                    document.getElementById('conversationPanel').style.display = 'flex';
+                    document.getElementById('conversationView').style.display = 'none';
+                }
+            });
+
+            // Handle window resize
             window.addEventListener('resize', function() {
                 if (window.innerWidth >= 768) {
                     // Show both panels on desktop
-                    document.getElementById('chatArea').style.display = 'flex';
+                    document.getElementById('conversationPanel').style.display = '';
+                    document.getElementById('chatAreaPanel').style.display = 'flex';
+                    document.getElementById('conversationView').style.display = 'flex';
                 }
             });
         });
