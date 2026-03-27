@@ -11,12 +11,12 @@
 
 ## Document Revision History
 
-| Version | Date              | Author            | Description                       |
-| ------- | ----------------- | ----------------- | --------------------------------- |
+| Version | Date              | Author            | Description                                                   |
+| ------- | ----------------- | ----------------- | ------------------------------------------------------------- |
 | 1.3     | March 27, 2026    | Development Team  | Real-time messaging system, dark mode UI, enhanced components |
-| 1.2     | March 19, 2026    | Development Team  | Profile data model expansion, appointment enhancements |
-| 1.1     | February 13, 2026 | Development Team  | Bug fixes and maintenance updates |
-| 1.0     | January 29, 2026  | Architecture Team | Initial Release                   |
+| 1.2     | March 19, 2026    | Development Team  | Profile data model expansion, appointment enhancements        |
+| 1.1     | February 13, 2026 | Development Team  | Bug fixes and maintenance updates                             |
+| 1.0     | January 29, 2026  | Architecture Team | Initial Release                                               |
 
 ---
 
@@ -830,7 +830,7 @@ Processing:
   4. Send JSON event with new messages
   5. Keep connection open (infinite loop with sleep)
 Output: Server-Sent Events stream
-  Event Format: 
+  Event Format:
   {
     event: "new_message",
     data: JSON stringified message object
@@ -879,7 +879,7 @@ darkModeToggle.toggle();
 
 // Listen to changes
 darkModeToggle.onChange((isDark) => {
-  console.log('Dark mode is now', isDark ? 'ON' : 'OFF');
+  console.log("Dark mode is now", isDark ? "ON" : "OFF");
 });
 ```
 

@@ -11,12 +11,12 @@
 
 ## Document Revision History
 
-| Version | Date              | Author           | Description                       |
-| ------- | ----------------- | ---------------- | --------------------------------- |
-| 1.3     | March 27, 2026    | Development Team | Real-time messaging, dark mode, enhanced profile fields |
+| Version | Date              | Author           | Description                                                    |
+| ------- | ----------------- | ---------------- | -------------------------------------------------------------- |
+| 1.3     | March 27, 2026    | Development Team | Real-time messaging, dark mode, enhanced profile fields        |
 | 1.2     | March 19, 2026    | Development Team | Patient profile enhancements (gender, DOB, address, insurance) |
-| 1.1     | February 13, 2026 | Development Team | Bug fixes and maintenance updates |
-| 1.0     | January 29, 2026  | Development Team | Initial Release                   |
+| 1.1     | February 13, 2026 | Development Team | Bug fixes and maintenance updates                              |
+| 1.0     | January 29, 2026  | Development Team | Initial Release                                                |
 
 ---
 
