@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION[
 
 // Ensure request method
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../../public/patient-book.html');
+    header('Location: ../../public/patient-book.php');
     exit;
 }
 
@@ -31,34 +31,34 @@ $phone      = get_post('phone');
 
 // Basic validation
 if (empty($department)) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Please select a department'));
+    header('Location: ../../public/patient-book.php?error=' . urlencode('Please select a department'));
     exit;
 }
 
 if (empty($doctorId)) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Please select a doctor'));
+    header('Location: ../../public/patient-book.php?error=' . urlencode('Please select a doctor'));
     exit;
 }
 
 if (empty($date)) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Please select an appointment date'));
+    header('Location: ../../public/patient-book.php?error=' . urlencode('Please select an appointment date'));
     exit;
 }
 
 if (empty($time)) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Please select an appointment time'));
+    header('Location: ../../public/patient-book.php?error=' . urlencode('Please select an appointment time'));
     exit;
 }
 
 // Validate date is not in the past
 if (strtotime($date) < strtotime(date('Y-m-d'))) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Please select a future date for your appointment'));
+    header('Location: ../../public/patient-book.php?error=' . urlencode('Please select a future date for your appointment'));
     exit;
 }
 
 // Validate phone if provided
 if (empty($phone)) {
-    header('Location: ../../public/patient-book.html?error=' . urlencode('Please provide your phone number'));
+    header('Location: ../../public/patient-book.php?error=' . urlencode('Please provide your phone number'));
     exit;
 }
 
@@ -155,6 +155,6 @@ try {
         $errorMsg = $e->getMessage();
     }
 
-    header('Location: ../../public/patient-book.html?error=' . urlencode($errorMsg));
+    header('Location: ../../public/patient-book.php?error=' . urlencode($errorMsg));
     exit;
 }

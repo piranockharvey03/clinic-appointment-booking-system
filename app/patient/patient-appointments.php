@@ -187,7 +187,7 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
@@ -226,7 +226,7 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
                         <i data-feather="menu" class="h-6 w-6"></i>
                     </button>
                     <h1 class="text-lg font-semibold text-gray-900">Appointments</h1>
-                    <a href="../../public/patient-book.html" class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <a href="../../public/patient-book.php" class="inline-flex items-center px-3 py-2 text-sm rounded-md text-white bg-blue-600 hover:bg-blue-700">
                         <i data-feather="plus" class="mr-1 h-4 w-4"></i>
                         New
                     </a>
@@ -266,7 +266,7 @@ $filtered = array_reverse(filter_appointments($appointments, $tab));
                         </div>
                         <div class="divide-y divide-gray-200">
                             <?php if (empty($filtered)) : ?>
-                                <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../../public/patient-book.html">Book your appointment here</a>.</div>
+                                <div class="p-6 text-sm text-gray-600">No appointments yet. <a class="text-blue-600" href="../../public/patient-book.php">Book your appointment here</a>.</div>
                             <?php else : ?>
                                 <?php foreach ($filtered as $appt): ?>
                                     <?php $status = strtolower($appt['status'] ?? 'pending'); ?>

@@ -101,7 +101,7 @@ All essential workflows verified:
 **Appointment Booking Flow** ✅
 
 ```
-public/patient-book.html
+public/patient-book.php
   → app/patient/submit-booking.php
     → app/includes/check-slot-availability.php
       → mysql.appointments table
@@ -187,7 +187,7 @@ All public entry points operational:
 5. http://localhost/hospital/public/admin-login.html
    → Admin console ✅
 
-6. http://localhost/hospital/public/patient-book.html
+6. http://localhost/hospital/public/patient-book.php
    → Appointment booking ✅
 ```
 

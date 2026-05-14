@@ -130,7 +130,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
@@ -213,7 +213,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                             <h2 class="text-2xl font-bold text-white">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                             <p class="mt-1 text-blue-100">Here's what's happening with your health today.</p>
                         </div>
-                        <a href="../../public/patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
+                        <a href="../../public/patient-book.php" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50">
                             Book Appointment
                             <i data-feather="plus" class="ml-2"></i>
                         </a>
@@ -344,7 +344,7 @@ $upcomingAppointments = array_slice($upcomingAppointments, 0, 3);
                                 <i data-feather="calendar" class="h-16 w-16 mx-auto mb-4 text-gray-300"></i>
                                 <p class="text-lg font-medium">No upcoming appointments</p>
                                 <p class="text-sm mt-1 mb-4">Book your first appointment to get started</p>
-                                <a href="../../public/patient-book.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                <a href="../../public/patient-book.php" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
                                     <i data-feather="plus" class="h-4 w-4 mr-2"></i>
                                     Book Appointment
                                 </a>

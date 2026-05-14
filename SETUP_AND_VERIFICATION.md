@@ -213,7 +213,7 @@ All PHP files have these includes verified (149 include/require statements total
 [ ] Homepage loads: http://localhost/hospital/public/index.html
 [ ] Login page displays: http://localhost/hospital/public/login.html
 [ ] Register page works: http://localhost/hospital/public/register.html
-[ ] Doctor listing loads: http://localhost/hospital/public/doctors.html
+[ ] Doctor listing loads: http://localhost/hospital/public/doctors.php
 ```
 
 **Login Test (Demo Account):**

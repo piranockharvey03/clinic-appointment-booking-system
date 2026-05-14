@@ -13,9 +13,9 @@ Provides public-facing pages for marketing, login entry points, account creation
 - index.html: landing page and feedback UI.
 - login.html, register.html: patient auth entry points.
 - admin-login.html, doctor-login.html: role-specific login entry points.
-- patient-book.html: booking UI and dynamic doctor lookup.
+- patient-book.php: booking UI and dynamic doctor lookup.
 - forgot-password.html: password reset request UI.
-- about.html, doctors.html, services.html, privacy.html, terms.html: informational pages.
+- about.html, doctors.php, services.html, privacy.html, terms.html: informational pages.
 
 ## Inbound Dependencies
 

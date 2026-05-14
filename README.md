@@ -11,7 +11,7 @@ A comprehensive web-based hospital management system designed to streamline heal
 
 ## ✅ System Health Status
 
-**Last Verified:** March 26, 2026
+**Last Verified:** May 14, 2026
 
 ```
 COMPONENT                          STATUS      DETAILS
@@ -25,6 +25,7 @@ Cross-Module Data Flow             ✅ PASS     All workflows verified
 Database Schema                    ✅ PASS     11/11 tables verified
 Frontend-Backend Links             ✅ PASS     6/6 entry points OK
 Security Foundation                ✅ PASS     No critical issues
+Dynamic Pages (PHP)                ✅ PASS     doctors.php, patient-book.php
 ════════════════════════════════════════════════════════════
 OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
 ```
@@ -46,7 +47,30 @@ OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
 
 ---
 
-## 🚀 Features
+## 📝 Recent Changes (May 2026)
+
+### Dynamic Pages & Improvements
+
+- ✅ **doctors.php** — Converted from static HTML. Now dynamically fetches doctors from database with real specialties and experience
+- ✅ **patient-book.php** — Converted from HTML. Added login requirement to prevent booking form errors
+- ✅ **Admin access fixed** — Password reset utility (`reset-admin-password.php`) for troubleshooting authentication issues
+- ✅ **Dynamic doctor listing** — Doctors page now pulls all active doctors from database with color-coded cards
+
+### Updated Navigation
+
+All internal links have been updated to reference the new PHP pages:
+
+- `doctors.html` → `doctors.php`
+- `patient-book.html` → `patient-book.php`
+
+### Testing the Changes
+
+1. Access doctors page: `http://localhost/clinic-appointment-booking-system/public/doctors.php`
+2. View all active doctors from database
+3. Login first, then access: `http://localhost/clinic-appointment-booking-system/public/patient-book.php`
+4. If admin login fails, use: `http://localhost/clinic-appointment-booking-system/reset-admin-password.php`
+
+---
 
 ### Patient Portal
 
@@ -96,7 +120,7 @@ OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
 1. **Clone or download** the project to your XAMPP `htdocs` directory:
 
    ```
-   C:\xampp\htdocs\hospital\
+   C:\xampp\htdocs\clinic-appointment-booking-system\
    ```
 
 2. **Import the database** (single file — sets up the complete schema):
@@ -109,11 +133,13 @@ OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
    - Default credentials: host=`localhost`, user=`root`, password=`""`, database=`medicare`
 
 4. **Access the application**:
-   - Public Home: http://localhost/hospital/public/index.html
-   - Patient Login: http://localhost/hospital/public/login.html
-   - Patient Register: http://localhost/hospital/public/register.html
-   - Admin Login: http://localhost/hospital/public/admin-login.html
-   - Doctor Login: http://localhost/hospital/public/doctor-login.html
+   - Public Home: http://localhost/clinic-appointment-booking-system/public/index.html
+   - Patient Login: http://localhost/clinic-appointment-booking-system/public/login.html
+   - Patient Register: http://localhost/clinic-appointment-booking-system/public/register.html
+   - Book Appointment: http://localhost/clinic-appointment-booking-system/public/patient-book.php (requires login)
+   - View Doctors: http://localhost/clinic-appointment-booking-system/public/doctors.php
+   - Admin Login: http://localhost/clinic-appointment-booking-system/public/admin-login.html
+   - Doctor Login: http://localhost/clinic-appointment-booking-system/public/doctor-login.html
 
 ## 🔑 Default Credentials
 
@@ -121,13 +147,14 @@ OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
 | ----- | ------------------ | -------- |
 | Admin | admin@hospital.com | admin123 |
 
+> **Note:** If password doesn't work, use `reset-admin-password.php` to reset it.
 > Doctors are created through the Admin panel. Patients register themselves.  
 > **Change the default admin password immediately after first login.**
 
 ## 📁 Project Structure
 
 ```
-hospital/
+clinic-appointment-booking-system/
 ├── app/
 │   ├── admin/          # Admin dashboard pages
 │   │   ├── new-admin-dashboard.php
@@ -171,7 +198,13 @@ hospital/
 │   ├── db-config.php                  # Database connection + logActivity()
 │   ├── session-config.php             # Session security settings
 │   └── medicare-complete-database.sql # ★ MASTER — use this to set up the DB
-├── public/             # Public-facing HTML pages (no auth required)
+├── public/             # Public-facing pages
+│   ├── *.html          # Static public pages (index, about, services, etc.)
+│   ├── doctors.php     # Dynamic doctors listing (fetches from database)
+│   ├── patient-book.php # Appointment booking (requires patient login)
+│   ├── admin-login.html
+│   ├── doctor-login.html
+│   └── assets/         # CSS, JS, images
 ├── CHANGELOG.md        # Version history
 ├── SECURITY.md         # Security controls and hardening guide
 ├── SDD_MediCare_Clinic_System.md

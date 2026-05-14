@@ -1,3 +1,11 @@
+<?php
+require_once '../config/session-config.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
+    header('Location: login.html');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,6 +23,7 @@
         .sidebar {
             transition: all 0.3s;
         }
+
         .sidebar-collapsed {
             width: 5rem;
         }
@@ -36,7 +45,7 @@
             background-color: #3b82f6;
             color: white;
         }
-        
+
         .spinner {
             border: 3px solid #f3f4f6;
             border-top: 3px solid #ffffff;
@@ -45,10 +54,17 @@
             height: 16px;
             animation: spin 0.8s linear infinite;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
+
         button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -59,7 +75,7 @@
 <body class="bg-gray-50 font-sans antialiased">
     <!-- Mobile overlay -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
+
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div class="sidebar bg-blue-800 text-white" id="sidebar">
@@ -87,7 +103,7 @@
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
+                            <a href="patient-book.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
@@ -129,7 +145,7 @@
                         <button class="p-1 text-gray-400 hover:text-gray-500">
                             <i data-feather="bell" class="h-6 w-6"></i>
                         </button>
-            
+
                     </div>
                 </div>
             </header>
@@ -139,129 +155,129 @@
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <form id="bookingForm" action="../app/patient/submit-booking.php" method="POST" class="p-6">
                         <h2 class="text-lg font-medium text-gray-900 mb-6">Select a doctor and time for your appointment</h2>
-                        
+
                         <!-- Loading State -->
                         <div id="loadingState" class="text-center py-8">
                             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                             <p class="mt-2 text-gray-600">Loading departments...</p>
                         </div>
-                        
+
                         <!-- Main Form Content (initially hidden) -->
                         <div id="mainFormContent" style="display: none;">
-                        
-                        <!-- Step 1: Select Department -->
-                        <div class="mb-7">
-                            <h3 class="text-md font-medium text-gray-900 mb-4">1. Select Department</h3>
-                            <div id="departmentList" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                <!-- Departments loaded dynamically -->
-                            </div>
-                        </div>
-                        
-                        <!-- Step 2: Select Doctor (auto-populated by department) -->
-                        <div class="mb-7">
-                            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
-                                <div>
-                                    <h3 class="text-md font-medium text-gray-900 mb-1">2. Select Doctor</h3>
-                                    <div class="text-sm text-gray-500">Choose your preferred doctor</div>
+
+                            <!-- Step 1: Select Department -->
+                            <div class="mb-7">
+                                <h3 class="text-md font-medium text-gray-900 mb-4">1. Select Department</h3>
+                                <div id="departmentList" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                    <!-- Departments loaded dynamically -->
                                 </div>
-                                <div class="flex-1 max-w-md">
-                                    <label for="doctorSearch" class="sr-only">Search doctors</label>
-                                    <div class="relative">
-                                        <input type="text" id="doctorSearch" placeholder="Search doctor by name..."
-                                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i data-feather="search" class="h-4 w-4 text-gray-400"></i>
+                            </div>
+
+                            <!-- Step 2: Select Doctor (auto-populated by department) -->
+                            <div class="mb-7">
+                                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
+                                    <div>
+                                        <h3 class="text-md font-medium text-gray-900 mb-1">2. Select Doctor</h3>
+                                        <div class="text-sm text-gray-500">Choose your preferred doctor</div>
+                                    </div>
+                                    <div class="flex-1 max-w-md">
+                                        <label for="doctorSearch" class="sr-only">Search doctors</label>
+                                        <div class="relative">
+                                            <input type="text" id="doctorSearch" placeholder="Search doctor by name..."
+                                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i data-feather="search" class="h-4 w-4 text-gray-400"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Doctor Loading State -->
-                            <div id="doctorLoadingState" class="text-center py-8" style="display: none;">
-                                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                                <p class="mt-2 text-sm text-gray-600">Loading doctors...</p>
-                            </div>
-                            
-                            <!-- Doctor Selection Prompt -->
-                            <div id="doctorSelectionPrompt" class="text-center py-8 bg-blue-50 rounded-lg border-2 border-blue-200 border-dashed">
-                                <i data-feather="user-check" class="h-12 w-12 text-blue-400 mx-auto mb-3"></i>
-                                <p class="text-gray-600">Please select a department first to view available doctors</p>
-                            </div>
-                            
-                            <!-- No Doctors Found -->
-                            <div id="noDoctorsFound" class="text-center py-8 bg-yellow-50 rounded-lg border-2 border-yellow-200" style="display: none;">
-                                <i data-feather="alert-circle" class="h-12 w-12 text-yellow-500 mx-auto mb-3"></i>
-                                <p class="text-gray-700 font-medium">No doctors found</p>
-                                <p class="text-sm text-gray-600 mt-1">Try selecting a different department or clearing your search</p>
-                            </div>
-                            
-                            <div id="doctorList" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3" style="display: none;">
-                                <!-- Doctors loaded dynamically -->
-                            </div>
-                        </div>
-                        <!-- Step 3: Select Date & Time -->
-                        <div class="mb-8">
-                            <h3 class="text-md font-medium text-gray-900 mb-4">3. Select Date & Time</h3>
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i data-feather="calendar" class="inline h-4 w-4 mr-1"></i>
-                                    Appointment Date
-                                </label>
-                                <input name="date" type="date" required class="w-full md:w-auto border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    <i data-feather="clock" class="inline h-4 w-4 mr-1"></i>
-                                    Available Time Slots
-                                </label>
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                                    <label class="time-slot cursor-pointer group">
-                                        <input type="radio" name="time" value="09:00" required class="hidden peer">
-                                        <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
-                                            <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">09:00 AM</div>
-                                            <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Morning</div>
-                                        </div>
-                                    </label>
-                                    <label class="time-slot cursor-pointer group">
-                                        <input type="radio" name="time" value="10:30" class="hidden peer">
-                                        <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
-                                            <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">10:30 AM</div>
-                                            <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Morning</div>
-                                        </div>
-                                    </label>
-                                    <label class="time-slot cursor-pointer group">
-                                        <input type="radio" name="time" value="11:15" class="hidden peer">
-                                        <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
-                                            <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">11:15 AM</div>
-                                            <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Morning</div>
-                                        </div>
-                                    </label>
-                                    <label class="time-slot cursor-pointer group">
-                                        <input type="radio" name="time" value="13:00" class="hidden peer">
-                                        <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
-                                            <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">01:00 PM</div>
-                                            <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Afternoon</div>
-                                        </div>
-                                    </label>
-                                    <label class="time-slot cursor-pointer group">
-                                        <input type="radio" name="time" value="14:45" class="hidden peer">
-                                        <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
-                                            <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">02:45 PM</div>
-                                            <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Afternoon</div>
-                                        </div>
-                                    </label>
+
+                                <!-- Doctor Loading State -->
+                                <div id="doctorLoadingState" class="text-center py-8" style="display: none;">
+                                    <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                    <p class="mt-2 text-sm text-gray-600">Loading doctors...</p>
                                 </div>
-                                <div id="slotAvailabilityStatus" class="mt-3 text-sm hidden"></div>
+
+                                <!-- Doctor Selection Prompt -->
+                                <div id="doctorSelectionPrompt" class="text-center py-8 bg-blue-50 rounded-lg border-2 border-blue-200 border-dashed">
+                                    <i data-feather="user-check" class="h-12 w-12 text-blue-400 mx-auto mb-3"></i>
+                                    <p class="text-gray-600">Please select a department first to view available doctors</p>
+                                </div>
+
+                                <!-- No Doctors Found -->
+                                <div id="noDoctorsFound" class="text-center py-8 bg-yellow-50 rounded-lg border-2 border-yellow-200" style="display: none;">
+                                    <i data-feather="alert-circle" class="h-12 w-12 text-yellow-500 mx-auto mb-3"></i>
+                                    <p class="text-gray-700 font-medium">No doctors found</p>
+                                    <p class="text-sm text-gray-600 mt-1">Try selecting a different department or clearing your search</p>
+                                </div>
+
+                                <div id="doctorList" class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3" style="display: none;">
+                                    <!-- Doctors loaded dynamically -->
+                                </div>
                             </div>
-                        </div>
-                        <!-- Step 4: Reason & Notes -->
-                        <div class="mb-6">
-                            <h3 class="text-md font-medium text-gray-900 mb-4">4. Contact & Reason for visit</h3>
-                            <input name="phone" type="tel" placeholder="Phone number" required class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
-                            <input name="reason" type="text" placeholder="e.g., Chest pain, follow-up" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
-                            <textarea name="notes" rows="3" placeholder="Additional notes (optional)" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
-                        </div>
-                        
+                            <!-- Step 3: Select Date & Time -->
+                            <div class="mb-8">
+                                <h3 class="text-md font-medium text-gray-900 mb-4">3. Select Date & Time</h3>
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i data-feather="calendar" class="inline h-4 w-4 mr-1"></i>
+                                        Appointment Date
+                                    </label>
+                                    <input name="date" type="date" required class="w-full md:w-auto border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i data-feather="clock" class="inline h-4 w-4 mr-1"></i>
+                                        Available Time Slots
+                                    </label>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                                        <label class="time-slot cursor-pointer group">
+                                            <input type="radio" name="time" value="09:00" required class="hidden peer">
+                                            <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
+                                                <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">09:00 AM</div>
+                                                <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Morning</div>
+                                            </div>
+                                        </label>
+                                        <label class="time-slot cursor-pointer group">
+                                            <input type="radio" name="time" value="10:30" class="hidden peer">
+                                            <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
+                                                <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">10:30 AM</div>
+                                                <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Morning</div>
+                                            </div>
+                                        </label>
+                                        <label class="time-slot cursor-pointer group">
+                                            <input type="radio" name="time" value="11:15" class="hidden peer">
+                                            <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
+                                                <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">11:15 AM</div>
+                                                <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Morning</div>
+                                            </div>
+                                        </label>
+                                        <label class="time-slot cursor-pointer group">
+                                            <input type="radio" name="time" value="13:00" class="hidden peer">
+                                            <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
+                                                <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">01:00 PM</div>
+                                                <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Afternoon</div>
+                                            </div>
+                                        </label>
+                                        <label class="time-slot cursor-pointer group">
+                                            <input type="radio" name="time" value="14:45" class="hidden peer">
+                                            <div class="px-4 py-3 border-2 border-gray-300 rounded-lg text-center transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-lg">
+                                                <div class="text-sm font-semibold group-hover:text-blue-700 peer-checked:text-white">02:45 PM</div>
+                                                <div class="text-xs mt-1 text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-100">Afternoon</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div id="slotAvailabilityStatus" class="mt-3 text-sm hidden"></div>
+                                </div>
+                            </div>
+                            <!-- Step 4: Reason & Notes -->
+                            <div class="mb-6">
+                                <h3 class="text-md font-medium text-gray-900 mb-4">4. Contact & Reason for visit</h3>
+                                <input name="phone" type="tel" placeholder="Phone number" required class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
+                                <input name="reason" type="text" placeholder="e.g., Chest pain, follow-up" class="w-full border border-gray-300 rounded-md px-3 py-2 mb-3" />
+                                <textarea name="notes" rows="3" placeholder="Additional notes (optional)" class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                            </div>
+
                         </div> <!-- End mainFormContent -->
                         <div class="flex justify-end space-x-3">
                             <a href="../app/patient/patient-appointments.php" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancel</a>
@@ -280,13 +296,13 @@
     <script src="assets/js/mobile-menu.js"></script>
     <script>
         feather.replace();
-        
+
         // Global variables
         let allDoctors = [];
         let allDepartments = [];
         let selectedDepartment = null;
         let slotCheckRequestId = 0;
-        
+
         // Department descriptions
         const departmentDescriptions = {
             'Cardiology Department': 'Heart and cardiovascular system',
@@ -310,7 +326,7 @@
             'Rheumatology Department': 'Joints and autoimmune',
             'Urology Department': 'Urinary system'
         };
-        
+
         // Load departments on page load
         window.addEventListener('DOMContentLoaded', function() {
             loadDepartments();
@@ -318,13 +334,13 @@
             setupSlotAvailabilityChecks();
             handleErrorMessages();
         });
-        
+
         // Load active departments
         async function loadDepartments() {
             try {
                 const response = await fetch('../app/includes/get-active-departments.php');
                 const data = await response.json();
-                
+
                 if (data.success && data.departments.length > 0) {
                     allDepartments = data.departments;
                     renderDepartments(data.departments);
@@ -339,21 +355,21 @@
                 showError('Failed to load departments. Please refresh the page.');
             }
         }
-        
+
         // Render departments
         function renderDepartments(departments) {
             const container = document.getElementById('departmentList');
             container.innerHTML = '';
-            
+
             departments.forEach(dept => {
                 const deptName = dept.department;
                 const shortName = deptName.replace(' Department', '').replace(' (OB/GYN)', '');
                 const description = departmentDescriptions[deptName] || 'Specialized medical care';
-                
+
                 const label = document.createElement('label');
                 label.className = 'dept-card cursor-pointer group';
                 label.setAttribute('data-dept', deptName);
-                
+
                 label.innerHTML = `
                     <input type="radio" name="department" value="${deptName}" required class="hidden peer" onchange="selectDepartment('${deptName}')" />
                     <div class="p-3.5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
@@ -362,18 +378,18 @@
                         <div class="mt-1.5 text-xs text-gray-400 group-hover:text-blue-500 peer-checked:text-blue-200">${dept.doctor_count} doctor${dept.doctor_count !== 1 ? 's' : ''} available</div>
                     </div>
                 `;
-                
+
                 container.appendChild(label);
             });
         }
-        
+
         // Select department and load doctors
         async function selectDepartment(department) {
             selectedDepartment = department;
             document.getElementById('doctorSearch').value = ''; // Clear search
             await loadDoctors(department);
         }
-        
+
         // Load doctors by department
         async function loadDoctors(department, searchQuery = '') {
             // Show loading state
@@ -381,16 +397,16 @@
             document.getElementById('doctorLoadingState').style.display = 'block';
             document.getElementById('doctorList').style.display = 'none';
             document.getElementById('noDoctorsFound').style.display = 'none';
-            
+
             try {
                 let url = `../app/includes/get-doctors-by-department.php?department=${encodeURIComponent(department)}`;
                 if (searchQuery) {
                     url += `&search=${encodeURIComponent(searchQuery)}`;
                 }
-                
+
                 const response = await fetch(url);
                 const data = await response.json();
-                
+
                 if (data.success && data.doctors.length > 0) {
                     allDoctors = data.doctors;
                     renderDoctors(data.doctors);
@@ -406,18 +422,18 @@
                 setTimeout(() => feather.replace(), 50);
             }
         }
-        
+
         // Render doctors
         function renderDoctors(doctors) {
             const container = document.getElementById('doctorList');
             container.innerHTML = '';
-            
+
             doctors.forEach(doctor => {
                 const label = document.createElement('label');
                 label.className = 'doctor-card cursor-pointer group';
                 label.setAttribute('data-doctor-id', doctor.id);
                 label.setAttribute('data-doctor-name', doctor.full_name.toLowerCase());
-                
+
                 // Handle departments display
                 let departmentsDisplay = '';
                 if (doctor.departments) {
@@ -427,7 +443,7 @@
                 } else if (doctor.department) {
                     departmentsDisplay = doctor.department.replace(' Department', '').replace(' (OB/GYN)', '');
                 }
-                
+
                 // Handle additional specialties display
                 let additionalSpecialtiesHTML = '';
                 if (doctor.additional_specialties) {
@@ -440,7 +456,7 @@
                         </div>
                     `;
                 }
-                
+
                 label.innerHTML = `
                     <input type="radio" name="doctorId" value="${doctor.id}" required class="hidden peer" />
                     <div class="p-3.5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
@@ -461,34 +477,34 @@
                         </div>
                     </div>
                 `;
-                
+
                 container.appendChild(label);
             });
-            
+
             document.getElementById('doctorLoadingState').style.display = 'none';
             document.getElementById('doctorList').style.display = 'grid';
             setTimeout(() => feather.replace(), 50);
         }
-        
+
         // Setup doctor search
         function setupDoctorSearch() {
             const searchInput = document.getElementById('doctorSearch');
             let searchTimeout;
-            
+
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 const query = this.value.trim();
-                
+
                 if (!selectedDepartment) {
                     return;
                 }
-                
+
                 searchTimeout = setTimeout(() => {
                     loadDoctors(selectedDepartment, query);
                 }, 300);
             });
         }
-        
+
         // Show error message
         function showError(message) {
             document.getElementById('loadingState').innerHTML = `
@@ -502,7 +518,7 @@
             `;
             setTimeout(() => feather.replace(), 50);
         }
-        
+
         function setBookingButtonLoading(isLoading) {
             const btn = document.getElementById('confirmBookingBtn');
             const spinner = document.getElementById('bookingSpinner');
@@ -625,7 +641,9 @@
             form.addEventListener('change', function(event) {
                 const targetName = event.target && event.target.name ? event.target.name : '';
                 if (targetName === 'doctorId' || targetName === 'date' || targetName === 'time') {
-                    checkSlotAvailability({ silent: true });
+                    checkSlotAvailability({
+                        silent: true
+                    });
                 }
             });
 
@@ -646,12 +664,12 @@
                 form.submit();
             });
         }
-        
+
         // Display error messages from URL
         function handleErrorMessages() {
             const urlParams = new URLSearchParams(window.location.search);
             const error = urlParams.get('error');
-            
+
             if (error) {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded animate-pulse';
@@ -672,14 +690,14 @@
                         </button>
                     </div>
                 `;
-                
+
                 // Insert error at the top of the form container
                 const formContainer = document.querySelector('form');
                 formContainer.insertBefore(errorDiv, formContainer.firstChild);
-                
+
                 // Remove error from URL
                 window.history.replaceState({}, document.title, window.location.pathname);
-                
+
                 // Auto-remove after 8 seconds
                 setTimeout(() => {
                     if (errorDiv.parentNode) {
@@ -690,7 +708,6 @@
                 }, 8000);
             }
         }
-        
     </script>
 
     <!-- Doctor Details Modal -->
@@ -700,7 +717,7 @@
                 <h3 class="text-lg font-semibold text-gray-900">Doctor Details</h3>
                 <button onclick="closeDoctorDetails()" class="text-gray-400 hover:text-gray-600 transition-colors">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -731,13 +748,13 @@
                 allDepts.push(doctor.department.replace(' Department', '').replace(' (OB/GYN)', ''));
             }
 
-            const specsHTML = allSpecs.length > 0
-                ? allSpecs.map(s => `<span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full mr-1 mb-1">${s}</span>`).join('')
-                : '<span class="text-gray-400 text-sm">None listed</span>';
+            const specsHTML = allSpecs.length > 0 ?
+                allSpecs.map(s => `<span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full mr-1 mb-1">${s}</span>`).join('') :
+                '<span class="text-gray-400 text-sm">None listed</span>';
 
-            const deptsHTML = allDepts.length > 0
-                ? allDepts.map(d => `<span class="inline-block px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full mr-1 mb-1">${d}</span>`).join('')
-                : '<span class="text-gray-400 text-sm">Not specified</span>';
+            const deptsHTML = allDepts.length > 0 ?
+                allDepts.map(d => `<span class="inline-block px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full mr-1 mb-1">${d}</span>`).join('') :
+                '<span class="text-gray-400 text-sm">Not specified</span>';
 
             document.getElementById('doctorDetailsContent').innerHTML = `
                 <div class="flex items-start space-x-4 mb-5">

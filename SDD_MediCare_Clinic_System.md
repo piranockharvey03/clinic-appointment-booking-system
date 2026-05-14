@@ -2438,7 +2438,7 @@ hospital/
 │   ├── admin-login.html
 │   ├── index.html
 │   ├── login.html
-│   ├── patient-book.html
+│   ├── patient-book.php
 │   ├── privacy.html
 │   ├── register.html
 │   ├── services.html
@@ -2766,7 +2766,7 @@ TC-004: Admin Approval
   - `public/privacy.html`
   - `public/terms.html`
   - `public/admin-login.html`
-  - `public/patient-book.html`
+  - `public/patient-book.php`
 - **Fix:** Updated all favicon paths from `../favicon.svg` to `assets/images/favicon.svg`
 - **Impact:** All public pages now correctly display the MediCare favicon
 

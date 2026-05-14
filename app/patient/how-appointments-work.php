@@ -51,7 +51,7 @@ $firstName = trim(explode(' ', $fullName)[0]);
                                 <i data-feather="calendar" class="mr-3 h-5 w-5"></i>
                                 Appointments
                             </a>
-                            <a href="../../public/patient-book.html" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <a href="../../public/patient-book.php" class="flex items-center px-4 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                                 <i data-feather="plus-circle" class="mr-3 h-5 w-5"></i>
                                 Book Appointment
                             </a>
@@ -183,7 +183,7 @@ $firstName = trim(explode(' ', $fullName)[0]);
                 </section>
 
                 <div class="flex flex-wrap gap-3">
-                    <a href="../../public/patient-book.html" class="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium">
+                    <a href="../../public/patient-book.php" class="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium">
                         <i data-feather="plus" class="h-4 w-4 mr-2"></i>
                         Book an Appointment
                     </a>

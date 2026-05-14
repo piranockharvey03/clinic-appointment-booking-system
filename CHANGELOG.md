@@ -129,7 +129,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enabled admin dashboard bell/dropdown using admin endpoints
   - Standardized patient/doctor/admin notification behavior through the shared dropdown module
 
-- **Patient booking flow** ([public/patient-book.html](public/patient-book.html)):
+- **Patient booking flow** ([public/patient-book.php](public/patient-book.php)):
   - Added real-time slot availability checks when doctor/date/time changes
   - Added submit-time guard to block booking if the slot becomes unavailable
 
@@ -214,7 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Broken path — patient booking cancel link** (`public/patient-book.html`):
+- **Broken path — patient booking cancel link** (`public/patient-book.php`):
   - Updated cancel target from missing `patient-appointments.html` to `../app/patient/patient-appointments.php`
 
 - **Broken path — feedback AJAX endpoint (app assets)** (`app/assets/js/feedback-form.js`):
@@ -339,7 +339,7 @@ The following files have been permanently deleted. They were either expired deve
 ### Added
 
 - **View Doctor Details Modal** (Patient Booking Page):
-  - New "View Details" button on every doctor card in `patient-book.html`
+  - New "View Details" button on every doctor card in `patient-book.php`
   - Opens a clean slide-up modal with full doctor profile:
     - Doctor avatar icon
     - Full name, primary specialty, and qualification
@@ -447,7 +447,7 @@ The following files have been permanently deleted. They were either expired deve
   - Helps patients make informed decisions about doctor selection
   - Compact display: "Also: Cardiology, Oncology +2 more"
   - Files modified:
-    - public/patient-book.html (JavaScript rendering function)
+    - public/patient-book.php (JavaScript rendering function)
 
 - **UI Components**:
   - 3-column checkbox grid (30 specialties)
@@ -479,7 +479,7 @@ The following files have been permanently deleted. They were either expired deve
     - app/includes/get-doctors-by-department.php
 
 - **Dynamic Patient Booking Page**:
-  - Complete redesign of `patient-book.html` from static to dynamic
+  - Complete redesign of `patient-book.php` from static to dynamic
   - Departments load automatically from database via API
   - Department cards show real doctor count
   - Department descriptions displayed for all 20 departments
@@ -503,7 +503,7 @@ The following files have been permanently deleted. They were either expired deve
     - API error messages with retry button
     - URL parameter error display with auto-dismiss
   - Files modified:
-    - public/patient-book.html (complete UI overhaul + JavaScript)
+    - public/patient-book.php (complete UI overhaul + JavaScript)
 
 ### Changed
 
@@ -633,7 +633,7 @@ The following files have been permanently deleted. They were either expired deve
 
 - **Infrastructure Ready**:
   - APIs ready for patient-side department selection
-  - patient-book.html already has department UI (currently static)
+  - patient-book.php already has department UI (currently static)
   - Future update will connect UI to dynamic APIs
   - Patients will be able to:
     - Select department first
@@ -834,7 +834,7 @@ The following files have been permanently deleted. They were either expired deve
 ### Fixed
 
 - **Favicon Display**: Corrected favicon paths across all 9 public HTML pages from `../favicon.svg` to `assets/images/favicon.svg`
-  - Affected files: index.html, about.html, login.html, register.html, services.html, privacy.html, terms.html, admin-login.html, patient-book.html
+  - Affected files: index.html, about.html, login.html, register.html, services.html, privacy.html, terms.html, admin-login.html, patient-book.php
 - **Registration Form**: Fixed non-functional register button on signup page
   - Corrected escaped quotes in HTML button attributes
   - Removed undefined `handleFormSubmit()` function call

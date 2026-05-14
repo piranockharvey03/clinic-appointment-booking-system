@@ -21,7 +21,7 @@ Provides patient-facing appointment booking lifecycle operations, profile manage
 ## Inbound Dependencies
 
 - public/login.html (post-login navigation)
-- public/patient-book.html (booking form submission)
+- public/patient-book.php (booking form submission)
 
 ## Outbound Dependencies
 
