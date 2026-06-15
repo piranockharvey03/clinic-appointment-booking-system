@@ -1,6 +1,6 @@
 # Setup & Verification Guide
 
-**Last Updated:** March 26, 2026  
+**Last Updated:** June 15, 2026  
 **System Status:** ✅ PRODUCTION READY
 
 ---
@@ -77,7 +77,7 @@ Before setup, verify these critical files exist:
 
 ### Step 1: Project Placement
 
-- [ ] Project is in `C:\xampp\htdocs\hospital\`
+- [ ] Project is in `C:\xampp\htdocs\clinic-appointment-booking-system\`
 - [ ] All folders are present (app, config, public, docs)
 - [ ] All required files exist (use tree command to verify)
 
@@ -112,7 +112,7 @@ DB_NAME: 'medicare'
 
 ### Step 5: File Permissions
 
-- [ ] Hospital folder is readable by Apache
+- [ ] Project folder is readable by Apache
 - [ ] Session storage is writable
 - [ ] Logs can be written (if using logging)
 
@@ -154,7 +154,7 @@ SELECT * FROM users WHERE email = 'admin@hospital.com';
 SELECT * FROM departments LIMIT 5;
 
 -- Check sample doctors
-SELECT * FROM doctors LIMIT 3;
+SELECT * FROM doctors LIMIT 5;
 ```
 
 ---
@@ -190,7 +190,7 @@ if (isset($_SESSION)) {
 ?>
 ```
 
-Access at: `http://localhost/hospital/test-connection.php`
+Access at: `http://localhost/clinic-appointment-booking-system/test-connection.php`
 
 ### Critical Include Verification
 
@@ -207,13 +207,13 @@ All PHP files have these includes verified (149 include/require statements total
 
 ### 1. Patient Portal Test
 
-**Entry Point:** `http://localhost/hospital/public/login.html`
+**Entry Point:** `http://localhost/clinic-appointment-booking-system/public/login.html`
 
 ```
-[ ] Homepage loads: http://localhost/hospital/public/index.html
-[ ] Login page displays: http://localhost/hospital/public/login.html
-[ ] Register page works: http://localhost/hospital/public/register.html
-[ ] Doctor listing loads: http://localhost/hospital/public/doctors.php
+[ ] Homepage loads: http://localhost/clinic-appointment-booking-system/public/index.html
+[ ] Login page displays: http://localhost/clinic-appointment-booking-system/public/login.html
+[ ] Register page works: http://localhost/clinic-appointment-booking-system/public/register.html
+[ ] Doctor listing loads: http://localhost/clinic-appointment-booking-system/public/doctors.php
 ```
 
 **Login Test (Demo Account):**
@@ -233,7 +233,7 @@ After login:
 
 ### 2. Doctor Portal Test
 
-**Entry Point:** `http://localhost/hospital/public/doctor-login.html`
+**Entry Point:** `http://localhost/clinic-appointment-booking-system/public/doctor-login.html`
 
 ```
 [ ] Doctor login page displays
@@ -250,7 +250,7 @@ After login (with doctor account):
 
 ### 3. Admin Portal Test
 
-**Entry Point:** `http://localhost/hospital/public/admin-login.html`
+**Entry Point:** `http://localhost/clinic-appointment-booking-system/public/admin-login.html`
 
 **Default Credentials:**
 
@@ -283,8 +283,21 @@ After login:
 - [ ] Doctor receives notification
 - [ ] Doctor can approve appointment
 - [ ] Status change notifies patient
+- [ ] Patient can check in on the appointment day after approval
+- [ ] Check-in stores `checked_in_at`, `checkin_token`, and `checked_in_by`
+- [ ] Doctor sees the patient as checked in before completing the visit
+- [ ] Doctor cannot mark the appointment completed before check-in exists
+- [ ] Approved appointments without check-in are auto-canceled after the grace window
 - [ ] Patient can reschedule appointment
 - [ ] Patient can cancel appointment
+
+### Check-In / No-Show Verification
+
+- [ ] Check-in is only available for approved appointments
+- [ ] Check-in is only available on the appointment date
+- [ ] Check-in returns a verification code for the doctor
+- [ ] No-show cleanup marks missed appointments as canceled after 30 minutes past the appointment time
+- [ ] Patient and doctor notifications are generated for no-show cancellations
 
 ### Messaging System
 
@@ -349,9 +362,9 @@ After login:
 1. Verify file exists in correct location
 2. Check Apache is serving from `htdocs`
 3. Verify case sensitivity (Linux systems)
-4. Test with `http://localhost/hospital/` not `/hospital/public/`
+4. Test with `http://localhost/clinic-appointment-booking-system/` not `/clinic-appointment-booking-system/public/`
 
-### Issue: "Appointment booking fails"
+### Issue: "Appointment booking or check-in fails"
 
 **Cause:** Slot availability check or database issue
 
@@ -361,6 +374,18 @@ After login:
 2. Check `appointments` table has doctor slots
 3. Test database connectivity
 4. Check browser console for AJAX errors
+5. Verify `app/patient/checkin.php` is reachable and the appointment is approved and on the same day
+
+### Issue: "No-show is not auto-canceling"
+
+**Cause:** The grace period has not elapsed yet, or no request has triggered cleanup
+
+**Solution:**
+
+1. Confirm the appointment time is at least 30 minutes in the past
+2. Trigger a patient or doctor flow that runs no-show cleanup
+3. Check `config/db-config.php` for the default grace period setting
+4. Verify the appointment still has `checked_in_at IS NULL`
 
 ### Issue: "Messaging not working"
 
