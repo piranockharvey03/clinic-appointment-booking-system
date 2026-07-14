@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
+require_once '../includes/RateLimiter.php';
 
 // Start doctor-specific session
 startSession('doctor');
@@ -12,6 +13,14 @@ try {
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+        // --- Rate Limiting Check (5 attempts, 15 min lockout) ---
+        $rateLimiter = new RateLimiter($conn, 5, 15);
+        if ($rateLimiter->isLockedOut($ip)) {
+            header("Location: ../../public/doctor-login.html?error=" . urlencode("Too many failed attempts. Your IP has been locked out for 15 minutes."));
+            exit;
+        }
 
         // Validate inputs
         if (empty($email) || empty($password)) {
@@ -50,6 +59,9 @@ try {
 
             // Verify password
             if ($hashedPassword && password_verify($password, $hashedPassword)) {
+                // Clear failed attempts on success
+                $rateLimiter->clearAttempts($ip);
+
                 // Save session data
                 $_SESSION['user_id'] = $id;
                 $_SESSION['user_name'] = $fullName;
@@ -67,6 +79,8 @@ try {
                 header("Location: doctor-dashboard.php");
                 exit;
             } else {
+                // Record failed attempt
+                $rateLimiter->recordFailedAttempt($ip, $email);
                 $stmt->close();
                 logActivity($conn, $id, $fullName, 'doctor', 'login_failed', 'Failed login attempt - incorrect password');
                 closeDBConnection($conn);
@@ -74,6 +88,8 @@ try {
                 exit;
             }
         } else {
+            // Record failed attempt for unknown email too
+            $rateLimiter->recordFailedAttempt($ip, $email);
             $stmt->close();
             logActivity($conn, 0, $email, 'doctor', 'login_failed', 'Failed login attempt - account not found');
             closeDBConnection($conn);

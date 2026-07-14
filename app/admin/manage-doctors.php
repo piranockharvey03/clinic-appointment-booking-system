@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
+require_once '../includes/FileCache.php';
 
 // Start admin-specific session
 startSession('admin');
@@ -99,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     }
 
                     $successMessage = "Doctor added successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
+                    // Invalidate doctor-related caches
+                    (new FileCache())->flush();
                 } else {
                     $errorMessage = "Failed to add doctor. Please try again.";
                 }
@@ -232,6 +235,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             }
 
                             $successMessage = "Doctor details and password updated successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
+                            // Invalidate doctor-related caches
+                            (new FileCache())->flush();
                         } else {
                             $errorMessage = "Failed to update doctor. Please try again.";
                         }
@@ -279,6 +284,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             }
 
                             $successMessage = "Doctor details updated successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
+                            // Invalidate doctor-related caches
+                            (new FileCache())->flush();
                         } else {
                             $errorMessage = "Failed to update doctor. Please try again.";
                         }
@@ -307,6 +314,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
         if ($stmt->execute()) {
             $successMessage = "Doctor status updated successfully!";
+            // Invalidate doctor-related caches
+            (new FileCache())->flush();
         } else {
             $errorMessage = "Failed to update status.";
         }

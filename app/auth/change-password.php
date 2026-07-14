@@ -8,7 +8,7 @@ require_once '../../config/db-config.php';
 // Start patient-specific session
 startSession('patient');
 
-// Enable error logging for debugging (never display errors in JSON responses)
+// Enable error logging (never display errors in JSON responses)
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -39,11 +39,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role'])) {
 }
 
 $currentPassword = $_POST['current_password'] ?? '';
-$newPassword = $_POST['new_password'] ?? '';
+$newPassword     = $_POST['new_password']     ?? '';
 $confirmPassword = $_POST['confirm_password'] ?? '';
 
-// Validate input  
-if (empty($newPassword) || empty($confirmPassword)) {
+// Validate all fields are present
+if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
     ob_clean();
     echo json_encode(['success' => false, 'error' => 'All fields are required']);
     ob_end_flush();
@@ -57,16 +57,32 @@ if ($newPassword !== $confirmPassword) {
     exit;
 }
 
-if (strlen($newPassword) < 6) {
+if (strlen($newPassword) < 8) {
     ob_clean();
-    echo json_encode(['success' => false, 'error' => 'Password must be at least 6 characters long']);
+    echo json_encode(['success' => false, 'error' => 'Password must be at least 8 characters long']);
+    ob_end_flush();
+    exit;
+}
+
+// Enforce at least one number and one letter
+if (!preg_match('/[A-Za-z]/', $newPassword) || !preg_match('/[0-9]/', $newPassword)) {
+    ob_clean();
+    echo json_encode(['success' => false, 'error' => 'Password must contain at least one letter and one number']);
+    ob_end_flush();
+    exit;
+}
+
+// Prevent same-as-current password
+if ($currentPassword === $newPassword) {
+    ob_clean();
+    echo json_encode(['success' => false, 'error' => 'New password must be different from your current password']);
     ob_end_flush();
     exit;
 }
 
 try {
-    $conn = getDBConnection();
-    $userId = $_SESSION['user_id'];
+    $conn    = getDBConnection();
+    $userId  = $_SESSION['user_id'];
     $userRole = $_SESSION['user_role'];
 
     // Determine which table to use based on user role
@@ -83,34 +99,46 @@ try {
         exit;
     }
 
-    // Hash new password (no current password verification needed)
-    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    // --- Step 1: Verify the current password ---
+    $fetchStmt = $conn->prepare("SELECT password FROM `{$tableName}` WHERE id = ?");
+    if (!$fetchStmt) {
+        throw new Exception("Database prepare error: " . $conn->error);
+    }
+    $fetchStmt->bind_param("i", $userId);
+    $fetchStmt->execute();
+    $fetchResult = $fetchStmt->get_result();
+    $user = $fetchResult->fetch_assoc();
+    $fetchStmt->close();
 
-    // Log before update attempt
-    error_log("Attempting password update (no verification) for {$userRole} user ID: {$userId} in table: {$tableName}");
-    error_log("New password hash: " . substr($hashedPassword, 0, 20) . "...");
-
-    // Update password
-    $updateQuery = "UPDATE `{$tableName}` SET password = ? WHERE id = ?";
-    $updateStmt = $conn->prepare($updateQuery);
-    if (!$updateStmt) {
-        error_log("Update prepare failed: " . $conn->error);
-        closeDBConnection($conn);
+    if (!$user) {
         ob_clean();
-        echo json_encode(['success' => false, 'error' => 'Database error occurred']);
+        echo json_encode(['success' => false, 'error' => 'User not found. Please login again.']);
         ob_end_flush();
         exit;
     }
 
+    if (!password_verify($currentPassword, $user['password'])) {
+        error_log("Failed password change attempt for {$userRole} ID: {$userId} - incorrect current password");
+        ob_clean();
+        echo json_encode(['success' => false, 'error' => 'Your current password is incorrect']);
+        ob_end_flush();
+        exit;
+    }
+
+    // --- Step 2: Hash and update new password ---
+    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+    $updateStmt = $conn->prepare("UPDATE `{$tableName}` SET password = ? WHERE id = ?");
+    if (!$updateStmt) {
+        throw new Exception("Database prepare error: " . $conn->error);
+    }
     $updateStmt->bind_param("si", $hashedPassword, $userId);
 
     if ($updateStmt->execute()) {
         $affectedRows = $updateStmt->affected_rows;
         $updateStmt->close();
 
-        // Log the update result
-        error_log("Password update executed for {$userRole} user ID: {$userId}, affected_rows: {$affectedRows}");
-        error_log("New hash length: " . strlen($hashedPassword));
+        error_log("Password changed successfully for {$userRole} ID: {$userId}, affected_rows: {$affectedRows}");
 
         if ($affectedRows > 0) {
             logActivity($conn, $userId, $_SESSION['user_name'] ?? 'Unknown', $userRole, 'change_password', 'Password changed successfully');
@@ -118,16 +146,15 @@ try {
             ob_clean();
             echo json_encode([
                 'success' => true,
-                'message' => 'Password changed successfully'
+                'message' => 'Password changed successfully! Please use your new password next time you log in.'
             ]);
             ob_end_flush();
         } else {
             closeDBConnection($conn);
-            error_log("WARNING: execute() succeeded but affected_rows is 0 for user ID: {$userId}");
             ob_clean();
             echo json_encode([
                 'success' => false,
-                'error' => 'Password update failed - no rows affected. Please contact support.'
+                'error'   => 'Password could not be updated. Please try again.'
             ]);
             ob_end_flush();
         }
@@ -135,14 +162,12 @@ try {
         $error = $updateStmt->error;
         $updateStmt->close();
         closeDBConnection($conn);
-        error_log("Failed to update password: " . $error);
-        throw new Exception("Failed to update password");
+        throw new Exception("Failed to update password: " . $error);
     }
 } catch (Exception $e) {
     error_log("Password change error: " . $e->getMessage());
-    ob_clean(); // Clear any accidental output
+    ob_clean();
     echo json_encode(['success' => false, 'error' => 'Failed to change password. Please try again.']);
 }
 
-// End output buffering and send the response
 ob_end_flush();

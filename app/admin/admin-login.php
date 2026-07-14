@@ -1,9 +1,7 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
+require_once '../includes/RateLimiter.php';
 
 // Start admin-specific session
 startSession('admin');
@@ -15,6 +13,14 @@ try {
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+        // --- Rate Limiting Check (stricter: 5 attempts, 30 min lockout for admin) ---
+        $rateLimiter = new RateLimiter($conn, 5, 30);
+        if ($rateLimiter->isLockedOut($ip)) {
+            header("Location: ../../public/admin-login.html?error=" . urlencode("Too many failed attempts. Your IP has been locked out for 30 minutes."));
+            exit;
+        }
 
         // Validate inputs
         if (empty($email) || empty($password)) {
@@ -44,6 +50,9 @@ try {
 
             // Verify password
             if ($hashedPassword && password_verify($password, $hashedPassword)) {
+                // Clear failed attempts on success
+                $rateLimiter->clearAttempts($ip);
+
                 // Save session data
                 $_SESSION['user_id'] = $id;
                 $_SESSION['user_name'] = $fullName;
@@ -51,19 +60,24 @@ try {
                 $_SESSION['user_role'] = 'admin';
                 $_SESSION['login_time'] = time();
 
+                $stmt->close();
                 // Redirect to admin dashboard
                 header("Location: new-admin-dashboard.php");
                 exit;
             } else {
+                // Record failed attempt
+                $rateLimiter->recordFailedAttempt($ip, $email);
+                $stmt->close();
                 header("Location: ../../public/admin-login.html?error=" . urlencode("Incorrect password. Please try again"));
                 exit;
             }
         } else {
+            // Record failed attempt for unknown email too
+            $rateLimiter->recordFailedAttempt($ip, $email);
+            $stmt->close();
             header("Location: ../../public/admin-login.html?error=" . urlencode("Administrator account not found. Please contact support"));
             exit;
         }
-
-        $stmt->close();
     }
 
     closeDBConnection($conn);

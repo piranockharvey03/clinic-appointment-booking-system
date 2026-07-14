@@ -26,6 +26,17 @@ $fullName = $_SESSION['user_name'];
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="../assets/js/dark-mode.js"></script>
+    <style>
+        /* Password strength bar */
+        .strength-bar { height: 4px; border-radius: 9999px; transition: width 0.3s, background-color 0.3s; }
+        /* Animated modal backdrop */
+        #passwordModal { transition: opacity 0.2s; }
+        #passwordModal.hidden { pointer-events: none; opacity: 0; }
+        #passwordModal:not(.hidden) { opacity: 1; }
+        #modalCard { transition: transform 0.25s, opacity 0.25s; }
+        #passwordModal.hidden #modalCard { transform: scale(0.95); opacity: 0; }
+        #passwordModal:not(.hidden) #modalCard { transform: scale(1); opacity: 1; }
+    </style>
 </head>
 
 <body class="bg-gray-50 font-sans antialiased">
@@ -102,6 +113,7 @@ $fullName = $_SESSION['user_name'];
 
             <main class="p-4 sm:px-6 lg:px-8">
                 <div class="max-w-3xl mx-auto">
+
                     <!-- Appearance Settings -->
                     <div class="bg-white shadow rounded-lg p-6 mb-6">
                         <h2 class="text-xl font-bold mb-6 text-gray-900">Appearance</h2>
@@ -148,85 +160,191 @@ $fullName = $_SESSION['user_name'];
 
                     <!-- Account Settings -->
                     <div class="bg-white shadow rounded-lg p-6 mb-6">
-                        <h2 class="text-xl font-bold mb-6 text-gray-900">Account</h2>
-                        <div class="space-y-4">
-                            <button onclick="showPasswordModal()"
-                                class="w-full text-left px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700">
-                                <i data-feather="key" class="inline h-5 w-5 mr-2"></i>
-                                Change Password
-                            </button>
-                        </div>
+                        <h2 class="text-xl font-bold mb-4 text-gray-900">Security</h2>
+                        <p class="text-sm text-gray-500 mb-5">Keep your account secure by using a strong, unique password.</p>
+                        <button id="openPasswordModalBtn" onclick="showPasswordModal()"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150">
+                            <i data-feather="lock" class="h-4 w-4"></i>
+                            Change Password
+                        </button>
                     </div>
+
                 </div>
             </main>
         </div>
     </div>
 
-    <!-- Password Change Modal -->
-    <div id="passwordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Change Password</h3>
-                    <button onclick="hidePasswordModal()" class="text-gray-400 hover:text-gray-600">
-                        <i data-feather="x" class="h-6 w-6"></i>
-                    </button>
+    <!-- ═══════════════════════════════════════════════════
+         Change Password Modal
+    ═══════════════════════════════════════════════════ -->
+    <div id="passwordModal"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
+         role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div id="modalCard" class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i data-feather="lock" class="h-5 w-5 text-blue-600"></i>
+                    </div>
+                    <h3 id="modalTitle" class="text-xl font-semibold text-gray-900">Change Password</h3>
+                </div>
+                <button onclick="hidePasswordModal()"
+                    class="text-gray-400 hover:text-gray-600 rounded-full p-1 hover:bg-gray-100 transition-colors">
+                    <i data-feather="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+
+            <!-- Alert banners -->
+            <div id="passwordError"
+                 class="hidden mb-4 flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                <i data-feather="alert-circle" class="h-4 w-4 mt-0.5 flex-shrink-0"></i>
+                <span id="passwordErrorText"></span>
+            </div>
+            <div id="passwordSuccess"
+                 class="hidden mb-4 flex items-start gap-2 p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
+                <i data-feather="check-circle" class="h-4 w-4 mt-0.5 flex-shrink-0"></i>
+                <span id="passwordSuccessText"></span>
+            </div>
+
+            <!-- Form -->
+            <form id="changePasswordForm" onsubmit="return submitPasswordChange()" novalidate>
+
+                <!-- Current Password -->
+                <div class="mb-4">
+                    <label for="currentPassword" class="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
+                    <div class="relative">
+                        <input type="password" id="currentPassword" name="current_password"
+                            autocomplete="current-password"
+                            placeholder="Enter your current password"
+                            class="w-full px-3 py-2.5 pr-11 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <button type="button" tabindex="-1"
+                            onclick="toggleVis('currentPassword', 'eyeCurrentIcon')"
+                            class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="eyeCurrentIcon" data-feather="eye" class="h-4 w-4"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <form onsubmit="return submitPasswordChange()">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                        <div class="relative">
-                            <input type="password" id="newPassword" name="new_password" required minlength="6"
-                                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleNewPasswordIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                                <i id="toggleNewPasswordIcon" data-feather="eye" class="h-5 w-5"></i>
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                        <div class="relative">
-                            <input type="password" id="confirmPassword" name="confirm_password" required
-                                class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'toggleConfirmPasswordIcon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                                <i id="toggleConfirmPasswordIcon" data-feather="eye" class="h-5 w-5"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="passwordError" class="text-red-600 text-sm mb-4 hidden"></div>
-                    <div id="passwordSuccess" class="text-green-600 text-sm mb-4 hidden"></div>
-
-                    <div class="flex justify-end gap-3">
-                        <button type="button" onclick="hidePasswordModal()"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
-                            Cancel
-                        </button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                            id="submitPasswordChange">
-                            Change Password
+                <!-- New Password -->
+                <div class="mb-4">
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
+                    <div class="relative">
+                        <input type="password" id="newPassword" name="new_password"
+                            autocomplete="new-password"
+                            placeholder="At least 8 characters"
+                            oninput="updateStrength(this.value)"
+                            class="w-full px-3 py-2.5 pr-11 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <button type="button" tabindex="-1"
+                            onclick="toggleVis('newPassword', 'eyeNewIcon')"
+                            class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="eyeNewIcon" data-feather="eye" class="h-4 w-4"></i>
                         </button>
                     </div>
-                </form>
-            </div>
+                    <!-- Strength meter -->
+                    <div class="mt-2">
+                        <div class="w-full bg-gray-200 rounded-full h-1">
+                            <div id="strengthBar" class="strength-bar h-1 w-0 bg-gray-300"></div>
+                        </div>
+                        <p id="strengthLabel" class="text-xs text-gray-400 mt-1">Enter a password to see its strength</p>
+                    </div>
+                    <!-- Requirements checklist -->
+                    <ul class="mt-2 space-y-1 text-xs text-gray-500">
+                        <li id="req-length" class="flex items-center gap-1.5">
+                            <i data-feather="circle" class="h-3 w-3"></i> At least 8 characters
+                        </li>
+                        <li id="req-letter" class="flex items-center gap-1.5">
+                            <i data-feather="circle" class="h-3 w-3"></i> At least one letter
+                        </li>
+                        <li id="req-number" class="flex items-center gap-1.5">
+                            <i data-feather="circle" class="h-3 w-3"></i> At least one number
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-6">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1.5">Confirm New Password</label>
+                    <div class="relative">
+                        <input type="password" id="confirmPassword" name="confirm_password"
+                            autocomplete="new-password"
+                            placeholder="Re-enter your new password"
+                            oninput="checkMatch()"
+                            class="w-full px-3 py-2.5 pr-11 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        <button type="button" tabindex="-1"
+                            onclick="toggleVis('confirmPassword', 'eyeConfirmIcon')"
+                            class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="eyeConfirmIcon" data-feather="eye" class="h-4 w-4"></i>
+                        </button>
+                    </div>
+                    <p id="matchMsg" class="text-xs mt-1 hidden"></p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button type="button" onclick="hidePasswordModal()"
+                        class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submitBtn"
+                        class="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                        <span id="submitBtnText">Update Password</span>
+                    </button>
+                </div>
+            </form>
+
         </div>
     </div>
 
     <script src="../assets/js/mobile-menu.js"></script>
     <script src="../assets/js/dark-mode.js"></script>
     <script>
-        // Initialize feather icons immediately
         feather.replace();
 
-        // Toggle password visibility function
-        function togglePasswordVisibility(inputId, iconId) {
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
+        // ─────────────────────────────────────────────
+        // Modal open / close
+        // ─────────────────────────────────────────────
+        function showPasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                document.getElementById('currentPassword').focus();
+                feather.replace();
+            }, 50);
+        }
 
+        function hidePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('passwordError').classList.add('hidden');
+            document.getElementById('passwordSuccess').classList.add('hidden');
+            document.getElementById('strengthBar').style.width = '0';
+            document.getElementById('strengthLabel').textContent = 'Enter a password to see its strength';
+            document.getElementById('matchMsg').classList.add('hidden');
+            // Reset requirement icons
+            ['req-length','req-letter','req-number'].forEach(id => setReq(id, null));
+        }
+
+        // Close on backdrop click
+        document.getElementById('passwordModal').addEventListener('click', function(e) {
+            if (e.target === this) hidePasswordModal();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') hidePasswordModal();
+        });
+
+        // ─────────────────────────────────────────────
+        // Password visibility toggle
+        // ─────────────────────────────────────────────
+        function toggleVis(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon  = document.getElementById(iconId);
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.setAttribute('data-feather', 'eye-off');
@@ -237,203 +355,200 @@ $fullName = $_SESSION['user_name'];
             feather.replace();
         }
 
-        // Password modal functions
-        function showPasswordModal() {
-            document.getElementById('passwordModal').style.display = 'block';
-            document.getElementById('currentPassword').focus();
-            setTimeout(() => feather.replace(), 50);
+        // ─────────────────────────────────────────────
+        // Password strength meter
+        // ─────────────────────────────────────────────
+        function updateStrength(val) {
+            const bar   = document.getElementById('strengthBar');
+            const label = document.getElementById('strengthLabel');
+            const hasLen    = val.length >= 8;
+            const hasLetter = /[A-Za-z]/.test(val);
+            const hasNum    = /[0-9]/.test(val);
+            const hasSpec   = /[^A-Za-z0-9]/.test(val);
+
+            setReq('req-length', hasLen);
+            setReq('req-letter', hasLetter);
+            setReq('req-number', hasNum);
+
+            let score = 0;
+            if (hasLen)    score++;
+            if (hasLetter) score++;
+            if (hasNum)    score++;
+            if (hasSpec)   score++;
+
+            const levels = [
+                { w:'0%',   color:'bg-gray-300', text:'',                 textColor:'text-gray-400' },
+                { w:'25%',  color:'bg-red-500',  text:'Weak',             textColor:'text-red-600'  },
+                { w:'50%',  color:'bg-orange-500',text:'Fair',            textColor:'text-orange-600'},
+                { w:'75%',  color:'bg-yellow-500',text:'Good',            textColor:'text-yellow-600'},
+                { w:'100%', color:'bg-green-500', text:'Strong',          textColor:'text-green-600' },
+            ];
+
+            if (val.length === 0) { bar.style.width='0'; label.textContent='Enter a password to see its strength'; label.className='text-xs mt-1 text-gray-400'; return; }
+
+            const lvl = levels[score] || levels[0];
+            bar.style.width   = lvl.w;
+            bar.className     = `strength-bar h-1 ${lvl.color}`;
+            label.textContent = lvl.text;
+            label.className   = `text-xs mt-1 ${lvl.textColor}`;
+
+            checkMatch();
         }
 
-        function hidePasswordModal() {
-            document.getElementById('passwordModal').style.display = 'none';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-            document.getElementById('passwordError').style.display = 'none';
-            document.getElementById('passwordSuccess').style.display = 'none';
+        function setReq(id, passed) {
+            const el   = document.getElementById(id);
+            const icon = el.querySelector('[data-feather]');
+            if (passed === null) {
+                el.className = 'flex items-center gap-1.5 text-gray-400';
+                icon.setAttribute('data-feather','circle');
+            } else if (passed) {
+                el.className = 'flex items-center gap-1.5 text-green-600';
+                icon.setAttribute('data-feather','check-circle');
+            } else {
+                el.className = 'flex items-center gap-1.5 text-red-500';
+                icon.setAttribute('data-feather','x-circle');
+            }
+            feather.replace();
         }
 
-        // Password change form submission
+        function checkMatch() {
+            const np  = document.getElementById('newPassword').value;
+            const cp  = document.getElementById('confirmPassword').value;
+            const msg = document.getElementById('matchMsg');
+            if (!cp) { msg.classList.add('hidden'); return; }
+            msg.classList.remove('hidden');
+            if (np === cp) {
+                msg.textContent = '✓ Passwords match';
+                msg.className   = 'text-xs mt-1 text-green-600';
+            } else {
+                msg.textContent = '✗ Passwords do not match';
+                msg.className   = 'text-xs mt-1 text-red-500';
+            }
+        }
+
+        // ─────────────────────────────────────────────
+        // Show / hide alert banners
+        // ─────────────────────────────────────────────
+        function showError(msg) {
+            document.getElementById('passwordErrorText').textContent = msg;
+            document.getElementById('passwordError').classList.remove('hidden');
+            document.getElementById('passwordSuccess').classList.add('hidden');
+            feather.replace();
+        }
+
+        function showSuccess(msg) {
+            document.getElementById('passwordSuccessText').textContent = msg;
+            document.getElementById('passwordSuccess').classList.remove('hidden');
+            document.getElementById('passwordError').classList.add('hidden');
+            feather.replace();
+        }
+
+        // ─────────────────────────────────────────────
+        // Form submission
+        // ─────────────────────────────────────────────
         function submitPasswordChange() {
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            const current = document.getElementById('currentPassword').value.trim();
+            const newPwd  = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const btn     = document.getElementById('submitBtn');
+            const btnText = document.getElementById('submitBtnText');
 
-            // Basic validation
-            if (!newPassword || !confirmPassword) {
-                document.getElementById('passwordError').textContent = 'All fields are required';
-                document.getElementById('passwordError').style.display = 'block';
-                document.getElementById('passwordSuccess').style.display = 'none';
+            // Client-side validation
+            if (!current || !newPwd || !confirm) {
+                showError('All fields are required.');
+                return false;
+            }
+            if (newPwd.length < 8) {
+                showError('New password must be at least 8 characters long.');
+                return false;
+            }
+            if (!/[A-Za-z]/.test(newPwd) || !/[0-9]/.test(newPwd)) {
+                showError('New password must contain at least one letter and one number.');
+                return false;
+            }
+            if (newPwd !== confirm) {
+                showError('New passwords do not match.');
                 return false;
             }
 
-            if (newPassword !== confirmPassword) {
-                document.getElementById('passwordError').textContent = 'New passwords do not match';
-                document.getElementById('passwordError').style.display = 'block';
-                document.getElementById('passwordSuccess').style.display = 'none';
-                return false;
-            }
+            // Loading state
+            btn.disabled    = true;
+            btnText.textContent = 'Updating...';
 
-            if (newPassword.length < 6) {
-                document.getElementById('passwordError').textContent = 'Password must be at least 6 characters long';
-                document.getElementById('passwordError').style.display = 'block';
-                document.getElementById('passwordSuccess').style.display = 'none';
-                return false;
-            }
-
-            // Show loading state
-            const submitBtn = document.getElementById('submitPasswordChange');
-            submitBtn.textContent = 'Changing...';
-            submitBtn.disabled = true;
-
-            // Send AJAX request
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', '../auth/change-password.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    submitBtn.textContent = 'Change Password';
-                    submitBtn.disabled = false;
-
-                    if (xhr.status === 200) {
-                        // First, check if response is empty
-                        if (!xhr.responseText || xhr.responseText.trim() === '') {
-                            console.error('Empty response from server');
-                            document.getElementById('passwordError').textContent = 'Server returned empty response. Please try again.';
-                            document.getElementById('passwordError').style.display = 'block';
-                            document.getElementById('passwordSuccess').style.display = 'none';
-                            return;
-                        }
-
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                document.getElementById('passwordSuccess').textContent = response.message || 'Password changed successfully';
-                                document.getElementById('passwordSuccess').style.display = 'block';
-                                document.getElementById('passwordError').style.display = 'none';
-
-                                // Clear form fields
-                                document.getElementById('newPassword').value = '';
-                                document.getElementById('confirmPassword').value = '';
-
-                                // Close modal after 2 seconds
-                                setTimeout(function() {
-                                    hidePasswordModal();
-                                }, 2000);
-                            } else {
-                                document.getElementById('passwordError').textContent = response.error || 'Failed to change password';
-                                document.getElementById('passwordError').style.display = 'block';
-                                document.getElementById('passwordSuccess').style.display = 'none';
-                            }
-                        } catch (e) {
-                            console.error('Parse error:', e);
-                            console.error('Response text:', xhr.responseText);
-                            document.getElementById('passwordError').textContent = 'Invalid response from server. Please check the browser console for details.';
-                            document.getElementById('passwordError').style.display = 'block';
-                            document.getElementById('passwordSuccess').style.display = 'none';
-                        }
-                    } else if (xhr.status === 401) {
-                        document.getElementById('passwordError').textContent = 'Session expired. Please login again.';
-                        document.getElementById('passwordError').style.display = 'block';
-                        document.getElementById('passwordSuccess').style.display = 'none';
-                        setTimeout(function() {
-                            window.location.href = '../../public/login.html';
-                        }, 2000);
-                    } else if (xhr.status === 0) {
-                        console.error('Network error - status 0');
-                        document.getElementById('passwordError').textContent = 'Network error. Please check your connection.';
-                        document.getElementById('passwordError').style.display = 'block';
-                        document.getElementById('passwordSuccess').style.display = 'none';
-                    } else {
-                        console.error('HTTP Status:', xhr.status);
-                        console.error('Response:', xhr.responseText);
-                        document.getElementById('passwordError').textContent = 'Error: ' + (xhr.responseText || 'Failed to change password');
-                        document.getElementById('passwordError').style.display = 'block';
-                        document.getElementById('passwordSuccess').style.display = 'none';
-                    }
+            fetch('../auth/change-password.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    current_password: current,
+                    new_password:     newPwd,
+                    confirm_password: confirm,
+                }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled    = false;
+                btnText.textContent = 'Update Password';
+                if (data.success) {
+                    showSuccess(data.message || 'Password updated successfully!');
+                    document.getElementById('changePasswordForm').reset();
+                    ['req-length','req-letter','req-number'].forEach(id => setReq(id, null));
+                    document.getElementById('strengthBar').style.width = '0';
+                    document.getElementById('strengthLabel').textContent = 'Enter a password to see its strength';
+                    // Auto-close after 3 s
+                    setTimeout(hidePasswordModal, 3000);
+                } else {
+                    showError(data.error || 'Failed to change password. Please try again.');
                 }
-            };
+            })
+            .catch(() => {
+                btn.disabled    = false;
+                btnText.textContent = 'Update Password';
+                showError('Network error. Please check your connection and try again.');
+            });
 
-            // Handle network errors
-            xhr.onerror = function() {
-                submitBtn.textContent = 'Change Password';
-                submitBtn.disabled = false;
-                console.error('Network error occurred');
-                document.getElementById('passwordError').textContent = 'Network error. Please check your connection and try again.';
-                document.getElementById('passwordError').style.display = 'block';
-                document.getElementById('passwordSuccess').style.display = 'none';
-            };
-
-            // Handle timeout
-            xhr.ontimeout = function() {
-                submitBtn.textContent = 'Change Password';
-                submitBtn.disabled = false;
-                console.error('Request timeout');
-                document.getElementById('passwordError').textContent = 'Request timed out. Please try again.';
-                document.getElementById('passwordError').style.display = 'block';
-                document.getElementById('passwordSuccess').style.display = 'none';
-            };
-
-            const params = 'current_password=' + encodeURIComponent('') +
-                '&new_password=' + encodeURIComponent(newPassword) +
-                '&confirm_password=' + encodeURIComponent(confirmPassword);
-
-            xhr.send(params);
-
-            return false; // Prevent form submission
+            return false;
         }
 
-        // Load settings from localStorage
+        // ─────────────────────────────────────────────
+        // Notification toggles (persisted to localStorage)
+        // ─────────────────────────────────────────────
         function loadSettings() {
-            // Dark Mode
-            const darkModeEnabled = localStorage.getItem('darkMode') === 'true';
-            if (darkModeEnabled) {
+            const darkOn = localStorage.getItem('darkMode') === 'true';
+            if (darkOn) {
                 document.getElementById('darkModeToggle').classList.add('active');
                 document.getElementById('darkModeStatus').textContent = 'On';
             }
 
-            // Email Notifications
-            const emailNotifications = localStorage.getItem('patient_email_notifications');
-            if (emailNotifications === 'false') {
+            const emailOff = localStorage.getItem('patient_email_notifications') === 'false';
+            if (emailOff) {
                 document.getElementById('emailToggle').classList.remove('active');
                 document.getElementById('emailStatus').textContent = 'Off';
             }
 
-            // SMS Notifications
-            const smsNotifications = localStorage.getItem('patient_sms_notifications');
-            if (smsNotifications === 'true') {
+            const smsOn = localStorage.getItem('patient_sms_notifications') === 'true';
+            if (smsOn) {
                 document.getElementById('smsToggle').classList.add('active');
                 document.getElementById('smsStatus').textContent = 'On';
             }
         }
 
-        // DOMContentLoaded event handler
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadSettings();
 
-            // Email Notifications Toggle
-            document.getElementById('emailToggle').addEventListener('click', function() {
+            document.getElementById('emailToggle').addEventListener('click', function () {
                 this.classList.toggle('active');
-                const isActive = this.classList.contains('active');
-                document.getElementById('emailStatus').textContent = isActive ? 'On' : 'Off';
-                localStorage.setItem('patient_email_notifications', isActive);
+                const active = this.classList.contains('active');
+                document.getElementById('emailStatus').textContent = active ? 'On' : 'Off';
+                localStorage.setItem('patient_email_notifications', active);
             });
 
-            // SMS Notifications Toggle
-            document.getElementById('smsToggle').addEventListener('click', function() {
+            document.getElementById('smsToggle').addEventListener('click', function () {
                 this.classList.toggle('active');
-                const isActive = this.classList.contains('active');
-                document.getElementById('smsStatus').textContent = isActive ? 'On' : 'Off';
-                localStorage.setItem('patient_sms_notifications', isActive);
+                const active = this.classList.contains('active');
+                document.getElementById('smsStatus').textContent = active ? 'On' : 'Off';
+                localStorage.setItem('patient_sms_notifications', active);
             });
 
-            // Close modal when clicking outside
-            document.getElementById('passwordModal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    hidePasswordModal();
-                }
-            });
-
-            // Re-render feather icons
             setTimeout(() => feather.replace(), 100);
         });
     </script>

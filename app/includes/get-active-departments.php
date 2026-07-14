@@ -1,9 +1,25 @@
 <?php
 require_once '../../config/db-config.php';
+require_once 'FileCache.php';
 
 header('Content-Type: application/json');
 
 try {
+    $cache = new FileCache();
+    $cacheKey = 'active_departments';
+
+    // Serve from cache if fresh (TTL: 1 hour)
+    $cached = $cache->get($cacheKey);
+    if ($cached !== null) {
+        echo json_encode([
+            'success'     => true,
+            'departments' => $cached['departments'],
+            'count'       => $cached['count'],
+            'from_cache'  => true,
+        ]);
+        exit;
+    }
+
     $conn = getDBConnection();
 
     // Get all departments with active doctors
@@ -23,17 +39,24 @@ try {
 
     closeDBConnection($conn);
 
-    echo json_encode([
-        'success' => true,
+    // Store result in cache
+    $cache->set($cacheKey, [
         'departments' => $departments,
-        'count' => count($departments)
+        'count'       => count($departments),
+    ], 3600);
+
+    echo json_encode([
+        'success'     => true,
+        'departments' => $departments,
+        'count'       => count($departments),
+        'from_cache'  => false,
     ]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Failed to fetch departments',
-        'message' => $e->getMessage()
+        'error'   => 'Failed to fetch departments',
+        'message' => $e->getMessage(),
     ]);
     error_log("Get departments error: " . $e->getMessage());
 }

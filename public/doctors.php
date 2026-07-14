@@ -1,23 +1,33 @@
 <?php
 require_once '../config/db-config.php';
+require_once '../app/includes/FileCache.php';
 
-$conn = getDBConnection();
-$doctors = [];
+$cache    = new FileCache();
+$cacheKey = 'doctors_page_list';
+$doctors  = $cache->get($cacheKey);
 
-$query = "SELECT d.id, d.full_name, d.qualification, d.experience_years, d.specialty, d.department, d.photo
-          FROM doctors d
-          WHERE d.status = 'active'
-          ORDER BY d.full_name";
+if ($doctors === null) {
+    // Cache miss — query the database
+    $conn = getDBConnection();
 
-$result = $conn->query($query);
+    $query = "SELECT d.id, d.full_name, d.qualification, d.experience_years, d.specialty, d.department, d.photo
+              FROM doctors d
+              WHERE d.status = 'active'
+              ORDER BY d.full_name";
 
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $doctors[] = $row;
+    $result = $conn->query($query);
+    $doctors = [];
+
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $doctors[] = $row;
+        }
     }
-}
+    $conn->close();
 
-$conn->close();
+    // Cache for 1 hour
+    $cache->set($cacheKey, $doctors, 3600);
+}
 
 // Color palette for doctor cards
 $colors = ['blue', 'green', 'purple', 'red', 'yellow', 'indigo', 'pink', 'teal'];
