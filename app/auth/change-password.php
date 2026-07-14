@@ -5,6 +5,9 @@ ob_start();
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start patient-specific session
+startSession('patient');
+
 // Enable error logging for debugging (never display errors in JSON responses)
 error_reporting(E_ALL);
 ini_set('display_errors', 0);

@@ -12,7 +12,7 @@ try {
 
     if (empty($department) && empty($searchQuery)) {
         // Return all active doctors grouped by their departments and specialties
-        $query = "SELECT DISTINCT d.id, d.full_name, d.specialty, d.qualification, d.experience_years,
+        $query = "SELECT DISTINCT d.id, d.full_name, d.specialty, d.qualification, d.experience_years, d.photo,
                   GROUP_CONCAT(DISTINCT dd.department SEPARATOR ', ') as departments,
                   GROUP_CONCAT(DISTINCT ds.specialty SEPARATOR ', ') as additional_specialties
                   FROM doctors d
@@ -24,7 +24,7 @@ try {
         $stmt = $conn->query($query);
     } else {
         // Build dynamic query based on filters
-        $query = "SELECT DISTINCT d.id, d.full_name, d.specialty, d.qualification, d.experience_years,
+        $query = "SELECT DISTINCT d.id, d.full_name, d.specialty, d.qualification, d.experience_years, d.photo,
                   GROUP_CONCAT(DISTINCT dd.department SEPARATOR ', ') as departments,
                   GROUP_CONCAT(DISTINCT ds.specialty SEPARATOR ', ') as additional_specialties
                   FROM doctors d

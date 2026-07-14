@@ -2,6 +2,9 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start doctor-specific session before destroying
+startSession('doctor');
+
 // Capture session data before destroying the session
 $logUserId   = $_SESSION['user_id']   ?? 0;
 $logUserName = $_SESSION['user_name'] ?? 'Unknown';

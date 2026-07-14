@@ -1,6 +1,10 @@
 <?php
-// Include database configuration
+// Include session configuration
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
+
+// Start patient-specific session
+startSession('patient');
 
 // Set content type to JSON
 header('Content-Type: application/json');

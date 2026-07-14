@@ -1,6 +1,9 @@
 <?php
 require_once '../config/session-config.php';
 
+// Start patient-specific session
+startSession('patient');
+
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
     header('Location: login.html');
     exit;
@@ -460,20 +463,25 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
                 label.innerHTML = `
                     <input type="radio" name="doctorId" value="${doctor.id}" required class="hidden peer" />
                     <div class="p-3.5 border-2 border-gray-200 rounded-lg transition-all duration-200 hover:border-blue-500 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-100 hover:shadow-md hover:scale-105 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-checked:shadow-lg">
-                        <div class="font-semibold text-sm text-gray-900 mb-1 group-hover:text-blue-700 peer-checked:text-white">${doctor.full_name}</div>
-                        <div class="text-xs text-gray-600 mb-1.5 group-hover:text-blue-600 peer-checked:text-blue-100">${doctor.specialty}</div>
-                        ${additionalSpecialtiesHTML}
-                        <div class="flex flex-wrap gap-1 mb-1.5">
-                            <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700 group-hover:bg-blue-200 group-hover:text-blue-800 peer-checked:bg-blue-400 peer-checked:text-white transition-all duration-200">${departmentsDisplay}</div>
-                        </div>
-                        <div class="flex items-center justify-between mt-1.5">
-                            <div class="text-xs text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-200">
-                                <i data-feather="award" class="inline h-3 w-3"></i> ${doctor.experience_years} years exp.
+                        <div class="flex items-start gap-3">
+                            ${doctor.photo ? `<img src="${doctor.photo}" alt="${doctor.full_name}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-400 peer-checked:border-white transition-all duration-200" />` : `<div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-200 group-hover:border-blue-400 peer-checked:border-white transition-all duration-200"><i data-feather="user" class="h-6 w-6 text-gray-400 group-hover:text-blue-400 peer-checked:text-white"></i></div>`}
+                            <div class="flex-1">
+                                <div class="font-semibold text-sm text-gray-900 mb-1 group-hover:text-blue-700 peer-checked:text-white">${doctor.full_name}</div>
+                                <div class="text-xs text-gray-600 mb-1.5 group-hover:text-blue-600 peer-checked:text-blue-100">${doctor.specialty}</div>
+                                ${additionalSpecialtiesHTML}
+                                <div class="flex flex-wrap gap-1 mb-1.5">
+                                    <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-700 group-hover:bg-blue-200 group-hover:text-blue-800 peer-checked:bg-blue-400 peer-checked:text-white transition-all duration-200">${departmentsDisplay}</div>
+                                </div>
+                                <div class="flex items-center justify-between mt-1.5">
+                                    <div class="text-xs text-gray-500 group-hover:text-blue-600 peer-checked:text-blue-200">
+                                        <i data-feather="award" class="inline h-3 w-3"></i> ${doctor.experience_years} years exp.
+                                    </div>
+                                    <button type="button" onclick="event.preventDefault(); showDoctorDetails(${JSON.stringify(doctor).replace(/"/g, '&quot;')})"
+                                        class="text-xs text-blue-600 hover:text-blue-800 font-medium underline focus:outline-none peer-checked:text-white">
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
-                            <button type="button" onclick="event.preventDefault(); showDoctorDetails(${JSON.stringify(doctor).replace(/"/g, '&quot;')})"
-                                class="text-xs text-blue-600 hover:text-blue-800 font-medium underline focus:outline-none peer-checked:text-white">
-                                View Details
-                            </button>
                         </div>
                     </div>
                 `;
@@ -758,11 +766,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'patient') {
 
             document.getElementById('doctorDetailsContent').innerHTML = `
                 <div class="flex items-start space-x-4 mb-5">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                    </div>
+                    ${doctor.photo ? `<img src="${doctor.photo}" alt="${doctor.full_name}" class="w-16 h-16 rounded-full object-cover border-2 border-blue-200 flex-shrink-0" />` : `<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0"><svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>`}
                     <div>
                         <h4 class="text-xl font-bold text-gray-900">${doctor.full_name}</h4>
                         <p class="text-blue-600 font-medium">${doctor.specialty}</p>

@@ -5,6 +5,9 @@ ini_set('display_errors', 1);
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start admin-specific session
+startSession('admin');
+
 try {
     $conn = getDBConnection();
 

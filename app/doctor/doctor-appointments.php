@@ -2,6 +2,9 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start doctor-specific session
+startSession('doctor');
+
 // Redirect to login if not authenticated or not a doctor
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'doctor') {
     header('Location: ../../public/doctor-login.html');

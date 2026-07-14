@@ -4,7 +4,7 @@ require_once '../config/db-config.php';
 $conn = getDBConnection();
 $doctors = [];
 
-$query = "SELECT d.id, d.full_name, d.qualification, d.experience_years, d.specialty, d.department
+$query = "SELECT d.id, d.full_name, d.qualification, d.experience_years, d.specialty, d.department, d.photo
           FROM doctors d
           WHERE d.status = 'active'
           ORDER BY d.full_name";
@@ -159,9 +159,13 @@ $colors = ['blue', 'green', 'purple', 'red', 'yellow', 'indigo', 'pink', 'teal']
                         <div class="<?php echo $colorMap[$colorClass]; ?> h-32"></div>
                         <div class="relative px-6 pb-6">
                             <div class="absolute -top-16 left-1/2 transform -translate-x-1/2">
-                                <div class="h-32 w-32 rounded-full bg-gray-300 border-4 border-white flex items-center justify-center">
-                                    <i data-feather="user" class="h-16 w-16 text-gray-600"></i>
-                                </div>
+                                <?php if (!empty($doctor['photo'])): ?>
+                                    <img src="<?php echo htmlspecialchars($doctor['photo']); ?>" alt="<?php echo htmlspecialchars($doctor['full_name']); ?>" class="h-32 w-32 rounded-full border-4 border-white object-cover">
+                                <?php else: ?>
+                                    <div class="h-32 w-32 rounded-full bg-gray-300 border-4 border-white flex items-center justify-center">
+                                        <i data-feather="user" class="h-16 w-16 text-gray-600"></i>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <div class="pt-20 text-center">
                                 <h3 class="text-xl font-bold text-gray-900"><?php echo htmlspecialchars($doctor['full_name']); ?></h3>
@@ -226,53 +230,42 @@ $colors = ['blue', 'green', 'purple', 'red', 'yellow', 'indigo', 'pink', 'teal']
     </div>
 
     <!-- Footer -->
-    <footer class="bg-gray-800">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center">
-                        <i data-feather="heart" class="h-8 w-8 text-blue-400"></i>
-                        <span class="ml-2 text-xl font-bold text-white">MediCare</span>
-                    </div>
-                    <p class="mt-4 text-gray-400 text-sm">Compassionate care for your health and wellbeing.</p>
+    <footer class="bg-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <nav class="-mx-5 -my-2 flex flex-wrap justify-center" aria-label="Footer">
+                <div class="px-5 py-2">
+                    <a href="index.html" class="text-base text-gray-500 hover:text-gray-900">Home</a>
                 </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Quick Links</h3>
-                    <ul class="mt-4 space-y-2">
-                        <li><a href="index.html" class="text-gray-300 hover:text-white">Home</a></li>
-                        <li><a href="services.html" class="text-gray-300 hover:text-white">Services</a></li>
-                        <li><a href="doctors.php" class="text-gray-300 hover:text-white">Doctors</a></li>
-                        <li><a href="about.html" class="text-gray-300 hover:text-white">About</a></li>
-                    </ul>
+                <div class="px-5 py-2">
+                    <a href="services.html" class="text-base text-gray-500 hover:text-gray-900">Services</a>
                 </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Contact</h3>
-                    <ul class="mt-4 space-y-2 text-gray-300">
-                        <li class="flex items-center">
-                            <i data-feather="phone" class="h-4 w-4 mr-2"></i>
-                            <span>+1 (555) 123-4567</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i data-feather="mail" class="h-4 w-4 mr-2"></i>
-                            <span>info@medicare.com</span>
-                        </li>
-                        <li class="flex items-center">
-                            <i data-feather="map-pin" class="h-4 w-4 mr-2"></i>
-                            <span>123 Health St, Medical City</span>
-                        </li>
-                    </ul>
+                <div class="px-5 py-2">
+                    <a href="doctors.php" class="text-base text-gray-500 hover:text-gray-900">Doctors</a>
                 </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
-                    <ul class="mt-4 space-y-2">
-                        <li><a href="privacy.html" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
-                        <li><a href="terms.html" class="text-gray-300 hover:text-white">Terms of Service</a></li>
-                    </ul>
+                <div class="px-5 py-2">
+                    <a href="about.html" class="text-base text-gray-500 hover:text-gray-900">About</a>
                 </div>
+                <div class="px-5 py-2">
+                    <a href="privacy.html" class="text-base text-gray-500 hover:text-gray-900">Privacy Policy</a>
+                </div>
+                <div class="px-5 py-2">
+                    <a href="terms.html" class="text-base text-gray-500 hover:text-gray-900">Terms</a>
+                </div>
+            </nav>
+            <div class="mt-8 flex justify-center space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="facebook" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="instagram" class="h-6 w-6"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <i data-feather="twitter" class="h-6 w-6"></i>
+                </a>
             </div>
-            <div class="mt-8 border-t border-gray-700 pt-8 text-center">
-                <p class="text-gray-400 text-sm">&copy; 2026 MediCare Clinic. All rights reserved.</p>
-            </div>
+            <p class="mt-8 text-center text-base text-gray-400">
+                &copy; 2026 MediCare Clinic. All rights reserved.
+            </p>
         </div>
     </footer>
 

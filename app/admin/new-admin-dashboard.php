@@ -2,6 +2,9 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start admin-specific session
+startSession('admin');
+
 // Redirect to login if not authenticated or not an admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: ../../public/admin-login.html');
@@ -98,6 +101,14 @@ try {
                         <a href="manage-doctors.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                             <i data-feather="users" class="mr-3 h-5 w-5"></i>
                             Manage Doctors
+                        </a>
+                        <a href="manage-patients.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <i data-feather="user" class="mr-3 h-5 w-5"></i>
+                            Manage Patients
+                        </a>
+                        <a href="manage-feedback.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
+                            Feedback
                         </a>
                         <a href="reports.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                             <i data-feather="bar-chart-2" class="mr-3 h-5 w-5"></i>

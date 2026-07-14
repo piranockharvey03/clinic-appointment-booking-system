@@ -2,6 +2,9 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start patient-specific session
+startSession('patient');
+
 try {
     $conn = getDBConnection();
 

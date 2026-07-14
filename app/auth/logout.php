@@ -1,6 +1,9 @@
 <?php
 require_once '../../config/session-config.php';
 
+// Start patient-specific session before destroying
+startSession('patient');
+
 // Destroy all session data
 $_SESSION = array();
 

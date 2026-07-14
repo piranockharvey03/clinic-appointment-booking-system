@@ -1,6 +1,9 @@
 <?php
 require_once '../../config/session-config.php';
 
+// Start admin-specific session before destroying
+startSession('admin');
+
 // Destroy all session data
 $_SESSION = array();
 

@@ -2,8 +2,8 @@
 
 # MediCare Clinic - Hospital Management System
 
-**Document Version:** 1.1  
-**Date:** February 13, 2026  
+**Document Version:** 1.4  
+**Date:** July 13, 2026  
 **Prepared by:** Software Architecture Team  
 **Status:** Approved
 
@@ -13,6 +13,7 @@
 
 | Version | Date              | Author            | Description                                                   |
 | ------- | ----------------- | ----------------- | ------------------------------------------------------------- |
+| 1.4     | July 13, 2026     | Development Team  | Role-based session management, doctor image uploads, feedback system |
 | 1.3     | March 27, 2026    | Development Team  | Real-time messaging system, dark mode UI, enhanced components |
 | 1.2     | March 19, 2026    | Development Team  | Profile data model expansion, appointment enhancements        |
 | 1.1     | February 13, 2026 | Development Team  | Bug fixes and maintenance updates                             |
@@ -31,6 +32,8 @@
    - 3.4 User Management Module
    - 3.5 Patient-Doctor Messaging Module
    - 3.6 Database Connectivity Module
+   - 3.7 Doctor Image Management Module
+   - 3.8 Feedback Management Module
 4. [Data Design](#4-data-design)
 5. [Interface Design](#5-interface-design)
 6. [Security Design](#6-security-design)
@@ -485,23 +488,38 @@ Output: Redirect to login page
 
 ```php
 Function: validateSession($requiredRole)
-Input: Required user role ('patient' or 'admin')
+Input: Required user role ('patient', 'doctor', or 'admin')
 Processing:
   1. Check if session exists
   2. Validate user_id is set
   3. Validate user_role matches required role
   4. Check session expiry (30 minutes)
+  5. Check role-specific session cookie
 Output: Boolean (redirect if invalid)
 Usage: Include at top of protected pages
+```
+
+**Role-Based Session Management (v1.4):**
+
+```php
+Function: startSession($role)
+Input: User role ('patient', 'doctor', or 'admin')
+Processing:
+  1. Set session name based on role (medicare_patient_session, medicare_doctor_session, medicare_admin_session)
+  2. Start session with role-specific cookie
+  3. Regenerate session ID for security
+Output: Session started with role-specific configuration
+Usage: Call at the beginning of all login handlers and protected pages
 ```
 
 #### 3.1.4 Security Considerations
 
 - Password hashing: bcrypt (via password_hash with PASSWORD_DEFAULT)
-- Session security: HttpOnly, Secure flags
+- Session security: HttpOnly, Secure flags, role-based session separation
 - CSRF protection: Token validation (recommended for enhancement)
 - SQL injection prevention: Prepared statements
 - XSS prevention: Input sanitization, output encoding
+- Session isolation: Separate session cookies prevent role crossover
 
 ### 3.2 Appointment Management Module
 
@@ -710,15 +728,177 @@ Output: JSON {success: boolean, updated_count: int}
 - `appointment_canceled` - Admin canceled appointment
 - `appointment_completed` - Appointment marked as completed
 
-### 3.4 User Management Module
+### 3.6 Doctor Image Management Module
 
-#### 3.4.1 Component Overview
+#### 3.6.1 Component Overview
+
+**Purpose:** Manage doctor profile photo uploads and display  
+**Location:** `/app/admin/`, `/public/`  
+**Dependencies:** Database module, Session module, File system
+
+#### 3.6.2 Component Structure
+
+```
+admin/
+├── manage-doctors.php                     # Doctor management with photo upload
+
+public/
+├── doctors.php                            # Public doctors listing with photos
+├── patient-book.php                       # Booking page with doctor photos
+├── uploads/doctors/                       # Photo storage directory
+```
+
+#### 3.6.3 Key Functions
+
+**manage-doctors.php (Photo Upload):**
+
+```php
+Function: handlePhotoUpload()
+Input: $_FILES['photo'] (JPEG, PNG, GIF, max 5MB)
+Processing:
+  1. Validate file type (image/jpeg, image/jpg, image/png, image/gif)
+  2. Validate file size (max 5MB)
+  3. Generate unique filename (doctor_<uuid>.<ext>)
+  4. Move file to uploads/doctors/ directory
+  5. Delete old photo if updating existing doctor
+  6. Store path in database (doctors.photo column)
+Output: Photo path string or error message
+Security:
+  - File type validation
+  - File size limits
+  - Unique filename generation
+  - Old file cleanup
+```
+
+**Photo Display:**
+
+```php
+Function: displayDoctorPhoto($photoPath)
+Input: Photo path from database
+Processing:
+  1. Check if photo path exists
+  2. If exists, render <img> tag with path
+  3. If not exists, render default user icon
+Output: HTML img element or fallback icon
+Usage: Booking page, doctors page, view details modal
+```
+
+#### 3.6.4 Data Flow
+
+**Photo Upload Flow:**
+
+```
+Admin Browser
+    │
+    ├─► manage-doctors.php (POST with file)
+    │       │
+    │       ├─► Validate File Type & Size
+    │       ├─► Generate Unique Filename
+    │       │
+    │       ├─► Move to uploads/doctors/
+    │       │       ├─► doctor_<uuid>.jpg
+    │       │
+    │       ├─► Update Database
+    │       │       ├─► doctors.photo = 'uploads/doctors/...'
+    │       │
+    │       └─► Return Success
+    │
+    └─► Display Updated Photo
+```
+
+### 3.7 Feedback Management Module
+
+#### 3.7.1 Component Overview
+
+**Purpose:** Collect and manage patient and visitor feedback  
+**Location:** `/app/includes/`, `/app/admin/`, `/public/`  
+**Dependencies:** Database module, Session module
+
+#### 3.7.2 Component Structure
+
+```
+includes/
+├── feedback.php                           # Feedback submission handler
+
+admin/
+├── manage-feedback.php                     # Feedback management interface
+
+public/
+├── assets/js/feedback-form.js              # Client-side feedback form logic
+```
+
+#### 3.7.3 Key Functions
+
+**feedback.php:**
+
+```php
+Function: handleFeedbackSubmission()
+Input: POST data (name, email, phone, service, rating, feedback, newsletter, privacy_consent)
+Processing:
+  1. Sanitize and validate all inputs
+  2. Validate required fields
+  3. Validate email format
+  4. Validate rating (1-5)
+  5. Validate privacy consent
+  6. Insert into feedback table using prepared statement
+  7. Return JSON response
+Output: JSON {success: boolean, message: string}
+Security:
+  - Input sanitization
+  - Prepared statements
+  - Required field validation
+  - Privacy consent enforcement
+```
+
+**manage-feedback.php:**
+
+```php
+Function: loadFeedback()
+Input: Optional filters (service, rating)
+Processing:
+  1. Verify admin session
+  2. Build query with filters if provided
+  3. Execute query with prepared statements
+  4. Calculate statistics (total, by rating, by service)
+  5. Format data for display
+Output: HTML page with feedback data and statistics
+```
+
+Function: deleteFeedback()
+Input: POST data (feedback_id)
+Processing:
+  1. Verify admin session
+  2. Validate feedback_id exists
+  3. Delete from feedback table
+  4. Return success message
+Output: JSON {success: boolean, message: string}
+
+#### 3.7.4 Feedback Data Structure
+
+**Feedback Table Schema:**
+
+| Field              | Type         | Description                          |
+| ------------------ | ------------ | ------------------------------------ |
+| id                 | INT (PK)     | Auto-increment ID                    |
+| name               | VARCHAR(100) | Submitter name                       |
+| email              | VARCHAR(100) | Submitter email                      |
+| phone              | VARCHAR(20)  | Submitter phone                      |
+| service            | VARCHAR(100) | Service being rated                  |
+| rating             | INT          | Rating (1-5)                        |
+| feedback_text      | TEXT         | Detailed feedback                    |
+| newsletter         | BOOLEAN      | Newsletter opt-in                    |
+| privacy_consent    | BOOLEAN      | Privacy policy consent               |
+| created_at         | TIMESTAMP    | Submission timestamp                 |
+
+### 3.8 User Management Module
+
+#### 3.8.1 Component Overview
 
 **Purpose:** Manage user profiles and settings  
 **Location:** `/app/patient/`  
 **Dependencies:** Database module, Session module
 
-#### 3.4.2 Component Structure
+#### 3.8.2 Component Structure
 
 ```
 patient/
@@ -726,7 +906,7 @@ patient/
 └── patient-settings.php   # Account settings
 ```
 
-#### 3.4.3 Key Functions
+#### 3.8.3 Key Functions
 
 **patient-profile.php:**
 
@@ -752,15 +932,15 @@ Processing:
 Output: JSON {success: boolean, message: string}
 ```
 
-### 3.5 Patient-Doctor Messaging Module
+### 3.9 Patient-Doctor Messaging Module
 
-#### 3.5.1 Component Overview
+#### 3.9.1 Component Overview
 
 **Purpose:** Enable real-time messaging between patients and doctors  
 **Location:** `/app/patient/`, `/app/doctor/`, `/app/includes/`  
 **Dependencies:** Database module, Session module, Server-Sent Events (SSE)
 
-#### 3.5.2 Component Structure
+#### 3.9.2 Component Structure
 
 ```
 patient/

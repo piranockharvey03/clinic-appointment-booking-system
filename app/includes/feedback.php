@@ -1,5 +1,9 @@
 <?php
+require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
+
+// Set JSON response header
+header('Content-Type: application/json');
 
 try {
     $conn = getDBConnection();
@@ -51,8 +55,8 @@ try {
         if ($stmt->execute()) {
             $stmt->close();
             closeDBConnection($conn);
-            // Redirect with success message
-            header("Location: ../../public/index.html?success=" . urlencode("Thank you for your feedback!"));
+            // Return JSON success response
+            echo json_encode(['success' => true, 'message' => 'Thank you for your feedback!']);
             exit();
         } else {
             throw new Exception("Failed to submit feedback. Please try again.");
@@ -67,7 +71,7 @@ try {
     if (isset($stmt)) $stmt->close();
     if (isset($conn)) closeDBConnection($conn);
 
-    // Redirect back with error message
-    header("Location: ../../public/index.html?error=" . urlencode($e->getMessage()));
+    // Return JSON error response
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     exit();
 }

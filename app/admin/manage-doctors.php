@@ -2,6 +2,9 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start admin-specific session
+startSession('admin');
+
 // Redirect to login if not authenticated or not an admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     header('Location: ../../public/admin-login.html');
@@ -23,11 +26,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $experienceYears = intval($_POST['experience_years'] ?? 0);
     $status = $_POST['status'] ?? 'active';
     $password = $_POST['password'];
+    $photoPath = null;
+
+    // Handle photo upload
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        
+        if (!in_array($_FILES['photo']['type'], $allowedTypes)) {
+            $errorMessage = "Invalid file type. Please upload a JPEG, PNG, or GIF image.";
+        } elseif ($_FILES['photo']['size'] > $maxSize) {
+            $errorMessage = "File size too large. Maximum size is 5MB.";
+        } else {
+            $uploadDir = '../../public/uploads/doctors/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            $fileExtension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+            $fileName = uniqid('doctor_', true) . '.' . $fileExtension;
+            $uploadPath = $uploadDir . $fileName;
+            
+            if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadPath)) {
+                $photoPath = 'uploads/doctors/' . $fileName;
+            } else {
+                $errorMessage = "Failed to upload photo. Please try again.";
+            }
+        }
+    }
 
     // Validate at least one department selected
-    if (empty($departments)) {
+    if (empty($departments) && empty($errorMessage)) {
         $errorMessage = "Please select at least one department.";
-    } else {
+    } elseif (empty($errorMessage)) {
         try {
             $conn = getDBConnection();
 
@@ -43,8 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 // Hash password and insert doctor (keep first department for backward compatibility)
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                 $primaryDept = $departments[0];
-                $stmt = $conn->prepare("INSERT INTO doctors (full_name, email, phone, password, specialty, department, qualification, experience_years, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("sssssssds", $fullName, $email, $phone, $hashedPassword, $specialty, $primaryDept, $qualification, $experienceYears, $status);
+                $stmt = $conn->prepare("INSERT INTO doctors (full_name, email, phone, password, specialty, department, qualification, experience_years, status, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("sssssssdss", $fullName, $email, $phone, $hashedPassword, $specialty, $primaryDept, $qualification, $experienceYears, $status, $photoPath);
 
                 if ($stmt->execute()) {
                     $doctorId = $conn->insert_id;
@@ -95,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $experienceYears = intval($_POST['experience_years'] ?? 0);
     $status = $_POST['status'] ?? 'active';
     $newPassword = trim($_POST['new_password'] ?? '');
+    $photoPath = null;
 
     // Validate at least one department selected
     if (empty($departments)) {
@@ -103,108 +135,159 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         try {
             $conn = getDBConnection();
 
-            // Check if email already exists for a different doctor
-            $checkStmt = $conn->prepare("SELECT id FROM doctors WHERE email = ? AND id != ?");
-            $checkStmt->bind_param("si", $email, $doctorId);
-            $checkStmt->execute();
-            $checkStmt->store_result();
-
-            if ($checkStmt->num_rows > 0) {
-                $errorMessage = "A doctor with this email already exists.";
-            } else {
-                $primaryDept = $departments[0];
-
-                // Check if password should be updated
-                if (!empty($newPassword)) {
-                    // Update doctor with new password
-                    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-                    $stmt = $conn->prepare("UPDATE doctors SET full_name = ?, email = ?, phone = ?, specialty = ?, department = ?, qualification = ?, experience_years = ?, status = ?, password = ? WHERE id = ?");
-                    $stmt->bind_param("ssssssdssi", $fullName, $email, $phone, $specialty, $primaryDept, $qualification, $experienceYears, $status, $hashedPassword, $doctorId);
-
-                    if ($stmt->execute()) {
-                        // Update departments in junction table
-                        // First delete existing departments
-                        $delStmt = $conn->prepare("DELETE FROM doctor_departments WHERE doctor_id = ?");
-                        $delStmt->bind_param("i", $doctorId);
-                        $delStmt->execute();
-                        $delStmt->close();
-
-                        // Insert new departments
-                        $deptStmt = $conn->prepare("INSERT INTO doctor_departments (doctor_id, department) VALUES (?, ?)");
-                        foreach ($departments as $dept) {
-                            $deptStmt->bind_param("is", $doctorId, $dept);
-                            $deptStmt->execute();
-                        }
-                        $deptStmt->close();
-
-                        // Update additional specialties
-                        // First delete existing specialties
-                        $delSpecStmt = $conn->prepare("DELETE FROM doctor_specialties WHERE doctor_id = ?");
-                        $delSpecStmt->bind_param("i", $doctorId);
-                        $delSpecStmt->execute();
-                        $delSpecStmt->close();
-
-                        // Insert new specialties
-                        if (!empty($additionalSpecialties)) {
-                            $specStmt = $conn->prepare("INSERT INTO doctor_specialties (doctor_id, specialty) VALUES (?, ?)");
-                            foreach ($additionalSpecialties as $spec) {
-                                $specStmt->bind_param("is", $doctorId, $spec);
-                                $specStmt->execute();
-                            }
-                            $specStmt->close();
-                        }
-
-                        $successMessage = "Doctor details and password updated successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
-                    } else {
-                        $errorMessage = "Failed to update doctor. Please try again.";
-                    }
+            // Handle photo upload
+            if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                $maxSize = 5 * 1024 * 1024; // 5MB
+                
+                if (!in_array($_FILES['photo']['type'], $allowedTypes)) {
+                    $errorMessage = "Invalid file type. Please upload a JPEG, PNG, or GIF image.";
+                } elseif ($_FILES['photo']['size'] > $maxSize) {
+                    $errorMessage = "File size too large. Maximum size is 5MB.";
                 } else {
-                    // Update doctor without password
-                    $stmt = $conn->prepare("UPDATE doctors SET full_name = ?, email = ?, phone = ?, specialty = ?, department = ?, qualification = ?, experience_years = ?, status = ? WHERE id = ?");
-                    $stmt->bind_param("ssssssdsi", $fullName, $email, $phone, $specialty, $primaryDept, $qualification, $experienceYears, $status, $doctorId);
-
-                    if ($stmt->execute()) {
-                        // Update departments in junction table
-                        // First delete existing departments
-                        $delStmt = $conn->prepare("DELETE FROM doctor_departments WHERE doctor_id = ?");
-                        $delStmt->bind_param("i", $doctorId);
-                        $delStmt->execute();
-                        $delStmt->close();
-
-                        // Insert new departments
-                        $deptStmt = $conn->prepare("INSERT INTO doctor_departments (doctor_id, department) VALUES (?, ?)");
-                        foreach ($departments as $dept) {
-                            $deptStmt->bind_param("is", $doctorId, $dept);
-                            $deptStmt->execute();
-                        }
-                        $deptStmt->close();
-
-                        // Update additional specialties
-                        // First delete existing specialties
-                        $delSpecStmt = $conn->prepare("DELETE FROM doctor_specialties WHERE doctor_id = ?");
-                        $delSpecStmt->bind_param("i", $doctorId);
-                        $delSpecStmt->execute();
-                        $delSpecStmt->close();
-
-                        // Insert new specialties
-                        if (!empty($additionalSpecialties)) {
-                            $specStmt = $conn->prepare("INSERT INTO doctor_specialties (doctor_id, specialty) VALUES (?, ?)");
-                            foreach ($additionalSpecialties as $spec) {
-                                $specStmt->bind_param("is", $doctorId, $spec);
-                                $specStmt->execute();
+                    $uploadDir = '../../public/uploads/doctors/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    
+                    $fileExtension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+                    $fileName = uniqid('doctor_', true) . '.' . $fileExtension;
+                    $uploadPath = $uploadDir . $fileName;
+                    
+                    if (move_uploaded_file($_FILES['photo']['tmp_name'], $uploadPath)) {
+                        $photoPath = 'uploads/doctors/' . $fileName;
+                        
+                        // Delete old photo if exists
+                        $oldPhotoStmt = $conn->prepare("SELECT photo FROM doctors WHERE id = ?");
+                        $oldPhotoStmt->bind_param("i", $doctorId);
+                        $oldPhotoStmt->execute();
+                        $oldPhotoResult = $oldPhotoStmt->get_result();
+                        if ($oldPhotoRow = $oldPhotoResult->fetch_assoc()) {
+                            if ($oldPhotoRow['photo'] && file_exists('../../public/' . $oldPhotoRow['photo'])) {
+                                unlink('../../public/' . $oldPhotoRow['photo']);
                             }
-                            $specStmt->close();
                         }
-
-                        $successMessage = "Doctor details updated successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
+                        $oldPhotoStmt->close();
                     } else {
-                        $errorMessage = "Failed to update doctor. Please try again.";
+                        $errorMessage = "Failed to upload photo. Please try again.";
                     }
                 }
-                $stmt->close();
             }
-            $checkStmt->close();
-            closeDBConnection($conn);
+
+            if (empty($errorMessage)) {
+                // Check if email already exists for a different doctor
+                $checkStmt = $conn->prepare("SELECT id FROM doctors WHERE email = ? AND id != ?");
+                $checkStmt->bind_param("si", $email, $doctorId);
+                $checkStmt->execute();
+                $checkStmt->store_result();
+
+                if ($checkStmt->num_rows > 0) {
+                    $errorMessage = "A doctor with this email already exists.";
+                } else {
+                    $primaryDept = $departments[0];
+
+                    // Check if password should be updated
+                    if (!empty($newPassword)) {
+                        // Update doctor with new password
+                        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+                        if ($photoPath) {
+                            $stmt = $conn->prepare("UPDATE doctors SET full_name = ?, email = ?, phone = ?, specialty = ?, department = ?, qualification = ?, experience_years = ?, status = ?, password = ?, photo = ? WHERE id = ?");
+                            $stmt->bind_param("ssssssdsssi", $fullName, $email, $phone, $specialty, $primaryDept, $qualification, $experienceYears, $status, $hashedPassword, $photoPath, $doctorId);
+                        } else {
+                            $stmt = $conn->prepare("UPDATE doctors SET full_name = ?, email = ?, phone = ?, specialty = ?, department = ?, qualification = ?, experience_years = ?, status = ?, password = ? WHERE id = ?");
+                            $stmt->bind_param("ssssssdssi", $fullName, $email, $phone, $specialty, $primaryDept, $qualification, $experienceYears, $status, $hashedPassword, $doctorId);
+                        }
+
+                        if ($stmt->execute()) {
+                            // Update departments in junction table
+                            // First delete existing departments
+                            $delStmt = $conn->prepare("DELETE FROM doctor_departments WHERE doctor_id = ?");
+                            $delStmt->bind_param("i", $doctorId);
+                            $delStmt->execute();
+                            $delStmt->close();
+
+                            // Insert new departments
+                            $deptStmt = $conn->prepare("INSERT INTO doctor_departments (doctor_id, department) VALUES (?, ?)");
+                            foreach ($departments as $dept) {
+                                $deptStmt->bind_param("is", $doctorId, $dept);
+                                $deptStmt->execute();
+                            }
+                            $deptStmt->close();
+
+                            // Update additional specialties
+                            // First delete existing specialties
+                            $delSpecStmt = $conn->prepare("DELETE FROM doctor_specialties WHERE doctor_id = ?");
+                            $delSpecStmt->bind_param("i", $doctorId);
+                            $delSpecStmt->execute();
+                            $delSpecStmt->close();
+
+                            // Insert new specialties
+                            if (!empty($additionalSpecialties)) {
+                                $specStmt = $conn->prepare("INSERT INTO doctor_specialties (doctor_id, specialty) VALUES (?, ?)");
+                                foreach ($additionalSpecialties as $spec) {
+                                    $specStmt->bind_param("is", $doctorId, $spec);
+                                    $specStmt->execute();
+                                }
+                                $specStmt->close();
+                            }
+
+                            $successMessage = "Doctor details and password updated successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
+                        } else {
+                            $errorMessage = "Failed to update doctor. Please try again.";
+                        }
+                    } else {
+                        // Update doctor without password
+                        if ($photoPath) {
+                            $stmt = $conn->prepare("UPDATE doctors SET full_name = ?, email = ?, phone = ?, specialty = ?, department = ?, qualification = ?, experience_years = ?, status = ?, photo = ? WHERE id = ?");
+                            $stmt->bind_param("ssssssdssi", $fullName, $email, $phone, $specialty, $primaryDept, $qualification, $experienceYears, $status, $photoPath, $doctorId);
+                        } else {
+                            $stmt = $conn->prepare("UPDATE doctors SET full_name = ?, email = ?, phone = ?, specialty = ?, department = ?, qualification = ?, experience_years = ?, status = ? WHERE id = ?");
+                            $stmt->bind_param("ssssssdsi", $fullName, $email, $phone, $specialty, $primaryDept, $qualification, $experienceYears, $status, $doctorId);
+                        }
+
+                        if ($stmt->execute()) {
+                            // Update departments in junction table
+                            // First delete existing departments
+                            $delStmt = $conn->prepare("DELETE FROM doctor_departments WHERE doctor_id = ?");
+                            $delStmt->bind_param("i", $doctorId);
+                            $delStmt->execute();
+                            $delStmt->close();
+
+                            // Insert new departments
+                            $deptStmt = $conn->prepare("INSERT INTO doctor_departments (doctor_id, department) VALUES (?, ?)");
+                            foreach ($departments as $dept) {
+                                $deptStmt->bind_param("is", $doctorId, $dept);
+                                $deptStmt->execute();
+                            }
+                            $deptStmt->close();
+
+                            // Update additional specialties
+                            // First delete existing specialties
+                            $delSpecStmt = $conn->prepare("DELETE FROM doctor_specialties WHERE doctor_id = ?");
+                            $delSpecStmt->bind_param("i", $doctorId);
+                            $delSpecStmt->execute();
+                            $delSpecStmt->close();
+
+                            // Insert new specialties
+                            if (!empty($additionalSpecialties)) {
+                                $specStmt = $conn->prepare("INSERT INTO doctor_specialties (doctor_id, specialty) VALUES (?, ?)");
+                                foreach ($additionalSpecialties as $spec) {
+                                    $specStmt->bind_param("is", $doctorId, $spec);
+                                    $specStmt->execute();
+                                }
+                                $specStmt->close();
+                            }
+
+                            $successMessage = "Doctor details updated successfully with " . count($departments) . " department(s) and " . count($additionalSpecialties) . " additional specialt" . (count($additionalSpecialties) === 1 ? 'y' : 'ies') . "!";
+                        } else {
+                            $errorMessage = "Failed to update doctor. Please try again.";
+                        }
+                    }
+                    $stmt->close();
+                }
+                $checkStmt->close();
+                closeDBConnection($conn);
+            }
         } catch (Exception $e) {
             $errorMessage = "Error: " . $e->getMessage();
             error_log("Edit doctor error: " . $e->getMessage());
@@ -341,6 +424,14 @@ try {
                         <a href="manage-doctors.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md bg-blue-900 text-white">
                             <i data-feather="users" class="mr-3 h-5 w-5"></i>
                             Manage Doctors
+                        </a>
+                        <a href="manage-patients.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <i data-feather="user" class="mr-3 h-5 w-5"></i>
+                            Manage Patients
+                        </a>
+                        <a href="manage-feedback.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
+                            <i data-feather="message-square" class="mr-3 h-5 w-5"></i>
+                            Feedback
                         </a>
                         <a href="reports.php" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-blue-100 hover:bg-blue-700 hover:text-white">
                             <i data-feather="bar-chart-2" class="mr-3 h-5 w-5"></i>
@@ -604,7 +695,7 @@ try {
                     </button>
                 </div>
 
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="add">
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -899,6 +990,13 @@ try {
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <p class="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
                         </div>
+
+                        <div class="mb-4 col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Photo (Optional)</label>
+                            <input type="file" name="photo" accept="image/jpeg,image/jpg,image/png,image/gif"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Upload a photo (JPEG, PNG, or GIF, max 5MB)</p>
+                        </div>
                     </div>
 
                     <div class="flex justify-end gap-3 mt-6">
@@ -927,7 +1025,7 @@ try {
                     </button>
                 </div>
 
-                <form method="POST" id="editDoctorForm">
+                <form method="POST" id="editDoctorForm" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="doctor_id" id="edit_doctor_id">
 
@@ -1222,6 +1320,13 @@ try {
                             <input type="password" name="new_password" id="edit_new_password" minlength="6"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <p class="text-xs text-gray-500 mt-1">Leave blank to keep current password. Enter new password (min 6 characters) to reset.</p>
+                        </div>
+
+                        <div class="mb-4 col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Photo (Optional)</label>
+                            <input type="file" name="photo" id="edit_photo" accept="image/jpeg,image/jpg,image/png,image/gif"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Upload a new photo (JPEG, PNG, or GIF, max 5MB). Leave blank to keep current photo.</p>
                         </div>
                     </div>
 

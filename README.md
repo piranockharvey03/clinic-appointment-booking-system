@@ -11,7 +11,7 @@ A comprehensive web-based hospital management system designed to streamline heal
 
 ## ✅ System Health Status
 
-**Last Verified:** May 14, 2026
+**Last Verified:** July 13, 2026
 
 ```
 COMPONENT                          STATUS      DETAILS
@@ -22,21 +22,23 @@ Missing Dependencies               ✅ PASS     0 missing files
 Circular Dependencies              ✅ PASS     Clean hierarchy
 Module Integration                 ✅ PASS     4/4 modules connected
 Cross-Module Data Flow             ✅ PASS     All workflows verified
-Database Schema                    ✅ PASS     11/11 tables verified
+Database Schema                    ✅ PASS     12/12 tables verified
 Frontend-Backend Links             ✅ PASS     6/6 entry points OK
 Security Foundation                ✅ PASS     No critical issues
 Dynamic Pages (PHP)                ✅ PASS     doctors.php, patient-book.php
+Role-Based Sessions                ✅ PASS     Session separation implemented
+Doctor Image Uploads               ✅ PASS     Photo management enabled
+Feedback System                    ✅ PASS     Feedback collection active
 ════════════════════════════════════════════════════════════
 OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
 ```
 
 **Documentation References:**
 
-- 📋 [FILE_CONNECTIVITY_VERIFICATION.md](FILE_CONNECTIVITY_VERIFICATION.md) — Complete dependency map (149 include statements verified)
 - 🚀 [SETUP_AND_VERIFICATION.md](SETUP_AND_VERIFICATION.md) — Installation & testing checklist
-- 📊 [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md) — Executive summary report
-- 🏗️ [ARCHITECTURE_ANALYSIS.md](ARCHITECTURE_ANALYSIS.md) — System architecture details
-- 📖 [QUICK_REFERENCE.md](QUICK_REFERENCE.md) — Quick lookup guide
+- 📦 [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) — Comprehensive deployment instructions
+- 🔗 [INTEGRATION_SUMMARY.md](INTEGRATION_SUMMARY.md) — Component integration and API flow
+- 💬 [MESSAGING_FEATURE_ENHANCED.md](MESSAGING_FEATURE_ENHANCED.md) — Real-time messaging implementation
 
 **Key Metrics:**
 
@@ -47,9 +49,43 @@ OVERALL SYSTEM STATUS              ✅ HEALTHY  Production Ready
 
 ---
 
-## 📝 Recent Changes (May 2026)
+## 📝 Recent Changes (July 2026)
 
-### Dynamic Pages & Improvements
+### Role-Based Session Management
+
+- ✅ **Session Separation** — Implemented role-based session management with separate session cookies for each role (admin, doctor, patient)
+- ✅ **Session Configuration** — Added `startSession('role')` function in `config/session-config.php` for consistent session handling
+- ✅ **Authentication Updates** — Updated all login handlers and protected pages to use role-specific sessions
+- ✅ **Session Security** — Enhanced session security with proper cookie settings and session regeneration
+
+### Doctor Image Management
+
+- ✅ **Photo Uploads** — Admin can now upload doctor photos (JPEG, PNG, GIF, max 5MB) when adding/editing doctors
+- ✅ **Photo Display** — Doctor images displayed on booking page, doctors page, and view details modal
+- ✅ **Image Storage** — Photos stored in `public/uploads/doctors/` with automatic old photo deletion on updates
+- ✅ **Fallback UI** — Default user icon displayed when no photo is uploaded
+
+### Feedback System
+
+- ✅ **Feedback Form** — Public feedback form for patients and visitors to submit feedback
+- ✅ **Feedback Management** — Admin page (`manage-feedback.php`) to view, filter, and delete feedback entries
+- ✅ **AJAX Integration** — Feedback submission via AJAX with JSON responses
+- ✅ **Feedback Table** — Database table for storing feedback with ratings, service selection, and consent tracking
+
+### Real-Time Messaging System
+
+- ✅ **Server-Sent Events (SSE)** — Implemented real-time messaging between doctors and patients using `message-stream.php`.
+- ✅ **Automatic Reconnection** — Built-in exponential backoff and fallback polling for connection drops.
+- ✅ **Session Persistence** — Securely loads conversation history using URL parameters.
+
+### Bug Fixes
+
+- ✅ **Feedback Form Fetch URL** — Fixed 404 error caused by incorrect relative path in frontend JS.
+- ✅ **Booking Page Session** — Fixed session issue where booking page required re-login by implementing patient-specific session
+- ✅ **Database Connection** — Fixed undefined `$conn` error in doctor photo upload handling
+- ✅ **Image Path Resolution** — Corrected image paths for proper display across all pages
+
+### Previous Changes (May 2026)
 
 - ✅ **doctors.php** — Converted from static HTML. Now dynamically fetches doctors from database with real specialties and experience
 - ✅ **patient-book.php** — Converted from HTML. Added login requirement to prevent booking form errors
@@ -66,9 +102,11 @@ All internal links have been updated to reference the new PHP pages:
 ### Testing the Changes
 
 1. Access doctors page: `http://localhost/clinic-appointment-booking-system/public/doctors.php`
-2. View all active doctors from database
+2. View all active doctors from database with photos
 3. Login first, then access: `http://localhost/clinic-appointment-booking-system/public/patient-book.php`
-4. If admin login fails, use: `http://localhost/clinic-appointment-booking-system/reset-admin-password.php`
+4. Test feedback form on public pages
+5. Access admin feedback management: `http://localhost/clinic-appointment-booking-system/app/admin/manage-feedback.php`
+6. If admin login fails, use: `http://localhost/clinic-appointment-booking-system/reset-admin-password.php`
 
 ---
 
@@ -78,16 +116,18 @@ All internal links have been updated to reference the new PHP pages:
 - **Dynamic Appointment Booking** — Select department, browse doctors, view their details, and choose a time slot
 - **View Doctor Details** — See primary specialty, all additional specialties, departments, qualification, and experience
 - **Appointment Management** — View, reschedule, or cancel appointments
+- **Real-Time Messaging** — Chat securely with doctors using live SSE updates
 - **Real-time Notifications** — Get instant updates on appointment status changes
 - **Profile Management** — Update personal information and preferences
 - **Dark Mode Support** — Eye-friendly interface option
 
 ### Admin Dashboard
 
-- **Doctor Management** — Add, edit, activate/deactivate doctors with full profile including multiple departments and specialties
+- **Doctor Management** — Add, edit, activate/deactivate doctors with full profile including multiple departments, specialties, and photo uploads
 - **Appointment Oversight** — Browse all appointments by doctor and status via the Appointments page
 - **Doctor Evaluation** — Per-doctor stats with appointment drill-down including cancel reasons
 - **Analytics & Reports** — View appointment statistics and trends
+- **Feedback Management** — View, filter, and manage patient and visitor feedback
 - **Database Backup** — One-click backup from the Settings page
 - **Activity Logs** — Full audit trail of doctor actions
 - **System Settings** — Configure admin password and preferences
@@ -97,6 +137,7 @@ All internal links have been updated to reference the new PHP pages:
 - **Doctor Login** — Separate authentication for doctors
 - **Scoped Appointments** — Doctors only see their own patients' appointments
 - **Appointment Actions** — Approve, cancel (with reason), reschedule, or complete appointments
+- **Patient Messaging** — Real-time chat with patients via SSE
 - **Patient Notifications** — Status changes automatically notify patients
 - **Settings** — Update profile and password
 
@@ -219,7 +260,7 @@ All tables are defined in `config/medicare-complete-database.sql`:
 | ----------------------- | ---------------------------------------- |
 | `users`                 | Patient accounts                         |
 | `admin`                 | Administrator accounts                   |
-| `doctors`               | Doctor profiles (primary specialty/dept) |
+| `doctors`               | Doctor profiles (primary specialty/dept, photo) |
 | `departments`           | Department master list (24 departments)  |
 | `doctor_departments`    | Doctor ↔ Department (many-to-many)       |
 | `specialties`           | Specialty master list (30 specialties)   |
@@ -229,6 +270,7 @@ All tables are defined in `config/medicare-complete-database.sql`:
 | `patient_notifications` | Patient notifications                    |
 | `doctor_notifications`  | Doctor notifications                     |
 | `activity_logs`         | Audit trail for all user actions         |
+| `feedback`              | Patient and visitor feedback             |
 
 ## 🔒 Security
 
@@ -237,9 +279,11 @@ See [SECURITY.md](SECURITY.md) for the full security reference. Summary:
 - Passwords hashed with bcrypt (`PASSWORD_DEFAULT`)
 - All queries use prepared statements — no SQL injection possible
 - Session cookies: `httponly=true`, `samesite=Lax`, strict mode
+- Role-based session management with separate session cookies per role
 - Role-based access control on every protected page and API endpoint
 - Appointment data scoped per doctor — doctors cannot see other doctors' patients
 - Patient notification endpoints enforce ownership (`patient_id = session user`)
+- File upload validation for doctor photos (type, size checks)
 - All debug/dev/test files removed from the codebase
 
 ### Production checklist
@@ -256,17 +300,15 @@ See [SECURITY.md](SECURITY.md) for the full security reference. Summary:
 ### Core Documentation
 
 - [SETUP_AND_VERIFICATION.md](SETUP_AND_VERIFICATION.md) — Complete installation and verification guide with feature testing
-- [FILE_CONNECTIVITY_VERIFICATION.md](FILE_CONNECTIVITY_VERIFICATION.md) — Detailed file dependency map and connectivity verification
-- [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md) — Executive summary of system health and integrity
-- [ARCHITECTURE_ANALYSIS.md](ARCHITECTURE_ANALYSIS.md) — System architecture, data flows, and enhancement recommendations
-- [QUICK_REFERENCE.md](QUICK_REFERENCE.md) — Quick lookup guide for entry points and module locations
+- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) — Server deployment and environment configuration
+- [INTEGRATION_SUMMARY.md](INTEGRATION_SUMMARY.md) — Module integrations and component links
+- [MESSAGING_FEATURE_ENHANCED.md](MESSAGING_FEATURE_ENHANCED.md) — Technical details of the SSE real-time messaging system
 
 ### System Documentation
 
 - [SECURITY.md](SECURITY.md) — Security controls, hardening guide, and v2.x fixes
 - [SRS_MediCare_Clinic_System.md](SRS_MediCare_Clinic_System.md) — Software Requirements Specification
 - [SDD_MediCare_Clinic_System.md](SDD_MediCare_Clinic_System.md) — Software Design Document
-- [CHANGELOG.md](CHANGELOG.md) — Version history
 
 ### Module Documentation
 
@@ -284,6 +326,6 @@ Proprietary — MediCare Clinic Management System. All rights reserved.
 
 ---
 
-**Last Updated**: March 26, 2026  
-**Current Version**: 2.0.2  
+**Last Updated**: July 13, 2026  
+**Current Version**: 2.1.0  
 **System Status**: ✅ Production Ready

@@ -1,5 +1,9 @@
 <?php
 require_once '../../config/session-config.php';
+require_once '../../config/db-config.php';
+
+// Start patient-specific session
+startSession('patient');
 
 // Redirect to login if not authenticated or not a patient
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_name']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'patient') {

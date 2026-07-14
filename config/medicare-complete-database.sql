@@ -459,6 +459,28 @@ CREATE TABLE IF NOT EXISTS `typing_status` (
   COMMENT='Tracks real-time typing indicators for conversations';
 
 -- =====================================================
+-- 16. FEEDBACK (Patient and visitor feedback)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `feedback` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(100) NOT NULL,
+  `phone` VARCHAR(20) DEFAULT NULL,
+  `service` VARCHAR(100) NOT NULL,
+  `rating` INT NOT NULL,
+  `feedback` TEXT NOT NULL,
+  `newsletter` TINYINT(1) NOT NULL DEFAULT 0,
+  `privacy` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_email` (`email`),
+  INDEX `idx_service` (`service`),
+  INDEX `idx_rating` (`rating`),
+  INDEX `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='Stores feedback from patients and visitors';
+
+-- =====================================================
 -- SETUP COMPLETE
 -- ===================================================
 -- Default credentials:

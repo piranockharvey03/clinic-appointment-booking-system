@@ -2,6 +2,9 @@
 require_once '../../config/session-config.php';
 require_once '../../config/db-config.php';
 
+// Start admin-specific session
+startSession('admin');
+
 header('Content-Type: application/json');
 
 // Only allow POST requests

@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Submit form via AJAX
             const formData = new FormData(form);
             
-            fetch('../../app/includes/feedback.php', {
+            fetch('../app/includes/feedback.php', {
                 method: 'POST',
                 body: formData
             })
